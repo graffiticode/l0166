@@ -6,6 +6,7 @@ import {
   Transformer as BasisTransformer,
   Compiler as BasisCompiler
 } from '@graffiticode/basis';
+import { t } from './types.js';
 
 const rowInRange = (range, cellName) => {
   const [min, max] = range.split("..");
@@ -69,9 +70,9 @@ const getValidation = ({rows = {}, cells = {}}) => (
 
 export class Checker extends BasisChecker {
   HELLO(node, options, resume) {
-    this.visit(node.elts[0], options, async (e0, v0) => {
+    this.visit(node.elts[0], options, async (_e0, _v0) => {
       const err = [];
-      const val = node;
+      const val = { type: t.any() };
       resume(err, val);
     });
   }
@@ -80,7 +81,8 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        // Return a fragment type for title
+        const val = { type: t.record({ title: t.string() }, true) };
         resume(err, val);
       });
     });
@@ -90,7 +92,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const val = { type: t.record({ instructions: t.string() }, true) };
         resume(err, val);
       });
     });
@@ -100,7 +102,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const val = { type: t.record({ text: t.string() }, true) };
         resume(err, val);
       });
     });
@@ -110,7 +112,8 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        // First pass: an open assess record
+        const val = { type: t.record({ assess: t.record({}, true) }, true) };
         resume(err, val);
       });
     });
@@ -118,8 +121,16 @@ export class Checker extends BasisChecker {
 
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      const err = [];
-      const val = node;
+      const err = [].concat(e0 || []);
+      const methodName =
+        (typeof v0 === 'string' && v0) ||
+        (v0 && typeof v0.tag === 'string' && v0.tag) ||
+        undefined;
+      if (methodName === undefined) {
+        err.push("E_ARG_TYPE: METHOD expects a string or tag literal");
+      }
+      const methodType = methodName ? t.enum([methodName]) : t.string();
+      const val = { type: t.record({ method: methodType }, true) };
       resume(err, val);
     });
   }
@@ -127,7 +138,7 @@ export class Checker extends BasisChecker {
   EXPECTED(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       const err = [];
-      const val = node;
+      const val = { type: t.record({ expected: t.any() }, true) };
       resume(err, val);
     });
   }
@@ -135,12 +146,11 @@ export class Checker extends BasisChecker {
   WIDTH(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        console.log(
-          "Checker/WIDTH()",
-          "v0=" + v0,
-        );
-        const err = [];
-        const val = node;
+        const err = [].concat(e0 || [], e1 || []);
+        if (typeof v0 !== 'number') {
+          err.push("E_ARG_TYPE: WIDTH expects a number literal");
+        }
+        const val = { type: t.record({ width: t.number() }, true) };
         resume(err, val);
       });
     });
@@ -149,8 +159,22 @@ export class Checker extends BasisChecker {
   ALIGN(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
-        const val = node;
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        const allowed = ['left', 'right', 'center'];
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: ALIGN expects a string or tag literal");
+        } else if (!allowed.includes(value)) {
+          err.push(`E_INVALID_ALIGN: '${value}' not in [${allowed.join(', ')}]`);
+        }
+        const val = { type: t.record({ align: t.enum(allowed) }, true) };
+        console.log(
+          "Checker/ALIGN()",
+          "err=" + JSON.stringify(err, null, 2),
+        );
         resume(err, val);
       });
     });
@@ -160,7 +184,11 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const cellName =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          'A1';
+        const val = { type: t.record({ [cellName]: t.record({}, true) }, true) };
         resume(err, val);
       });
     });
@@ -170,7 +198,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const val = { type: t.record({ cells: t.record({}, true) }, true) };
         resume(err, val);
       });
     });
@@ -180,7 +208,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const val = { type: t.record({ rows: t.record({}, true) }, true) };
         resume(err, val);
       });
     });
@@ -190,7 +218,11 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const columnName =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          'A';
+        const val = { type: t.record({ [columnName]: t.record({}, true) }, true) };
         resume(err, val);
       });
     });
@@ -200,7 +232,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        const val = node;
+        const val = { type: t.record({ columns: t.record({}, true) }, true) };
         resume(err, val);
       });
     });
