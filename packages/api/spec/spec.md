@@ -12,17 +12,69 @@ semantics and base library can be found here:
 
 | Function | Signature | Description |
 | :------- | :-------- | :---------- |
-| `cells`  | `<record record: record>` | Defines cell data and configurations |
+| `text`   | `<string string: record>` | Sets text content for a cell |
+| `assess` | `<array array: record>` | Defines assessment criteria for a cell |
+| `method` | `<string>` | Specifies the assessment method |
+| `expected` | `<string>` | Specifies the expected value for assessment |
+| `width`  | `<int record: record>` | Sets the width of a column |
+| `align`  | `<string record: record>` | Sets the alignment of a column (left, right, center, justify) |
+| `cell`   | `<string string: record>` | Defines a single cell data and configuration |
+| `cells`  | `<array array: record>` | Defines multiple cells from an array |
 | `rows`   | `<record record: record>` | Defines row data and configurations |
-| `columns`| `<record record: record>` | Defines column data and configurations |
+| `column` | `<string string: record>` | Defines a single column configuration |
+| `columns`| `<array array: record>` | Defines multiple columns from an array |
 | `params` | `<record: record>` | Defines parameters available as cell values |
+
+### text
+
+Sets the text content for a cell.
+
+```
+text "Hello World" {...}
+```
+
+### assess
+
+Defines assessment criteria for a cell.
+
+```
+assess [method "value" expected "10"] {...}
+```
+
+### method
+
+Specifies the assessment method type.
+
+```
+method "value"
+```
+
+### expected
+
+Specifies the expected value for assessment validation.
+
+```
+expected "10"
+```
+
+### cell
+
+Defines a single cell content and configuration.
+
+```
+cell "A1" text "Hello" {}
+cell "A1" text "A1" assess [method "value" expected "10"] {}
+```
 
 ### cells
 
-Defines cell content.
+Defines multiple cells from an array.
 
 ```
-cells {...} {...}
+cells [
+  cell "A1" text "Hello" {},
+  cell "B1" text "World" {}
+] {...}
 ```
 
 ### rows
@@ -33,12 +85,39 @@ Defines row attributes.
 rows {...} {...}
 ```
 
-### columns
+### width
 
-Defines column attributes.
+Sets the width of a column in pixels.
 
 ```
-columns {...} {...}
+width 100 {...}
+```
+
+### align
+
+Sets the alignment of column content. Valid values are "left", "right", "center", or "justify".
+
+```
+align "right" {...}
+```
+
+### column
+
+Defines a single column configuration.
+
+```
+column "A" width 100 align "right" {}
+```
+
+### columns
+
+Defines multiple column configurations from an array.
+
+```
+columns [
+  column "A" width 100 align "right" {},
+  column "B" width 150 align "left" {}
+] {...}
 ```
 
 ### params
@@ -75,11 +154,11 @@ rows {
 columns {
   A: {
     width: 100,
-    justify: "right",
+    align: "right",
   },
   B: {
     width: 100,
-    justify: "left",
+    align: "left",
   },
 }
 cells {

@@ -49,8 +49,8 @@ const getValidation = ({rows = {}, cells = {}}) => (
       id: order !== "actual" && rowIndex + 1 || undefined,
       [col]: cell,
     };
-    const points = cells[key]?.attrs?.assess
-          ? cells[key]?.attrs?.assess?.points
+    const points = cells[key]?.assess
+          ? cells[key]?.assess?.points
           : 0;  // No validation so no points counted.
     return {
       ...obj,
@@ -96,6 +96,76 @@ export class Checker extends BasisChecker {
     });
   }
 
+  TEXT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const val = node;
+        resume(err, val);
+      });
+    });
+  }
+
+  ASSESS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const val = node;
+        resume(err, val);
+      });
+    });
+  }
+
+  METHOD(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [];
+      const val = node;
+      resume(err, val);
+    });
+  }
+
+  EXPECTED(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [];
+      const val = node;
+      resume(err, val);
+    });
+  }
+
+  WIDTH(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        console.log(
+          "Checker/WIDTH()",
+          "v0=" + v0,
+        );
+        const err = [];
+        const val = node;
+        resume(err, val);
+      });
+    });
+  }
+
+  ALIGN(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const val = node;
+        resume(err, val);
+      });
+    });
+  }
+
+  CELL(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const val = node;
+        resume(err, val);
+      });
+    });
+  }
+
   CELLS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -107,6 +177,16 @@ export class Checker extends BasisChecker {
   }
 
   ROWS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const val = node;
+        resume(err, val);
+      });
+    });
+  }
+
+  COLUMN(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
@@ -156,40 +236,119 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  TEXT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        // v0 is the text content
+        // v1 is the rest record
+        const val = {
+          ...v1,
+          text: v0
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  ASSESS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        // v0 is an array containing assess properties
+        // v1 is the continuation value
+        const assessObj = v0.reduce((acc, item) => ({...acc, ...item}), {});
+        const val = {
+          ...v1,
+          assess: assessObj
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  METHOD(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [];
+      // v0 is the method value
+      const val = {
+        method: v0
+      };
+      resume(err, val);
+    });
+  }
+
+  EXPECTED(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [];
+      // v0 is the expected value
+      const val = {
+        expected: v0
+      };
+      resume(err, val);
+    });
+  }
+
+  WIDTH(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        // v0 is the width value (integer)
+        // v1 is the continuation value
+        const val = {
+          ...v1,
+          width: v0
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  ALIGN(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        // v0 is the alignment value (string or tag)
+        // v1 is the continuation value
+        const alignment = typeof v0 === 'string' ? v0 : v0.tag;
+        const val = {
+          ...v1,
+          align: alignment
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  CELL(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const cellName =
+              typeof v0 === 'string' && v0 ||
+              typeof v0.tag === "string" && v0.tag;
+        const cellContent = v1;
+        const val = {
+          [cellName]: cellContent
+        };
+        resume(err, val);
+      });
+    });
+  }
+
   CELLS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        console.log(
-          "CELLS()",
-          "v0=" + JSON.stringify(v0, null, 2),
-          "v1=" + JSON.stringify(v1, null, 2),
-        );
         const err = [];
-        // Normalize cell attributes - make textAlign and align into justify
-        const normalizedCells = {};
-        Object.keys(v0).forEach(cellKey => {
-          const cell = v0[cellKey];
-          const normalizedCell = { ...cell };
-          // If cell has attrs
-          if (normalizedCell.attrs) {
-            // If textAlign or align is present but justify is not, use it for justify
-            if ((normalizedCell.attrs.textAlign || normalizedCell.attrs.align) && !normalizedCell.attrs.justify) {
-              normalizedCell.attrs.justify = normalizedCell.attrs.textAlign || normalizedCell.attrs.align;
-            }
-            // If numberFormat is present but format is not, use it for format
-            if (normalizedCell.attrs.numberFormat && !normalizedCell.attrs.format) {
-              normalizedCell.attrs.format = normalizedCell.attrs.numberFormat;
-            }
-            // If backgroundColor is present but background is not, use it for background
-            if (normalizedCell.attrs.backgroundColor && !normalizedCell.attrs.background) {
-              normalizedCell.attrs.background = normalizedCell.attrs.backgroundColor;
-            }
-          }
-          normalizedCells[cellKey] = normalizedCell;
-        });
+        const cells = v0.reduce((cells, cell) => {
+          return {
+            ...cells,
+            ...cell
+          };
+        }, {});
         const val = {
           ...v1,
-          cells: normalizedCells,
+          cells,
         };
         resume(err, val);
       });
@@ -209,32 +368,40 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  COLUMN(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [];
+        const columnName =
+              typeof v0 === 'string' && v0 ||
+              typeof v0.tag === "string" && v0.tag;
+        const columnContent = v1;
+        const val = {
+          [columnName]: columnContent
+        };
+        resume(err, val);
+      });
+    });
+  }
+
   COLUMNS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [];
-        // Normalize column attributes - make textAlign and align into justify
-        const normalizedColumns = {};
-        Object.keys(v0).forEach(colKey => {
-          const column = v0[colKey];
-          const normalizedColumn = { ...column };
-          // If textAlign or align is present but justify is not, use it for justify
-          if ((column.textAlign || column.align) && !column.justify) {
-            normalizedColumn.justify = column.textAlign || column.align;
-          }
-          // If numberFormat is present but format is not, use it for format
-          if (column.numberFormat && !column.format) {
-            normalizedColumn.format = column.numberFormat;
-          }
-          // If backgroundColor is present but background is not, use it for background
-          if (column.backgroundColor && !column.background) {
-            normalizedColumn.background = column.backgroundColor;
-          }
-          normalizedColumns[colKey] = normalizedColumn;
-        });
+        console.log(
+          "COLUMNS()",
+          "v0=" + JSON.stringify(v0, null, 2),
+        );
+        // v0 is an array of column objects
+        const columns = v0.reduce((cols, col) => {
+          return {
+            ...cols,
+            ...col
+          };
+        }, {});
         const val = {
           ...v1,
-          columns: normalizedColumns,
+          columns,
         };
         resume(err, val);
       });

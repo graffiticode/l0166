@@ -587,7 +587,7 @@ const getCellsValidationFromRangeValidation = ({ cells, range }) => {
     // TODO mark holes as errors.
     index = row?.id || index + 1,
     row && Object.keys(row).forEach(key => (
-      row[key]?.attrs?.assess && (cells[key + index] = row[key])
+      row[key]?.assess && (cells[key + index] = row[key])
     )),
     cells
   ), {}) || {};
@@ -757,7 +757,7 @@ export const scoreCells = ({ cells, validation }) => {
       ...cells,
       [cellName]: cells[cellName] && {
         ...cells[cellName],
-        score: scoreCell(cellsValidation[cellName].attrs.assess, cells[cellName]),
+        score: scoreCell(cellsValidation[cellName].assess, cells[cellName]),
       } || undefined,
     }
   ), cells);
@@ -839,7 +839,7 @@ const applyModelRules = (cellExprs, state, value, validation) => {
     if (cell.col === 1 || cell.row === 1) {
       styleStr += 'text-align: center; ';
     } else {
-      styleStr += `font-weight: ${cell.fontWeight || "normal"}; text-align: ${cell.justify || "right"}; `;
+      styleStr += `font-weight: ${cell.fontWeight || "normal"}; text-align: ${cell.align || "right"}; `;
     }
     return { styleStr, borderClass };
   };
@@ -892,7 +892,7 @@ const getCells = (cellExprs, state) => {
         type,
         from: pos,
         to: pos + node.nodeSize,
-        justify: node.attrs.justify || node.attrs.align,
+        align: node.attrs.align || node.attrs.justify,
         background: node.attrs.background,
         fontWeight: node.attrs.fontWeight,
         format: node.attrs.format,
@@ -951,6 +951,16 @@ const schema = new Schema({
             if (value) {
               attrs.dataset = `data-format: ${JSON.stringify(value)};`;
             }
+          },
+        },
+        align: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.textAlign || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `text-align: ${value};`;
           },
         },
         justify: {
@@ -1813,13 +1823,10 @@ const buildCellPlugin = formState => {
             if (columnAttrs) {
               // Merge any column attributes that aren't already set on the cell
               Object.keys(columnAttrs).forEach(attr => {
-                if (columnAttrs[attr] !== undefined && !cells[cellName].attrs?.[attr]) {
+                if (columnAttrs[attr] !== undefined && !cells[cellName]?.[attr]) {
                   cells[cellName] = {
                     ...cells[cellName],
-                    attrs: {
-                      ...cells[cellName].attrs,
-                      [attr]: columnAttrs[attr],
-                    },
+                    [attr]: columnAttrs[attr],
                   };
                 }
               });
@@ -2114,7 +2121,7 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
       // Set readonly attribute for header cells
       readonly: isHeader ? "true" : null,
       ...colsAttrs[col],
-      ...cell.attrs,
+      ...cell,
     },
     "content": content,
   };
@@ -2203,7 +2210,7 @@ const getCell = (row, col, cells, columns) => {
         border: mergedAttrs?.border,
         fontWeight: mergedAttrs?.fontWeight,
         background: mergedAttrs?.background,
-        justify: mergedAttrs?.justify,
+        align: mergedAttrs?.align || mergedAttrs?.justify,
         format: mergedAttrs?.format,
         assess: mergedAttrs?.assess,
         protected: mergedAttrs?.protected,

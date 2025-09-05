@@ -300,6 +300,55 @@ export const lexicon = {
     "length": 2,
     "arity": 2
   },
+  "cell": {
+    "tk": 1,
+    "name": "CELL",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "text": {
+    "tk": 1,
+    "name": "TEXT",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "assess": {
+    "tk": 1,
+    "name": "ASSESS",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "method": {
+    "tk": 1,
+    "name": "METHOD",
+    "cls": "function",
+    "length": 1,
+    "arity": 1
+  },
+  "expected": {
+    "tk": 1,
+    "name": "EXPECTED",
+    "cls": "function",
+    "length": 1,
+    "arity": 1
+  },
+  "width": {
+    "tk": 1,
+    "name": "WIDTH",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "align": {
+    "tk": 1,
+    "name": "ALIGN",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
   "cells": {
     "tk": 1,
     "name": "CELLS",
@@ -310,6 +359,13 @@ export const lexicon = {
   "rows": {
     "tk": 1,
     "name": "ROWS",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "column": {
+    "tk": 1,
+    "name": "COLUMN",
     "cls": "function",
     "length": 2,
     "arity": 2
