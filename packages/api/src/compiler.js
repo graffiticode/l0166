@@ -70,8 +70,8 @@ const getValidation = ({rows = {}, cells = {}}) => (
 
 export class Checker extends BasisChecker {
   HELLO(node, options, resume) {
-    this.visit(node.elts[0], options, async (_e0, _v0) => {
-      const err = [];
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [].concat(e0 || []);
       const val = { type: t.any() };
       resume(err, val);
     });
@@ -80,7 +80,7 @@ export class Checker extends BasisChecker {
   TITLE(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         // Return a fragment type for title
         const val = { type: t.record({ title: t.string() }, true) };
         resume(err, val);
@@ -91,7 +91,7 @@ export class Checker extends BasisChecker {
   INSTRUCTIONS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = { type: t.record({ instructions: t.string() }, true) };
         resume(err, val);
       });
@@ -101,7 +101,7 @@ export class Checker extends BasisChecker {
   TEXT(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = { type: t.record({ text: t.string() }, true) };
         resume(err, val);
       });
@@ -111,7 +111,7 @@ export class Checker extends BasisChecker {
   ASSESS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         // First pass: an open assess record
         const val = { type: t.record({ assess: t.record({}, true) }, true) };
         resume(err, val);
@@ -137,7 +137,7 @@ export class Checker extends BasisChecker {
 
   EXPECTED(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      const err = [];
+      const err = [].concat(e0 || []);
       const val = { type: t.record({ expected: t.any() }, true) };
       resume(err, val);
     });
@@ -171,10 +171,6 @@ export class Checker extends BasisChecker {
           err.push(`E_INVALID_ALIGN: '${value}' not in [${allowed.join(', ')}]`);
         }
         const val = { type: t.record({ align: t.enum(allowed) }, true) };
-        console.log(
-          "Checker/ALIGN()",
-          "err=" + JSON.stringify(err, null, 2),
-        );
         resume(err, val);
       });
     });
@@ -183,7 +179,7 @@ export class Checker extends BasisChecker {
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const cellName =
           (typeof v0 === 'string' && v0) ||
           (v0 && typeof v0.tag === 'string' && v0.tag) ||
@@ -197,7 +193,7 @@ export class Checker extends BasisChecker {
   CELLS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = { type: t.record({ cells: t.record({}, true) }, true) };
         resume(err, val);
       });
@@ -207,7 +203,7 @@ export class Checker extends BasisChecker {
   ROWS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = { type: t.record({ rows: t.record({}, true) }, true) };
         resume(err, val);
       });
@@ -217,7 +213,7 @@ export class Checker extends BasisChecker {
   COLUMN(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const columnName =
           (typeof v0 === 'string' && v0) ||
           (v0 && typeof v0.tag === 'string' && v0.tag) ||
@@ -231,7 +227,7 @@ export class Checker extends BasisChecker {
   COLUMNS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = { type: t.record({ columns: t.record({}, true) }, true) };
         resume(err, val);
       });
@@ -245,7 +241,7 @@ export class Transformer extends BasisTransformer {
   TITLE(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = {
           ...v1,
           title: v0,
@@ -258,7 +254,7 @@ export class Transformer extends BasisTransformer {
   INSTRUCTIONS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = {
           ...v1,
           instructions: v0,
@@ -271,7 +267,7 @@ export class Transformer extends BasisTransformer {
   TEXT(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         // v0 is the text content
         // v1 is the rest record
         const val = {
@@ -286,7 +282,7 @@ export class Transformer extends BasisTransformer {
   ASSESS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         // v0 is an array containing assess properties
         // v1 is the continuation value
         const assessObj = v0.reduce((acc, item) => ({...acc, ...item}), {});
@@ -301,7 +297,7 @@ export class Transformer extends BasisTransformer {
 
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      const err = [];
+      const err = [].concat(e0 || []);
       // v0 is the method value
       const val = {
         method: v0
@@ -312,7 +308,7 @@ export class Transformer extends BasisTransformer {
 
   EXPECTED(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      const err = [];
+      const err = [].concat(e0 || []);
       // v0 is the expected value
       const val = {
         expected: v0
@@ -324,7 +320,7 @@ export class Transformer extends BasisTransformer {
   WIDTH(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         // v0 is the width value (integer)
         // v1 is the continuation value
         const val = {
@@ -339,7 +335,7 @@ export class Transformer extends BasisTransformer {
   ALIGN(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         // v0 is the alignment value (string or tag)
         // v1 is the continuation value
         const alignment = typeof v0 === 'string' ? v0 : v0.tag;
@@ -355,7 +351,7 @@ export class Transformer extends BasisTransformer {
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const cellName =
               typeof v0 === 'string' && v0 ||
               typeof v0.tag === "string" && v0.tag;
@@ -371,7 +367,7 @@ export class Transformer extends BasisTransformer {
   CELLS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const cells = v0.reduce((cells, cell) => {
           return {
             ...cells,
@@ -390,7 +386,7 @@ export class Transformer extends BasisTransformer {
   ROWS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const val = {
           ...v1,
           rows: v0,
@@ -403,7 +399,7 @@ export class Transformer extends BasisTransformer {
   COLUMN(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         const columnName =
               typeof v0 === 'string' && v0 ||
               typeof v0.tag === "string" && v0.tag;
@@ -419,7 +415,7 @@ export class Transformer extends BasisTransformer {
   COLUMNS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [];
+        const err = [].concat(e0 || [], e1 || []);
         console.log(
           "COLUMNS()",
           "v0=" + JSON.stringify(v0, null, 2),
