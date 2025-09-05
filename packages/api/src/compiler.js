@@ -436,7 +436,7 @@ t;
 }
 
 export const compiler = new BasisCompiler({
-  langID: '0165',
+  langID: '0166',
   version: 'v0.0.1',
   Checker: Checker,
   Transformer: Transformer,
