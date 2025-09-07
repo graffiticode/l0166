@@ -1,12 +1,9 @@
-columns {
-  A: {
-    width: 100,
-    justify: "center",
-  }
+columns [
+  column A width 100 align "center" {}
 }
-cells {
-  A1: { text: "A1" }
-}
+cells [
+  cell A1 text "A1"
+]
 {
   v: "0.0.1"
 }..
