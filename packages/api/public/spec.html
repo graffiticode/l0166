@@ -19,10 +19,18 @@
 <div class="title">Contents</div>
 <ol>
 <li><a href="#sec-Functions"><span class="spec-secid">1</span>Functions</a><ol>
-<li><a href="#sec-cells"><span class="spec-secid">1.1</span>cells</a></li>
-<li><a href="#sec-rows"><span class="spec-secid">1.2</span>rows</a></li>
-<li><a href="#sec-columns"><span class="spec-secid">1.3</span>columns</a></li>
-<li><a href="#sec-params"><span class="spec-secid">1.4</span>params</a></li>
+<li><a href="#sec-text"><span class="spec-secid">1.1</span>text</a></li>
+<li><a href="#sec-assess"><span class="spec-secid">1.2</span>assess</a></li>
+<li><a href="#sec-method"><span class="spec-secid">1.3</span>method</a></li>
+<li><a href="#sec-expected"><span class="spec-secid">1.4</span>expected</a></li>
+<li><a href="#sec-cell"><span class="spec-secid">1.5</span>cell</a></li>
+<li><a href="#sec-cells"><span class="spec-secid">1.6</span>cells</a></li>
+<li><a href="#sec-rows"><span class="spec-secid">1.7</span>rows</a></li>
+<li><a href="#sec-width"><span class="spec-secid">1.8</span>width</a></li>
+<li><a href="#sec-align"><span class="spec-secid">1.9</span>align</a></li>
+<li><a href="#sec-column"><span class="spec-secid">1.10</span>column</a></li>
+<li><a href="#sec-columns"><span class="spec-secid">1.11</span>columns</a></li>
+<li><a href="#sec-params"><span class="spec-secid">1.12</span>params</a></li>
 </ol>
 </li>
 <li><a href="#sec-Program-Examples"><span class="spec-secid">2</span>Program Examples</a></li>
@@ -41,9 +49,44 @@
 </thead>
 <tbody>
 <tr>
+<td align="left"><code>text</code></td>
+<td align="left"><code>&lt;string string: record&gt;</code></td>
+<td align="left">Sets text content for a cell</td>
+</tr>
+<tr>
+<td align="left"><code>assess</code></td>
+<td align="left"><code>&lt;array array: record&gt;</code></td>
+<td align="left">Defines assessment criteria for a cell</td>
+</tr>
+<tr>
+<td align="left"><code>method</code></td>
+<td align="left"><code>&lt;string&gt;</code></td>
+<td align="left">Specifies the assessment method</td>
+</tr>
+<tr>
+<td align="left"><code>expected</code></td>
+<td align="left"><code>&lt;string&gt;</code></td>
+<td align="left">Specifies the expected value for assessment</td>
+</tr>
+<tr>
+<td align="left"><code>width</code></td>
+<td align="left"><code>&lt;int record: record&gt;</code></td>
+<td align="left">Sets the width of a column</td>
+</tr>
+<tr>
+<td align="left"><code>align</code></td>
+<td align="left"><code>&lt;string record: record&gt;</code></td>
+<td align="left">Sets the alignment of a column (left, right, center, justify)</td>
+</tr>
+<tr>
+<td align="left"><code>cell</code></td>
+<td align="left"><code>&lt;string string: record&gt;</code></td>
+<td align="left">Defines a single cell data and configuration</td>
+</tr>
+<tr>
 <td align="left"><code>cells</code></td>
-<td align="left"><code>&lt;record record: record&gt;</code></td>
-<td align="left">Defines cell data and configurations</td>
+<td align="left"><code>&lt;array array: record&gt;</code></td>
+<td align="left">Defines multiple cells from an array</td>
 </tr>
 <tr>
 <td align="left"><code>rows</code></td>
@@ -51,9 +94,14 @@
 <td align="left">Defines row data and configurations</td>
 </tr>
 <tr>
+<td align="left"><code>column</code></td>
+<td align="left"><code>&lt;string string: record&gt;</code></td>
+<td align="left">Defines a single column configuration</td>
+</tr>
+<tr>
 <td align="left"><code>columns</code></td>
-<td align="left"><code>&lt;record record: record&gt;</code></td>
-<td align="left">Defines column data and configurations</td>
+<td align="left"><code>&lt;array array: record&gt;</code></td>
+<td align="left">Defines multiple columns from an array</td>
 </tr>
 <tr>
 <td align="left"><code>params</code></td>
@@ -62,26 +110,81 @@
 </tr>
 </tbody>
 </table>
-<section id="sec-cells" secid="1.1">
-<h2><span class="spec-secid" title="link to this section"><a href="#sec-cells">1.1</a></span>cells</h2>
-<p>Defines cell content.</p>
-<pre><code>cells {...} {...}
+<section id="sec-text" secid="1.1">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-text">1.1</a></span>text</h2>
+<p>Sets the text content for a cell.</p>
+<pre><code>text "Hello World" {...}
 </code></pre>
 </section>
-<section id="sec-rows" secid="1.2">
-<h2><span class="spec-secid" title="link to this section"><a href="#sec-rows">1.2</a></span>rows</h2>
+<section id="sec-assess" secid="1.2">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-assess">1.2</a></span>assess</h2>
+<p>Defines assessment criteria for a cell.</p>
+<pre><code>assess [method "value" expected "10"] {...}
+</code></pre>
+</section>
+<section id="sec-method" secid="1.3">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-method">1.3</a></span>method</h2>
+<p>Specifies the assessment method type.</p>
+<pre><code>method "value"
+</code></pre>
+</section>
+<section id="sec-expected" secid="1.4">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-expected">1.4</a></span>expected</h2>
+<p>Specifies the expected value for assessment validation.</p>
+<pre><code>expected "10"
+</code></pre>
+</section>
+<section id="sec-cell" secid="1.5">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-cell">1.5</a></span>cell</h2>
+<p>Defines a single cell content and configuration.</p>
+<pre><code>cell "A1" text "Hello" {}
+cell "A1" text "A1" assess [method "value" expected "10"] {}
+</code></pre>
+</section>
+<section id="sec-cells" secid="1.6">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-cells">1.6</a></span>cells</h2>
+<p>Defines multiple cells from an array.</p>
+<pre><code>cells [
+  cell "A1" text "Hello" {},
+  cell "B1" text "World" {}
+] {...}
+</code></pre>
+</section>
+<section id="sec-rows" secid="1.7">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-rows">1.7</a></span>rows</h2>
 <p>Defines row attributes.</p>
 <pre><code>rows {...} {...}
 </code></pre>
 </section>
-<section id="sec-columns" secid="1.3">
-<h2><span class="spec-secid" title="link to this section"><a href="#sec-columns">1.3</a></span>columns</h2>
-<p>Defines column attributes.</p>
-<pre><code>columns {...} {...}
+<section id="sec-width" secid="1.8">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-width">1.8</a></span>width</h2>
+<p>Sets the width of a column in pixels.</p>
+<pre><code>width 100 {...}
 </code></pre>
 </section>
-<section id="sec-params" secid="1.4">
-<h2><span class="spec-secid" title="link to this section"><a href="#sec-params">1.4</a></span>params</h2>
+<section id="sec-align" secid="1.9">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-align">1.9</a></span>align</h2>
+<p>Sets the alignment of column content. Valid values are &ldquo;left&rdquo;, &ldquo;right&rdquo;, &ldquo;center&rdquo;, or &ldquo;justify&rdquo;.</p>
+<pre><code>align "right" {...}
+</code></pre>
+</section>
+<section id="sec-column" secid="1.10">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-column">1.10</a></span>column</h2>
+<p>Defines a single column configuration.</p>
+<pre><code>column "A" width 100 align "right" {}
+</code></pre>
+</section>
+<section id="sec-columns" secid="1.11">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-columns">1.11</a></span>columns</h2>
+<p>Defines multiple column configurations from an array.</p>
+<pre><code>columns [
+  column "A" width 100 align "right" {},
+  column "B" width 150 align "left" {}
+] {...}
+</code></pre>
+</section>
+<section id="sec-params" secid="1.12">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-params">1.12</a></span>params</h2>
 <p>Defines parameter sets used to populate cells.</p>
 <pre><code>params {
   A1: "Fees earned",
@@ -110,11 +213,11 @@
 columns {
   A: {
     width: 100,
-    justify: "right",
+    align: "right",
   },
   B: {
     width: 100,
-    justify: "left",
+    align: "left",
   },
 }
 cells {
@@ -161,10 +264,18 @@ Written in <a href="https://spec-md.com" target="_blank">Spec Markdown</a>.</foo
 <ol><li id="_sidebar_1"><a href="#sec-Functions"><span class="spec-secid">1</span>Functions</a>
 <input hidden class="toggle" type="checkbox" id="_toggle_1" /><label for="_toggle_1"></label>
 <ol>
-<li id="_sidebar_1.1"><a href="#sec-cells"><span class="spec-secid">1.1</span>cells</a></li>
-<li id="_sidebar_1.2"><a href="#sec-rows"><span class="spec-secid">1.2</span>rows</a></li>
-<li id="_sidebar_1.3"><a href="#sec-columns"><span class="spec-secid">1.3</span>columns</a></li>
-<li id="_sidebar_1.4"><a href="#sec-params"><span class="spec-secid">1.4</span>params</a></li>
+<li id="_sidebar_1.1"><a href="#sec-text"><span class="spec-secid">1.1</span>text</a></li>
+<li id="_sidebar_1.2"><a href="#sec-assess"><span class="spec-secid">1.2</span>assess</a></li>
+<li id="_sidebar_1.3"><a href="#sec-method"><span class="spec-secid">1.3</span>method</a></li>
+<li id="_sidebar_1.4"><a href="#sec-expected"><span class="spec-secid">1.4</span>expected</a></li>
+<li id="_sidebar_1.5"><a href="#sec-cell"><span class="spec-secid">1.5</span>cell</a></li>
+<li id="_sidebar_1.6"><a href="#sec-cells"><span class="spec-secid">1.6</span>cells</a></li>
+<li id="_sidebar_1.7"><a href="#sec-rows"><span class="spec-secid">1.7</span>rows</a></li>
+<li id="_sidebar_1.8"><a href="#sec-width"><span class="spec-secid">1.8</span>width</a></li>
+<li id="_sidebar_1.9"><a href="#sec-align"><span class="spec-secid">1.9</span>align</a></li>
+<li id="_sidebar_1.10"><a href="#sec-column"><span class="spec-secid">1.10</span>column</a></li>
+<li id="_sidebar_1.11"><a href="#sec-columns"><span class="spec-secid">1.11</span>columns</a></li>
+<li id="_sidebar_1.12"><a href="#sec-params"><span class="spec-secid">1.12</span>params</a></li>
 </ol>
 </li>
 <li id="_sidebar_2"><a href="#sec-Program-Examples"><span class="spec-secid">2</span>Program Examples</a></li>
