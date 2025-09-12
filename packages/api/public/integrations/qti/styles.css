@@ -1,0 +1,271 @@
+/**
+ * QTI 3.0 Portable Custom Interaction Styles
+ * Separated from JavaScript for better maintainability
+ */
+
+.pci-content {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.pci-content h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.25em;
+}
+
+/* Form Container Styles */
+.form-container {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    min-height: 200px;
+}
+
+/* Override Graffiticode Form styles for consistency */
+.form-container form {
+    width: 100%;
+}
+
+.form-container input,
+.form-container textarea,
+.form-container select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-container input:focus,
+.form-container textarea:focus,
+.form-container select:focus {
+    border-color: #2196f3;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+}
+
+/* Form validation states */
+.form-container .is-valid {
+    border-color: #4caf50;
+}
+
+.form-container .is-invalid {
+    border-color: #dc3545;
+}
+
+.form-container .form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Learnosity-style validation states */
+.form-container .lrn_correct {
+    border: 2px solid #4caf50;
+    background-color: rgba(76, 175, 80, 0.05);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.form-container .lrn_incorrect {
+    border: 2px solid #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Legacy drag-drop styles (kept for reference, can be removed if not needed) */
+.interaction-elements {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    gap: 20px;
+}
+
+.draggable-items, .drop-zones {
+    flex: 1;
+    min-width: 0;
+}
+
+.submit-btn {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 20px 0;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover {
+    background: #1976d2;
+}
+
+.submit-btn:active {
+    background: #1565c0;
+    transform: translateY(1px);
+}
+
+.submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.reset-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 20px 10px 20px 0;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.reset-btn:hover {
+    background: #5a6268;
+}
+
+.reset-btn:active {
+    background: #545b62;
+    transform: translateY(1px);
+}
+
+.reset-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.interaction-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.draggable-items h4, .drop-zones h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.1em;
+    color: #555;
+    text-align: center;
+}
+
+.feedback {
+    padding: 12px 16px;
+    margin: 15px 0;
+    border-radius: 6px;
+    font-weight: 500;
+    border-left: 4px solid;
+}
+
+.feedback.correct {
+    background: #d4edda;
+    border-left-color: #28a745;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.feedback.incorrect {
+    background: #f8d7da;
+    border-left-color: #dc3545;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.attempts-info {
+    font-size: 0.9em;
+    color: #666;
+    text-align: center;
+    margin: 10px 0;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* QTI 3.0 specific accessibility enhancements */
+.pci-content:focus-within {
+    outline: 2px solid #2196f3;
+    outline-offset: 2px;
+}
+
+.draggable-item:focus {
+    outline: 2px solid #2196f3;
+    outline-offset: 2px;
+}
+
+.drop-zone:focus {
+    outline: 2px solid #2196f3;
+    outline-offset: 2px;
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+    .interaction-elements {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .pci-content {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .draggable-item, .drop-zone {
+        padding: 15px 10px;
+        font-size: 0.95em;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .draggable-item {
+        border-width: 3px;
+        font-weight: bold;
+    }
+    
+    .drop-zone {
+        border-width: 3px;
+        font-weight: bold;
+    }
+    
+    .feedback {
+        border-width: 2px;
+        font-weight: bold;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .draggable-item, .drop-zone, .submit-btn {
+        transition: none;
+    }
+    
+    .draggable-item:hover {
+        transform: none;
+    }
+    
+    .drop-zone.dragover {
+        transform: none;
+    }
+}
