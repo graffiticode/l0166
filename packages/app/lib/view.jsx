@@ -90,6 +90,12 @@ export const View = () => {
         ...data,
         ...args,
       };
+    case "focus":
+      // Handle cell or column focus changes
+      return {
+        ...data,
+        focus: args,
+      };
     default:
       console.error(false, `Unimplemented action type: ${type}`);
       return data;

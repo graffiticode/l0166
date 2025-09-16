@@ -518,10 +518,12 @@ const buildMenuPlugin = (formState) => {
 
 const applyDecoration = ({ doc, cells }) => {
   const decorations = [];
-  cells.forEach(({ from, to, color, border, borderClass }) => {
+  cells.forEach(({ from, to, color, textColor, fontWeight, border, borderClass }) => {
     decorations.push(Decoration.node(from, to, {
       style: `
         background-color: ${color};
+        ${textColor ? `color: ${textColor};` : ''}
+        ${fontWeight ? `font-weight: ${fontWeight};` : ''}
         ${border};
       `,
       class: borderClass || ""
@@ -763,24 +765,122 @@ export const scoreCells = ({ cells, validation }) => {
   ), cells);
 };
 
-const applyModelRules = (cellExprs, state, value, validation) => {
+const applyModelRules = (cellExprs, state, value, validation, formState) => {
   const cells = getCells(cellExprs, state);
   const scoredCells = scoreCells({ cells: value.cells, validation });
   const { doc, selection } = state;
   const { lastFocusedCell } = value;
+  const focus = formState?.data?.focus;
+
   // Multiply first row and first column values and compare to body values.
   let cellColors = [];
+  let cellTextColors = [];
+  let cellFontWeights = [];
   cells.forEach(cell => {
-    const color = getCellColor({
+    let color = getCellColor({
       ...cell,
       lastFocusedCell,
       score: scoredCells[cell.name]?.score,
     });
+    let textColor = null;
+    let fontWeight = null;
+
+    // Set default text color and font weight for headers
+    if (cell.row === 1 || cell.col === 1) {
+      textColor = "#5f6368"; // Default Google Sheets gray for headers
+      fontWeight = "400"; // Normal weight for headers
+    }
+
+    // Apply highlighting based on focus type
+    if (focus) {
+      // Check if this is a header and apply dark blue when selected
+      if (cell.row === 1 && cell.col > 1) {
+        // Column header (A0, B0, C0, etc.)
+        const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
+        if (focus.type === "column" && cellColumn === focus.name) {
+          color = "#1a73e8"; // Google Sheets selected header blue
+          textColor = "#ffffff"; // White text for selected header
+          fontWeight = "600"; // Semibold weight when selected
+        } else if (focus.type === "sheet") {
+          color = "#1a73e8"; // Google Sheets selected header blue for all column headers
+          textColor = "#ffffff"; // White text for selected header
+          fontWeight = "600"; // Semibold weight when selected
+        } else {
+          // Unselected column header
+          textColor = "#5f6368"; // Google Sheets gray text for unselected headers
+          fontWeight = "400"; // Normal weight for unselected headers
+        }
+      } else if (cell.row > 1 && cell.col === 1) {
+        // Row header (_1, _2, _3, etc.)
+        const cellRow = cell.name.match(/(\d+)$/)?.[1];
+        if (focus.type === "row" && cellRow === focus.name) {
+          color = "#1a73e8"; // Google Sheets selected header blue
+          textColor = "#ffffff"; // White text for selected header
+          fontWeight = "600"; // Semibold weight when selected
+        } else if (focus.type === "sheet") {
+          color = "#1a73e8"; // Google Sheets selected header blue for all row headers
+          textColor = "#ffffff"; // White text for selected header
+          fontWeight = "600"; // Semibold weight when selected
+        } else {
+          // Unselected row header
+          textColor = "#5f6368"; // Google Sheets gray text for unselected headers
+          fontWeight = "400"; // Normal weight for unselected headers
+        }
+      } else if (cell.row === 1 && cell.col === 1) {
+        // Top-left corner header (_0)
+        if (focus.type === "sheet") {
+          color = "#1a73e8"; // Google Sheets selected header blue
+          textColor = "#ffffff"; // White text for selected header
+          fontWeight = "600"; // Semibold weight when selected
+        } else {
+          // Unselected top-left corner
+          textColor = "#5f6368"; // Google Sheets gray text for unselected headers
+          fontWeight = "400"; // Normal weight for unselected headers
+        }
+      }
+      // For data cells, apply light blue highlight
+      else if (cell.row > 0 && cell.col > 0) {
+        // Check if this cell currently has the selection/cursor
+        const isCellSelected = selection.anchor > cell.from && selection.anchor < cell.to;
+
+        if (!isCellSelected) {
+          // Only apply highlighting if this cell does NOT have the cursor
+          if (focus.type === "sheet") {
+            // Highlight all data cells for sheet focus
+            color = "#e6f3ff"; // Light blue for entire sheet
+          } else if (focus.type === "column") {
+            // Check if this cell is in the focused column
+            const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
+            if (cellColumn === focus.name) {
+              color = "#e6f3ff"; // Light blue for focused column
+            }
+          } else if (focus.type === "row") {
+            // Check if this cell is in the focused row
+            const cellRow = cell.name.match(/(\d+)$/)?.[1];
+            if (cellRow === focus.name) {
+              color = "#e6f3ff"; // Light blue for focused row
+            }
+          }
+        }
+        // When focus.type === "cell" or this cell has the cursor, no highlighting is applied (stays white)
+      }
+    }
+
     const { row, col } = cell;
     if (cellColors[row] === undefined) {
       cellColors[row] = [];
     }
     cellColors[row][col] = color;
+
+    if (cellTextColors[row] === undefined) {
+      cellTextColors[row] = [];
+    }
+    cellTextColors[row][col] = textColor;
+
+    if (cellFontWeights[row] === undefined) {
+      cellFontWeights[row] = [];
+    }
+    cellFontWeights[row][col] = fontWeight;
   });
   const getBorderStyle = (cell, isFocused) => {
     // Parse custom border sides
@@ -847,13 +947,18 @@ const applyModelRules = (cellExprs, state, value, validation) => {
   const coloredCells = cells.map(cell => {
     const isFocused = selection.anchor > cell.from && selection.anchor < cell.to;
     const { styleStr, borderClass } = getBorderStyle(cell, isFocused);
+    // Use the color from cellColors which includes our focus highlighting
+    const focusColor = cellColors[cell.row] && cellColors[cell.row][cell.col];
+    const focusTextColor = cellTextColors[cell.row] && cellTextColors[cell.row][cell.col];
+    const focusFontWeight = cellFontWeights[cell.row] && cellFontWeights[cell.row][cell.col];
     return {
       ...cell,
       readonly: cell.readonly,
       border: styleStr,
       borderClass: borderClass,
-      color: (cell.col === 1 || cell.row === 1) && "#f8f8f8" || // Light gray background for headers
-        cellColors[cell.row][cell.col] || "#fff"
+      color: focusColor || ((cell.col === 1 || cell.row === 1) && "#f8f8f8") || "#fff",
+      textColor: focusTextColor,
+      fontWeight: focusFontWeight
     };
   });
   return applyDecoration({doc, cells: coloredCells});
@@ -1484,7 +1589,7 @@ const getCellDependencies = ({ env, names }) => {
 
 
 
-const makeTableHeadersReadOnlyPlugin = new Plugin({
+const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
   props: {
     handleClickOn(view, _pos, node, _nodePos, _event, _direct) {
       const { state, dispatch } = view;
@@ -1493,14 +1598,67 @@ const makeTableHeadersReadOnlyPlugin = new Plugin({
       if (node.type.name === "table_header") {
         // Create a selection for the adjacent cell instead
         const name = node.attrs.name || "_0";
+
+        // Dispatch focus action for header click
+        if (name) {
+          // Parse the cell name to determine column and row
+          const colPart = name.match(/^([_A-Z]+)/)?.[1];
+          const rowPart = name.match(/(\d+)$/)?.[1];
+
+          if (colPart === "_" && rowPart === "0") {
+            // Top-left corner header (_0)
+            formState.apply({
+              type: "focus",
+              args: {
+                type: "sheet",
+              },
+            });
+            // Force re-render to update decorations with new focus
+            const updateTr = state.tr;
+            updateTr.setMeta("focusChanged", true);
+            updateTr.setMeta("headerClick", true);
+            dispatch(updateTr);
+          } else if (colPart && colPart !== "_" && rowPart === "0") {
+            // Column header (e.g., A0, B0, C0)
+            formState.apply({
+              type: "focus",
+              args: {
+                type: "column",
+                name: colPart,
+              },
+            });
+            // Force re-render to update decorations with new focus
+            const updateTr = state.tr;
+            updateTr.setMeta("focusChanged", true);
+            updateTr.setMeta("headerClick", true);
+            dispatch(updateTr);
+          } else if (colPart === "_" && rowPart && rowPart !== "0") {
+            // Row header (e.g., _1, _2, _3)
+            formState.apply({
+              type: "focus",
+              args: {
+                type: "row",
+                name: rowPart,
+              },
+            });
+            // Force re-render to update decorations with new focus
+            const updateTr = state.tr;
+            updateTr.setMeta("focusChanged", true);
+            updateTr.setMeta("headerClick", true);
+            dispatch(updateTr);
+          }
+        }
+
         const { pos: adjPos, node: adjNode } = getAdjacentCellNodeByName({state, name});
         if (adjPos && adjNode) {
           const cursorPos = adjPos + 2;
           const newText = adjNode.textContent;
           const selection = TextSelection.create(state.tr.doc, cursorPos + newText.length);
 
-          // Dispatch the transaction to update the selection
-          dispatch(state.tr.setSelection(selection));
+          // Dispatch the transaction with a meta flag indicating this is a synthetic focus
+          const tr = state.tr.setSelection(selection);
+          tr.setMeta("syntheticFocus", true);
+          dispatch(tr);
         }
         return true; // Prevent further handling
       }
@@ -1916,11 +2074,12 @@ const buildCellPlugin = formState => {
           lastFocusedCell: null,
           blurredCell: null,
           focusedCell: null,
+          lastHeaderClick: 0,
           dirtyCells,
           cells: allCells,
         };
         const { validation } = formState.data;
-        const decorations = applyModelRules(cellExprs, state, value, validation);
+        const decorations = applyModelRules(cellExprs, state, value, validation, formState);
         return {
           ...value,
           decorations,
@@ -1933,6 +2092,23 @@ const buildCellPlugin = formState => {
             ...value,
             focusedCell: null,
             dirtyCells: [],
+          };
+        }
+        // Track header clicks
+        if (tr.getMeta("headerClick")) {
+          value = {
+            ...value,
+            lastHeaderClick: Date.now(),
+          };
+        }
+        // Force recalculation of decorations when focus changes
+        if (tr.getMeta("focusChanged") || tr.getMeta("focusCleared") || tr.getMeta("headerClick")) {
+          const cellExprs = self.getState(state);
+          const { validation } = formState.data;
+          const decorations = applyModelRules(cellExprs, state, value, validation, formState);
+          return {
+            ...value,
+            decorations,
           };
         }
         const { selection } = state;
@@ -2014,6 +2190,17 @@ const buildCellPlugin = formState => {
               cells,
             },
           });
+          // Apply focus action only for explicit (non-synthetic) cell focus changes
+          if (node.attrs.name && !tr.getMeta("syntheticFocus")) {
+            // Clear any row/column focus by setting cell focus
+            formState.apply({
+              type: "focus",
+              args: {
+                type: "cell",
+                name: node.attrs.name,
+              },
+            });
+          }
         } else if (isTableCellOrHeader(node) && node.attrs?.name) {
           const name = node.attrs.name;
           const text = node.textContent.trim();
@@ -2037,7 +2224,7 @@ const buildCellPlugin = formState => {
         }
         const cellExprs = self.getState(state);
         const { validation } = formState.data;
-        const decorations = applyModelRules(cellExprs, state, value, validation);
+        const decorations = applyModelRules(cellExprs, state, value, validation, formState);
         return {
           ...value,
           decorations,
@@ -2047,6 +2234,74 @@ const buildCellPlugin = formState => {
     props: {
       decorations(state) {
         return this.getState(state).decorations;
+      },
+      handleDOMEvents: {
+        mousedown(view, event) {
+          // Get the position in the document from the mouse event
+          const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+          if (!pos) return false;
+
+          // Get the node at this position
+          const $pos = view.state.doc.resolve(pos.pos);
+          let cellNode = null;
+          let cellName = null;
+
+          // Find the table cell node
+          for (let depth = $pos.depth; depth > 0; depth--) {
+            const node = $pos.node(depth);
+            if (node.type.name === "table_cell") {
+              cellNode = node;
+              cellName = node.attrs.name;
+              break;
+            }
+          }
+
+          if (cellNode && cellName) {
+            const pluginState = this.getState(view.state);
+            const currentFocus = formState.data.focus;
+
+            console.log("Cell clicked:", cellName,
+                       "Currently focused:", pluginState.focusedCell,
+                       "Current focus state:", currentFocus);
+
+            // If there's row/column/sheet highlighting and we click on ANY cell (focused or not),
+            // we should clear the highlighting
+            if (currentFocus && (currentFocus.type === "row" || currentFocus.type === "column" || currentFocus.type === "sheet")) {
+              // Check if this cell is in the highlighted area
+              const cellColumn = cellName.match(/^([A-Z]+)/)?.[1];
+              const cellRow = cellName.match(/(\d+)$/)?.[1];
+
+              let isInHighlightedArea = false;
+              if (currentFocus.type === "sheet") {
+                // Any data cell click clears sheet focus
+                isInHighlightedArea = true;
+              } else if (currentFocus.type === "column" && cellColumn === currentFocus.name) {
+                // Clicking any cell in the highlighted column
+                isInHighlightedArea = true;
+              } else if (currentFocus.type === "row" && cellRow === currentFocus.name) {
+                // Clicking any cell in the highlighted row
+                isInHighlightedArea = true;
+              }
+
+              // If we're clicking on any cell in the highlighted area, clear the highlight
+              if (isInHighlightedArea) {
+                console.log("Clearing focus, setting cell focus:", cellName);
+                formState.apply({
+                  type: "focus",
+                  args: {
+                    type: "cell",
+                    name: cellName,
+                  },
+                });
+                // Force a re-render by dispatching an empty transaction
+                const tr = view.state.tr;
+                tr.setMeta("focusCleared", true);
+                view.dispatch(tr);
+              }
+            }
+          }
+          return false; // Allow normal event processing
+        }
       }
     }
   });
@@ -2304,7 +2559,7 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
     }),
     menuPlugin,
     //  modelBackgroundPlugin(),
-    makeTableHeadersReadOnlyPlugin,
+    makeTableHeadersReadOnlyPlugin(state),
     makeProtectedCellsPlugin(tooltipHandler),
     cellPlugin,
   ];
