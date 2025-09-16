@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## TODO: Google Sheets-style Edit Behavior
+When implementing row/column/sheet selection, consider that in Google Sheets:
+- The focused cell in a selection is not immediately editable (prevents accidental edits)
+- Editing is only enabled through explicit actions:
+  - Clicking in the formula bar
+  - Double-clicking the cell
+  - Pressing F2 or Enter
+  - Starting to type (replaces content)
+- This maintains visual clarity of the selection and separates "selection mode" from "edit mode"
+
 ## Architecture
 
 This is a Graffiticode language implementation (L0166) for creating spreadsheet-based assessments. The codebase is a monorepo with two packages:

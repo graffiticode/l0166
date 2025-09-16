@@ -899,29 +899,29 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
     }
     // Define default borders for different cell types
     let defaultBorders = {
-      top: '1px solid #ddd',
-      right: '1px solid #ddd',
-      bottom: '1px solid #ddd',
-      left: '1px solid #ddd'
+      top: '1px solid #e0e0e0',    // Google Sheets light gray for all grid lines
+      right: '1px solid #e0e0e0',
+      bottom: '1px solid #e0e0e0',
+      left: '1px solid #e0e0e0'
     };
     // Adjust defaults based on cell position and state
     if (cell.col === 1 && cell.row === 1) {
-      defaultBorders.right = '1px solid #aaa';
-      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #aaa';
+      defaultBorders.right = '1px solid #e0e0e0';  // Same color for all grid lines
+      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     } else if (cell.col === 1) {
-      defaultBorders.right = '1px solid #aaa';
-      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #ddd';
+      defaultBorders.right = '1px solid #e0e0e0';
+      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     } else if (cell.row === 1) {
-      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #aaa';
+      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     } else if (isFocused) {
       defaultBorders = {
-        top: '2px solid royalblue',
-        right: '2px solid royalblue',
-        bottom: cell.underline ? '2px solid #333' : '2px solid royalblue',
-        left: '2px solid royalblue'
+        top: '2px solid #1a73e8',    // Google Sheets blue for selected cell
+        right: '2px solid #1a73e8',
+        bottom: cell.underline ? '2px solid #333' : '2px solid #1a73e8',
+        left: '2px solid #1a73e8'
       };
     } else {
-      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #ddd';
+      defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     }
     let styleStr = '';
     if (customBorderSides.length === 0) {
