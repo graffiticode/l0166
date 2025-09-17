@@ -61,9 +61,10 @@ const resolveVariables = (obj, env) => (
 );
 
 export const View = () => {
-  const [ id, setId ] = useState();
-  const [ accessToken, setAccessToken ] = useState();
-  const [ targetOrigin, setTargetOrigin ] = useState(null);
+  const params = new URLSearchParams(window.location.search);
+  const [ id, setId ] = useState(params.get("id"));
+  const [ accessToken, setAccessToken ] = useState(params.get("access_token"));
+  const [ targetOrigin, setTargetOrigin ] = useState(params.get("origin"));
   const [ doInit, setDoInit ] = useState(true);
   const [ doRecompile, setDoRecompile ] = useState(false);
   const [ state ] = useState(createState({}, (data, { type, args }) => {
@@ -92,6 +93,9 @@ export const View = () => {
       };
     case "focus":
       // Handle cell or column focus changes
+      if (targetOrigin) {
+        window.parent.postMessage({focus: args}, targetOrigin);
+      }
       return {
         ...data,
         focus: args,
@@ -104,10 +108,6 @@ export const View = () => {
 
   useEffect(() => {
     if (window.location.search) {
-      const params = new URLSearchParams(window.location.search);
-      setId(params.get("id"));
-      setAccessToken(params.get("access_token"));
-      setTargetOrigin(params.get("origin"));
       const data = params.get("data");
       if (data) {
         state.apply({
