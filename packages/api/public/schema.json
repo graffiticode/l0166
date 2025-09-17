@@ -74,7 +74,7 @@
           "$ref": "#/definitions/assess"
         }
       },
-      "required": ["text"],
+      "required": [],
       "additionalProperties": true
     },
     "assess": {
