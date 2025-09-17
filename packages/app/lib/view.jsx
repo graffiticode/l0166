@@ -71,7 +71,8 @@ export const View = () => {
     console.log(
       "L0166 state.apply()",
       "type=" + type,
-      "args=" + JSON.stringify(args, null, 2)
+      "args=" + JSON.stringify(args, null, 2),
+      "data=" + JSON.stringify(data, null, 2),
     );
     switch (type) {
     case "init":
@@ -96,10 +97,7 @@ export const View = () => {
       if (targetOrigin) {
         window.parent.postMessage({focus: args}, targetOrigin);
       }
-      return {
-        ...data,
-        focus: args,
-      };
+      return data;
     default:
       console.error(false, `Unimplemented action type: ${type}`);
       return data;

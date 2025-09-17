@@ -1,10 +1,175 @@
 {
-  "$schema": "",
-  "$id": "",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://graffiticode.com/schemas/l0166.json",
   "title": "L0166",
-  "description": "A starter language",
+  "description": "A spreadsheet-based assessment language",
   "type": "object",
   "properties": {
+    "interaction": {
+      "type": "object",
+      "description": "The interaction configuration for the spreadsheet",
+      "properties": {
+        "cells": {
+          "type": "object",
+          "description": "Cell definitions keyed by cell name",
+          "patternProperties": {
+            "^[A-Z]+[0-9]+$": {
+              "$ref": "#/definitions/cell"
+            }
+          },
+          "additionalProperties": false
+        },
+        "columns": {
+          "type": "object",
+          "description": "Column definitions keyed by column letter",
+          "patternProperties": {
+            "^[A-Z]+$": {
+              "$ref": "#/definitions/column"
+            }
+          },
+          "additionalProperties": false
+        },
+        "rows": {
+          "type": "object",
+          "description": "Row definitions keyed by row number or range",
+          "patternProperties": {
+            "^([0-9]+|[0-9]+\\.\\.[0-9]+|\\*)$": {
+              "$ref": "#/definitions/row"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ranges": {
+          "type": "object",
+          "description": "Range definitions keyed by range notation (e.g., 'A1:B10' or '*' for all cells)",
+          "patternProperties": {
+            "^([A-Z]+[0-9]+:[A-Z]+[0-9]+|\\*)$": {
+              "$ref": "#/definitions/range"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
   },
-  "required": [""]
+  "definitions": {
+    "cell": {
+      "type": "object",
+      "description": "Individual cell configuration",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content of the cell"
+        },
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "description": "Text alignment in the cell"
+        },
+        "background": {
+          "type": "string",
+          "description": "Background color of the cell"
+        },
+        "assess": {
+          "$ref": "#/definitions/assess"
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": true
+    },
+    "assess": {
+      "type": "object",
+      "description": "Assessment configuration for validation",
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "The assessment method to use for validation"
+        },
+        "expected": {
+          "description": "The expected value for validation",
+          "oneOf": [
+            {"type": "string"},
+            {"type": "number"},
+            {"type": "boolean"},
+            {
+              "type": "string",
+              "format": "date",
+              "description": "Date in ISO 8601 format"
+            }
+          ]
+        },
+        "points": {
+          "type": "number",
+          "description": "Points awarded for correct answer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "column": {
+      "type": "object",
+      "description": "Column configuration",
+      "properties": {
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "description": "Default text alignment for the column"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Column width in pixels"
+        }
+      },
+      "additionalProperties": true
+    },
+    "row": {
+      "type": "object",
+      "description": "Row configuration",
+      "properties": {
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "description": "Default text alignment for the row"
+        },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether the row is protected from editing"
+        },
+        "fontWeight": {
+          "type": "string",
+          "enum": ["normal", "bold", "lighter", "bolder"],
+          "description": "Font weight for the row"
+        }
+      },
+      "additionalProperties": true
+    },
+    "range": {
+      "type": "object",
+      "description": "Range configuration - can have any row or column properties",
+      "properties": {
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "description": "Default text alignment for the range"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Column width in pixels for cells in the range"
+        },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether the range is protected from editing"
+        },
+        "fontWeight": {
+          "type": "string",
+          "enum": ["normal", "bold", "lighter", "bolder"],
+          "description": "Font weight for the range"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": []
 }
