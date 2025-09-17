@@ -94,10 +94,36 @@ export const View = () => {
       };
     case "focus":
       // Handle cell or column focus changes
-      if (targetOrigin) {
-        window.parent.postMessage({focus: args}, targetOrigin);
+      // Extract value from the focused element in interaction data
+      let focusValue = {};
+
+      if (data.interaction && args.type && args.name) {
+        const { type, name } = args;
+
+        // Get value based on the type of focused element
+        if (type === 'cell' && data.interaction.cells && data.interaction.cells[name]) {
+          focusValue = data.interaction.cells[name];
+        } else if (type === 'column' && data.interaction.columns && data.interaction.columns[name]) {
+          focusValue = data.interaction.columns[name];
+        } else if (type === 'row' && data.interaction.rows && data.interaction.rows[name]) {
+          focusValue = data.interaction.rows[name];
+        } else if (type === 'sheet' && data.interaction.sheets && data.interaction.sheets[name]) {
+          focusValue = data.interaction.sheets[name];
+        }
       }
-      return data;
+
+      // Ensure focusValue is never undefined
+      if (focusValue === undefined) {
+        focusValue = {};
+      }
+
+      if (targetOrigin) {
+        window.parent.postMessage({focus: {...args, value: focusValue}}, targetOrigin);
+      }
+      return {
+        ...data,
+        focus: args,
+      };
     default:
       console.error(false, `Unimplemented action type: ${type}`);
       return data;
