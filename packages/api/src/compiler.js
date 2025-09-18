@@ -126,11 +126,13 @@ export class Checker extends BasisChecker {
         (typeof v0 === 'string' && v0) ||
         (v0 && typeof v0.tag === 'string' && v0.tag) ||
         undefined;
+      const allowed = ['value', 'formula'];
       if (methodName === undefined) {
         err.push("E_ARG_TYPE: METHOD expects a string or tag literal");
+      } else if (!allowed.includes(methodName)) {
+        err.push(`E_INVALID_METHOD: '${methodName}' not in [${allowed.join(', ')}]`);
       }
-      const methodType = methodName ? t.enum([methodName]) : t.string();
-      const val = { type: t.record({ method: methodType }, true) };
+      const val = { type: t.record({ method: t.enum(allowed) }, true) };
       resume(err, val);
     });
   }

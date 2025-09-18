@@ -83,7 +83,8 @@
       "properties": {
         "method": {
           "type": "string",
-          "description": "The assessment method to use for validation"
+          "enum": ["value", "formula"],
+          "description": "The assessment method to use for validation (value: compare computed value, formula: compare formula text)"
         },
         "expected": {
           "description": "The expected value for validation",
