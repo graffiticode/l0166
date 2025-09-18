@@ -66,9 +66,9 @@
           "enum": ["left", "center", "right"],
           "description": "Text alignment in the cell"
         },
-        "background": {
+        "backgroundColor": {
           "type": "string",
-          "description": "Background color of the cell"
+          "description": "Background color of the cell (hex, rgb, rgba, or named colors)"
         },
         "assess": {
           "$ref": "#/definitions/assess"
@@ -119,6 +119,10 @@
           "type": "integer",
           "minimum": 0,
           "description": "Column width in pixels"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "description": "Background color for all cells in the column (hex, rgb, rgba, or named colors)"
         }
       },
       "additionalProperties": true
@@ -140,6 +144,10 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the row"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "description": "Background color for all cells in the row (hex, rgb, rgba, or named colors)"
         }
       },
       "additionalProperties": true
@@ -166,6 +174,10 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the range"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "description": "Background color for all cells in the range (hex, rgb, rgba, or named colors)"
         }
       },
       "additionalProperties": true

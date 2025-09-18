@@ -69,6 +69,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2,
   },
+  "background-color" : {
+    "tk": 1,
+    "name": "BACKGROUND_COLOR",
+    "cls": "function",
+    "length": 2,
+    "arity": 2,
+  },
   "cells" : {
     "tk": 1,
     "name": "CELLS",

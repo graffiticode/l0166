@@ -533,13 +533,13 @@ const applyDecoration = ({ doc, cells }) => {
 };
 
 const getCellColor = (cell) => {
-  const { row, col, name, background, lastFocusedCell, score } = cell;
+  const { row, col, name, background, backgroundColor, lastFocusedCell, score } = cell;
   //const { expected } = assess || {};
   return row > 1 && col > 1 && score !== undefined && name !== lastFocusedCell && (
     score.isValid === true &&
       "#efe" ||
       "#fee"
-  ) || background || null;
+  ) || backgroundColor || background || null;
 };
 
 const getCellValue = cell => (
@@ -999,6 +999,7 @@ const getCells = (cellExprs, state) => {
         to: pos + node.nodeSize,
         align: node.attrs.align || node.attrs.justify,
         background: node.attrs.background,
+        backgroundColor: node.attrs.backgroundColor,
         fontWeight: node.attrs.fontWeight,
         format: node.attrs.format,
         numberFormat: node.attrs.numberFormat,
@@ -1092,6 +1093,16 @@ const schema = new Schema({
           },
         },
         background: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.backgroundColor || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `background-color: ${value};`;
+          },
+        },
+        backgroundColor: {
           default: null,
           getFromDOM(dom) {
             return dom.style.backgroundColor || null;
@@ -2455,7 +2466,7 @@ const getCell = (row, col, cells, columns) => {
     const cellData = cells[`${col}${row}`] || {};
     const columnData = columns && columns[col] || {};
     // Merge column attributes with cell data, cell data takes precedence
-    const mergedAttrs = { ...columnData, ...cellData.attrs };
+    const mergedAttrs = { ...columnData, ...cellData, ...cellData.attrs };
     return {
       type: "td",
       ...cellData,
@@ -2465,6 +2476,7 @@ const getCell = (row, col, cells, columns) => {
         border: mergedAttrs?.border,
         fontWeight: mergedAttrs?.fontWeight,
         background: mergedAttrs?.background,
+        backgroundColor: mergedAttrs?.backgroundColor,
         align: mergedAttrs?.align || mergedAttrs?.justify,
         format: mergedAttrs?.format,
         assess: mergedAttrs?.assess,

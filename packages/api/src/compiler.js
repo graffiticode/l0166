@@ -176,6 +176,24 @@ export class Checker extends BasisChecker {
     });
   }
 
+  BACKGROUND_COLOR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: BACKGROUND_COLOR expects a string");
+        }
+        // Accept any string as a color value (hex, rgb, named colors, etc.)
+        const val = { type: t.record({ backgroundColor: t.string() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -348,6 +366,22 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  BACKGROUND_COLOR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the color value (string or tag)
+        // v1 is the continuation value
+        const color = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          backgroundColor: color
+        };
+        resume(err, val);
+      });
+    });
+  }
+
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -416,10 +450,6 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        console.log(
-          "COLUMNS()",
-          "v0=" + JSON.stringify(v0, null, 2),
-        );
         // v0 is an array of column objects
         const columns = v0.reduce((cols, col) => {
           return {
@@ -607,10 +637,6 @@ t;
       const data = options?.data || {};
       const err = e0;
       v0 = v0.pop();  // Get last expression.
-      console.log(
-        "PROG()",
-        "v0=" + JSON.stringify(v0, null, 2),
-      );
       const { templateVariablesRecords, title, instructions, ...tableData } = v0;
       const val = {
         title: title || "",
