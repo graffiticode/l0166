@@ -70,6 +70,10 @@
           "type": "string",
           "description": "Background color of the cell (hex, rgb, rgba, or named colors)"
         },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether the cell is protected from editing"
+        },
         "assess": {
           "$ref": "#/definitions/assess"
         }
@@ -124,6 +128,10 @@
         "backgroundColor": {
           "type": "string",
           "description": "Background color for all cells in the column (hex, rgb, rgba, or named colors)"
+        },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether all cells in the column are protected from editing"
         }
       },
       "additionalProperties": true

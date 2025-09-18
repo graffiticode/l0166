@@ -104,7 +104,7 @@ const wrapPlainTextInLatex = text => {
   if (typeof text !== 'string') {
     text = text == null ? '' : String(text);
   }
-  
+
   if (!text || text.length === 0) {
     return text;
   }
@@ -430,7 +430,7 @@ const equivValue = (actual, expected, actualType, expectedType) => {
   if (actualType && expectedType && actualType !== expectedType) {
     return false;
   }
-  
+
   // Both values should be strings now, so direct comparison works
   return actual !== undefined && actual === expected;
 };
@@ -1366,7 +1366,7 @@ const evalCell = ({ env, name }) => {
             }
             return false;
           };
-          
+
           // Check if it's a date format first
           if (isDateFormat(format) && isNumericValue(val)) {
             // Keep as string but mark as date type
@@ -1375,7 +1375,7 @@ const evalCell = ({ env, name }) => {
               val: String(val),
               type: 'date', // Formula result is a date
             };
-          } 
+          }
           // Check if it's a number
           else if (isNumericValue(val)) {
             // Convert to string for storage but mark as number type
@@ -1384,7 +1384,7 @@ const evalCell = ({ env, name }) => {
               val: String(val),
               type: 'number', // Formula result is a number
             };
-          } 
+          }
           // Otherwise it's text
           else {
             result = {
@@ -1427,7 +1427,7 @@ const formatCellValue = ({ env, name }) => {
   const type = cell.type || 'text';
   const format = cell.format || "";
   let result = val;
-  
+
   // Handle date serial numbers based on type and format
   const isDateFormatted = isDateFormat(format);
   // Convert string val to number if it's a date type

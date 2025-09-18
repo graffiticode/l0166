@@ -356,6 +356,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2
   },
+  "protected": {
+    "tk": 1,
+    "name": "PROTECTED",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
   "cells": {
     "tk": 1,
     "name": "CELLS",

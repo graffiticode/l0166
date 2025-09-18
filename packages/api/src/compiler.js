@@ -196,6 +196,17 @@ export class Checker extends BasisChecker {
     });
   }
 
+  PROTECTED(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the boolean value directly from BOOL node
+        const val = { type: t.record({ protected: t.bool() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -378,6 +389,21 @@ export class Transformer extends BasisTransformer {
         const val = {
           ...v1,
           backgroundColor: color
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  PROTECTED(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the boolean value
+        // v1 is the continuation value
+        const val = {
+          ...v1,
+          protected: v0
         };
         resume(err, val);
       });
