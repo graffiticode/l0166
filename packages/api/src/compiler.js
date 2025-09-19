@@ -207,6 +207,26 @@ export class Checker extends BasisChecker {
     });
   }
 
+  FONT_WEIGHT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        const allowed = ['normal', 'bold', 'lighter', 'bolder'];
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: FONT_WEIGHT expects a string or tag literal");
+        } else if (!allowed.includes(value)) {
+          err.push(`E_INVALID_FONT_WEIGHT: '${value}' not in [${allowed.join(', ')}]`);
+        }
+        const val = { type: t.record({ 'font-weight': t.enum(allowed) }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -404,6 +424,22 @@ export class Transformer extends BasisTransformer {
         const val = {
           ...v1,
           protected: v0
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  FONT_WEIGHT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the font-weight value (string or tag)
+        // v1 is the continuation value
+        const fontWeight = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          'font-weight': fontWeight
         };
         resume(err, val);
       });

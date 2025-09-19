@@ -76,6 +76,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2,
   },
+  "font-weight" : {
+    "tk": 1,
+    "name": "FONT_WEIGHT",
+    "cls": "function",
+    "length": 2,
+    "arity": 2,
+  },
   "protected" : {
     "tk": 1,
     "name": "PROTECTED",
