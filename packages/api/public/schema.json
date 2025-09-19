@@ -70,12 +70,17 @@
           "type": "string",
           "description": "Background color of the cell (hex, rgb, rgba, or named colors)"
         },
-        "protected": {
-          "type": "boolean",
-          "description": "Whether the cell is protected from editing"
+        "font-weight": {
+          "type": "string",
+          "enum": ["normal", "bold", "lighter", "bolder"],
+          "description": "Font weight for the row"
         },
         "assess": {
           "$ref": "#/definitions/assess"
+        },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether the cell is protected from editing"
         }
       },
       "required": [],
@@ -125,6 +130,11 @@
           "minimum": 0,
           "description": "Column width in pixels"
         },
+        "font-weight": {
+          "type": "string",
+          "enum": ["normal", "bold", "lighter", "bolder"],
+          "description": "Font weight for the row"
+        },
         "background-color": {
           "type": "string",
           "description": "Background color for all cells in the column (hex, rgb, rgba, or named colors)"
@@ -145,10 +155,6 @@
           "enum": ["left", "center", "right"],
           "description": "Default text alignment for the row"
         },
-        "protected": {
-          "type": "boolean",
-          "description": "Whether the row is protected from editing"
-        },
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
@@ -157,6 +163,10 @@
         "background-color": {
           "type": "string",
           "description": "Background color for all cells in the row (hex, rgb, rgba, or named colors)"
+        },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether the row is protected from editing"
         }
       },
       "additionalProperties": true

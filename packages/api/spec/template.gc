@@ -1,8 +1,11 @@
 columns [
   column A width 100 align "center" {}
-}
+]
+rows [
+  row 1 background-color "#eee" {}
+]
 cells [
-  cell A1 text "A1"
+  cell A1 text "A1" {}
 ]
 {
   v: "0.0.1"
