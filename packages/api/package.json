@@ -11,7 +11,7 @@
     "coverage": "nyc npm run test",
     "lint": "eslint src/ tools/",
     "lint:fix": "eslint src/ tools/ --fix",
-    "build-static": "npx spec-md ./spec/spec.md > ./public/spec.html && cp ./training/* ./public",
+    "build-spec": "npx spec-md ./spec/spec.md > ./public/spec.html && cp ./spec/template.gc ./public && cp ./spec/instructions.md ./public",
     "watch-spec": "npx nodemon --exec 'npx spec-md > ./public/spec.html' ./spec/spec.md"
   },
   "dependencies": {
