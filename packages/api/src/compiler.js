@@ -190,7 +190,7 @@ export class Checker extends BasisChecker {
           err.push("E_ARG_TYPE: BACKGROUND_COLOR expects a string");
         }
         // Accept any string as a color value (hex, rgb, named colors, etc.)
-        const val = { type: t.record({ backgroundColor: t.string() }, true) };
+        const val = { type: t.record({ 'background-color': t.string() }, true) };
         resume(err, val);
       });
     });
@@ -388,7 +388,7 @@ export class Transformer extends BasisTransformer {
         const color = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
         const val = {
           ...v1,
-          backgroundColor: color
+          'background-color': color
         };
         resume(err, val);
       });

@@ -13,18 +13,24 @@ This dialect is used for generating spreadsheet based assessments.
 ```
 title "Title"
 instructions `
-1. Step 1
-1. Step 2
-1. Step 3
+- Step 1
+- Step 2
+- Step 3
 `
-columns [
-  column A width 100 {}
-]
-cells [
-  cell A1 text "A1" {fontWeight: "bold"}
-]
+columns {
+  A: {
+    width: 100
+  }
+}
+cells {
+  A1: {
+    text: "A1"
+    attrs: {
+      font-weight: "bold"
+    }
+  }
+}
 {
-  v: "0.0.1"
 }..
 ```
 
@@ -33,11 +39,19 @@ cells [
 The following validates that cell A3 contains "300":
 
 ```
-cells [
-  cell A1 text "100" {}
-  cell A2 text "200" {}
-  cell A3 text "" assess [method "value" expected "300"] {}
-]
+cells {
+  A1: { text: "100" }
+  A2: { text: "200" }
+  A3: {
+    text: ""
+    attrs: {
+      assess: {
+        method: "value"
+        expected: "300"
+      }
+    }
+  }
+}
 ```
 
 ## Formatting Guidelines
@@ -46,12 +60,13 @@ cells [
 - IMPORTANT: Use the following code as a template for all generated code:
 
 ```
-columns [
-  column A width 100 {}
-]
-cells [
-  cell A1 text "A1" {}
-]
+title ""
+instructions `
+`
+columns {
+}
+cells {
+}
 {
   v: "0.0.1"
 }..

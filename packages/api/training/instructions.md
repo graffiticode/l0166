@@ -26,7 +26,7 @@ cells {
   A1: {
     text: "A1"
     attrs: {
-      fontWeight: "bold"
+      font-weight: "bold"
     }
   }
 }

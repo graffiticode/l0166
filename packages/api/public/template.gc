@@ -1,8 +1,8 @@
 columns [
   column A width 100 align "center" {}
-]
+}
 cells [
-  cell A1 text "10" {}
+  cell A1 text "A1"
 ]
 {
   v: "0.0.1"

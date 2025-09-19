@@ -533,9 +533,16 @@ const applyDecoration = ({ doc, cells }) => {
 };
 
 const getCellColor = (cell) => {
-  const { row, col, name, background, backgroundColor, lastFocusedCell, score } = cell;
+  const { row, col, name, background, 'background-color': bgColorKebab, backgroundColor: bgColorCamel, lastFocusedCell, score } = cell;
+  const backgroundColor = bgColorKebab || bgColorCamel; // Support both kebab-case and camelCase
   //const { expected } = assess || {};
-  return row > 1 && col > 1 && score !== undefined && name !== lastFocusedCell && (
+
+  // Don't apply colors to header cells (row 1 or column 1)
+  if (row <= 1 || col <= 1) {
+    return null;
+  }
+
+  return score !== undefined && name !== lastFocusedCell && (
     score.isValid === true &&
       "#efe" ||
       "#fee"
@@ -999,8 +1006,10 @@ const getCells = (cellExprs, state) => {
         to: pos + node.nodeSize,
         align: node.attrs.align || node.attrs.justify,
         background: node.attrs.background,
-        backgroundColor: node.attrs.backgroundColor,
-        fontWeight: node.attrs.fontWeight,
+        'background-color': node.attrs['background-color'] || node.attrs.backgroundColor,
+        backgroundColor: node.attrs.backgroundColor || node.attrs['background-color'], // Store in both formats for compatibility
+        'font-weight': node.attrs['font-weight'] || node.attrs.fontWeight,
+        fontWeight: node.attrs.fontWeight || node.attrs['font-weight'], // Store in both formats for compatibility
         format: node.attrs.format,
         numberFormat: node.attrs.numberFormat,
         assess: node.attrs.assess,
@@ -1102,6 +1111,17 @@ const schema = new Schema({
               attrs.style = (attrs.style || '') + `background-color: ${value};`;
           },
         },
+        'background-color': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.backgroundColor || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `background-color: ${value};`;
+          },
+        },
+        // Backward compatibility: support camelCase
         backgroundColor: {
           default: null,
           getFromDOM(dom) {
@@ -1112,6 +1132,17 @@ const schema = new Schema({
               attrs.style = (attrs.style || '') + `background-color: ${value};`;
           },
         },
+        'font-weight': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontWeight || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-weight: ${value};`;
+          },
+        },
+        // Backward compatibility: support camelCase
         fontWeight: {
           default: null,
           getFromDOM(dom) {
@@ -1988,6 +2019,13 @@ const buildCellPlugin = formState => {
           // Then merge column attributes into cells
           Object.keys(cells).forEach(cellName => {
             const colName = cellName.slice(0, 1); // Extract column letter (A, B, C, etc.)
+            const rowNum = parseInt(cellName.slice(1));
+
+            // Skip header row (row 1) when applying column attributes
+            if (rowNum <= 1) {
+              return;
+            }
+
             const columnAttrs = columns && columns[colName];
             if (columnAttrs) {
               // Merge any column attributes that aren't already set on the cell
@@ -2474,9 +2512,11 @@ const getCell = (row, col, cells, columns) => {
         // Extract attributes from merged attrs structure for ProseMirror
         underline: mergedAttrs?.underline,
         border: mergedAttrs?.border,
-        fontWeight: mergedAttrs?.fontWeight,
+        'font-weight': mergedAttrs?.['font-weight'] || mergedAttrs?.fontWeight,
+        fontWeight: mergedAttrs?.fontWeight || mergedAttrs?.['font-weight'], // Backward compatibility
         background: mergedAttrs?.background,
-        backgroundColor: mergedAttrs?.backgroundColor,
+        'background-color': mergedAttrs?.['background-color'] || mergedAttrs?.backgroundColor,
+        backgroundColor: mergedAttrs?.backgroundColor || mergedAttrs?.['background-color'], // Backward compatibility
         align: mergedAttrs?.align || mergedAttrs?.justify,
         format: mergedAttrs?.format,
         assess: mergedAttrs?.assess,
