@@ -227,6 +227,24 @@ export class Checker extends BasisChecker {
     });
   }
 
+  FORMAT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: FORMAT expects a string");
+        }
+        // Accept any string as a format pattern (e.g., "#,##0", "0.00", "date", etc.)
+        const val = { type: t.record({ format: t.string() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -440,6 +458,22 @@ export class Transformer extends BasisTransformer {
         const val = {
           ...v1,
           'font-weight': fontWeight
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  FORMAT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the format pattern (string or tag)
+        // v1 is the continuation value
+        const format = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          format: format
         };
         resume(err, val);
       });

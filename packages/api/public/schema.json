@@ -73,7 +73,11 @@
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the row"
+          "description": "Font weight for the cell"
+        },
+        "format": {
+          "type": "string",
+          "description": "Format pattern for cell values (e.g., '#,##0', '0.00', 'date', 'currency')"
         },
         "assess": {
           "$ref": "#/definitions/assess"
@@ -133,7 +137,11 @@
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the row"
+          "description": "Font weight for the column"
+        },
+        "format": {
+          "type": "string",
+          "description": "Default format pattern for all cells in the column"
         },
         "background-color": {
           "type": "string",
@@ -159,6 +167,10 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the row"
+        },
+        "format": {
+          "type": "string",
+          "description": "Default format pattern for all cells in the row"
         },
         "background-color": {
           "type": "string",
@@ -193,6 +205,10 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the range"
+        },
+        "format": {
+          "type": "string",
+          "description": "Default format pattern for all cells in the range"
         },
         "background-color": {
           "type": "string",

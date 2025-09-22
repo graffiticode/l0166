@@ -83,6 +83,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2,
   },
+  "format" : {
+    "tk": 1,
+    "name": "FORMAT",
+    "cls": "function",
+    "length": 2,
+    "arity": 2,
+  },
   "protected" : {
     "tk": 1,
     "name": "PROTECTED",
