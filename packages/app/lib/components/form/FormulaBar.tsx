@@ -67,7 +67,7 @@ export const FormulaBar = ({ editorView }) => {
   };
   return (
     <div className="flex flex-row gap-2 rounded-md">
-      <label className="block text-md font-medium font-serif italic text-gray-500">
+      <label className="block text-md font-medium font-serif italic text-gray-500 mb-0">
         fx
       </label>
       <input
@@ -77,7 +77,7 @@ export const FormulaBar = ({ editorView }) => {
         value={value}
         style={{borderStyle: "none"}}
         onChange={e => handleChange(e.target.value)}
-        className="block w-full ring-0 border-0 p-0 text-gray-900 placeholder:text-gray-400 sm:text-sm/6 focus:outline-0 focus:ring-0 border-none"
+        className="block w-full ring-0 border-0 p-0 text-gray-900 placeholder:text-gray-400 sm:text-sm/6 focus:outline-0 focus:ring-0 border-none p-0 mb-0"
       />
     </div>
   )
