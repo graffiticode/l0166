@@ -57,6 +57,32 @@ cells [
 }..
 ```
 
+## Available Functions
+
+The following functions are available in L0166 with their specified arity (number of arguments):
+
+### Spreadsheet-specific functions (arity 2):
+- `title` - Sets the spreadsheet title
+- `instructions` - Sets instructions for the spreadsheet
+- `params` - Defines parameter templates for cell population
+- `cells` - Defines cell content and properties
+- `rows` - Configures row properties and assessment ordering
+- `columns` - Sets column widths and justification
+- `cell` - Defines individual cell with properties
+- `text` - Sets text content for a cell
+- `assess` - Defines assessment rules for validation
+- `width` - Sets column width
+- `align` - Sets text alignment (left, center, right)
+- `background-color` - Sets background color
+- `font-weight` - Sets font weight (normal, bold, lighter, bolder)
+- `format` - Sets format pattern for cell values (#,##0.00, currency, date, etc.)
+- `protected` - Sets whether cell is protected from editing
+- `column` - Defines column properties
+
+### Assessment functions (arity 1):
+- `method` - Assessment method (value or formula)
+- `expected` - Expected value for validation
+
 ## Formula Function Usage
 
 - IMPORTANT: Use the SUM function when adding or subtracting contiguous numeric cells with a formula
