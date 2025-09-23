@@ -78,6 +78,7 @@ The following functions are available in L0166 with their specified arity (numbe
 - `format` - Sets format pattern for cell values (#,##0.00, currency, date, etc.)
 - `protected` - Sets whether cell is protected from editing
 - `column` - Defines column properties
+- `row` - Defines properties for a specific row
 
 ### Assessment functions (arity 1):
 - `method` - Assessment method (value or formula)

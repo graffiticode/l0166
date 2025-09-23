@@ -269,6 +269,17 @@ export class Checker extends BasisChecker {
     });
   }
 
+  ROW(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 should be row identifier (number or string)
+        const val = { type: t.record({}, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   ROWS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -515,19 +526,6 @@ export class Transformer extends BasisTransformer {
     });
   }
 
-  ROWS(node, options, resume) {
-    this.visit(node.elts[0], options, async (e0, v0) => {
-      this.visit(node.elts[1], options, async (e1, v1) => {
-        const err = [].concat(e0 || [], e1 || []);
-        const val = {
-          ...v1,
-          rows: v0,
-        };
-        resume(err, val);
-      });
-    });
-  }
-
   COLUMN(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -558,6 +556,42 @@ export class Transformer extends BasisTransformer {
         const val = {
           ...v1,
           columns,
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  ROW(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const rowName =
+              typeof v0 === "string" && v0 ||
+              typeof v0 === "number" && String(v0);
+        const rowContent = v1;
+        const val = {
+          [rowName]: rowContent
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  ROWS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is an array of column objects
+        const rows = v0.reduce((rows, row) => {
+          return {
+            ...rows,
+            ...row
+          };
+        }, {});
+        const val = {
+          ...v1,
+          rows,
         };
         resume(err, val);
       });

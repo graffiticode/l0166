@@ -384,6 +384,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2
   },
+  "row": {
+    "tk": 1,
+    "name": "ROW",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
   "rows": {
     "tk": 1,
     "name": "ROWS",
