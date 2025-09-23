@@ -2002,7 +2002,7 @@ const buildCellPlugin = formState => {
             dispatch(tr);
           }
           const cells = {...pluginState.cells};
-          const { columns, cells: interactionCells } = formState.data.interaction;
+          const { columns, cells: interactionCells, rows } = formState.data.interaction;
           // First merge cell attributes from formState
           if (interactionCells) {
             Object.keys(cells).forEach(cellName => {
@@ -2034,6 +2034,28 @@ const buildCellPlugin = formState => {
                   cells[cellName] = {
                     ...cells[cellName],
                     [attr]: columnAttrs[attr],
+                  };
+                }
+              });
+            }
+          });
+          // Then merge row attributes into cells
+          Object.keys(cells).forEach(cellName => {
+            const rowNum = parseInt(cellName.slice(1));
+
+            // Skip invalid row numbers
+            if (!rowNum || rowNum <= 0) {
+              return;
+            }
+
+            const rowAttrs = rows && rows[rowNum];
+            if (rowAttrs) {
+              // Merge any row attributes that aren't already set on the cell
+              Object.keys(rowAttrs).forEach(attr => {
+                if (rowAttrs[attr] !== undefined && !cells[cellName]?.[attr]) {
+                  cells[cellName] = {
+                    ...cells[cellName],
+                    [attr]: rowAttrs[attr],
                   };
                 }
               });
@@ -2424,8 +2446,9 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
       background,
       // Set readonly attribute for header cells
       readonly: isHeader ? "true" : null,
-      ...colsAttrs[col],
-      ...cell,
+      ...attrs,  // Spread all row attributes
+      ...colsAttrs[col],  // Column attributes override row attributes
+      ...cell,  // Cell attributes override everything
     },
     "content": content,
   };
@@ -2449,8 +2472,8 @@ const buildTable = ({ cols, rows, attrs, colsAttrs }) => {
   })
 };
 
-const buildDocFromTable = ({ cols, rows, colsAttrs }) => {
-  const attrs = applyRules({ cols, rows });
+const buildDocFromTable = ({ cols, rows, colsAttrs, rowsAttrs }) => {
+  const attrs = applyRules({ cols, rows, rowsAttrs });
   return {
     "type": "doc",
     "content": [
@@ -2461,7 +2484,7 @@ const buildDocFromTable = ({ cols, rows, colsAttrs }) => {
   }
 };
 
-const applyRules = ({ cols, rows }) => {
+const applyRules = ({ cols, rows, rowsAttrs }) => {
   const argsCols = cols.slice(0, cols.length - 1);
 //  const totalCol = cols[cols.length - 1];
   const rowAttrs = []
@@ -2473,12 +2496,21 @@ const applyRules = ({ cols, rows }) => {
     if (rowAttrs[rowIndex] === undefined) {
       rowAttrs[rowIndex] = {};
     }
-    rowAttrs[rowIndex].color = /*+row[totalCol] !== total && "#f99" ||*/ "#fff";
+    // Merge row attributes from rowsAttrs if available
+    // rowIndex 0 is the header row (column labels)
+    // rowIndex 1 is the first data row (labeled as row 1 in the spreadsheet)
+    // rowIndex 2 is the second data row (labeled as row 2 in the spreadsheet)
+    // rowsAttrs uses spreadsheet row numbers (1, 2, 3...) as keys
+    if (rowsAttrs && rowsAttrs[rowIndex]) {
+      rowAttrs[rowIndex] = { ...rowsAttrs[rowIndex] };
+    } else {
+      rowAttrs[rowIndex].color = /*+row[totalCol] !== total && "#f99" ||*/ "#fff";
+    }
   });
   return rowAttrs;
 };
 
-const getCell = (row, col, cells, columns) => {
+const getCell = (row, col, cells, columns, rows) => {
   if (row === 0 && col === "_") {
     return {
       type: "th",
@@ -2503,8 +2535,9 @@ const getCell = (row, col, cells, columns) => {
   if (row !== 0 && col !== "_") {
     const cellData = cells[`${col}${row}`] || {};
     const columnData = columns && columns[col] || {};
-    // Merge column attributes with cell data, cell data takes precedence
-    const mergedAttrs = { ...columnData, ...cellData, ...cellData.attrs };
+    const rowData = rows && rows[row] || {};
+    // Merge row and column attributes with cell data, cell data takes precedence
+    const mergedAttrs = { ...rowData, ...columnData, ...cellData, ...cellData.attrs };
     return {
       type: "td",
       ...cellData,
@@ -2527,7 +2560,7 @@ const getCell = (row, col, cells, columns) => {
   return {};
 };
 
-const makeEditorState = ({ type, columns, cells }) => {
+const makeEditorState = ({ type, columns, cells, rows }) => {
   //x = x > 26 && 26 || x;  // Max col count is 26.
   const { x, y } = Object.keys(cells).reduce((dims, cellName) => {
     const x = letters.indexOf(cellName.slice(0, 1));
@@ -2540,18 +2573,19 @@ const makeEditorState = ({ type, columns, cells }) => {
   switch (type) {
   case "table": {
     const cols = Array.apply(null, Array(x + 1)).map((_, col) => letters[col])
-    const rows = Array.apply(null, Array(y + 1)).map((_, row) =>
+    const rowsData = Array.apply(null, Array(y + 1)).map((_, row) =>
       cols.reduce((rows, col) =>
         ({
           ...rows,
-          [col]: getCell(row, col, cells || {}, columns)
+          [col]: getCell(row, col, cells || {}, columns, rows)
         }), {}
       )
     );
     const doc = buildDocFromTable({
       cols,
-      rows,
+      rows: rowsData,
       colsAttrs: columns,
+      rowsAttrs: rows,
     });
     return {
       doc: doc,
@@ -2648,13 +2682,13 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
       }
     };
   }, []);
-  const { type, columns, cells } = state.data.interaction;
+  const { type, columns, cells, rows } = state.data.interaction;
   // const templateVariablesRecords = state.data.templateVariablesRecords || [];
   // const index = Math.floor(Math.random() * templateVariablesRecords.length);
   // const env = templateVariablesRecords[index];
   useEffect(() => {
     if (editorView && cells) {
-      const editorStateData = makeEditorState({type, columns, cells});
+      const editorStateData = makeEditorState({type, columns, cells, rows});
       const newEditorState = EditorState.fromJSON({
         schema,
         plugins,
