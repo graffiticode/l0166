@@ -2565,10 +2565,10 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
   ];
   const isHeader = cell.type === "th";
 
-  // Calculate dynamic height based on font size if present
+  // Calculate dynamic height based on font size if present (but not for headers)
   let cellHeight = "auto"; // Default to auto height
   const fontSize = attrs?.['font-size'] || colsAttrs[col]?.['font-size'] || cell?.['font-size'];
-  if (fontSize) {
+  if (fontSize && !isHeader) {
     // Extract numeric value from font size
     const sizeMatch = fontSize.match(/(\d+(?:\.\d+)?)/);
     if (sizeMatch) {
@@ -2577,6 +2577,21 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
       // Using 1.2x for tighter spacing (was 1.5x)
       cellHeight = `${Math.max(size * 1.2 + 4, 24)}px`; // size * 1.2 + 4px padding
     }
+  }
+
+  // Filter out font-size for header cells
+  const filteredAttrs = isHeader ? { ...attrs } : attrs;
+  const filteredColsAttrs = isHeader ? { ...colsAttrs[col] } : colsAttrs[col];
+  const filteredCell = isHeader ? { ...cell } : cell;
+
+  if (isHeader) {
+    // Remove font-size related properties from headers
+    delete filteredAttrs?.['font-size'];
+    delete filteredAttrs?.fontSize;
+    delete filteredColsAttrs?.['font-size'];
+    delete filteredColsAttrs?.fontSize;
+    delete filteredCell?.['font-size'];
+    delete filteredCell?.fontSize;
   }
 
   return {
@@ -2591,9 +2606,9 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
       background,
       // Set readonly attribute for header cells
       readonly: isHeader ? "true" : null,
-      ...attrs,  // Spread all row attributes
-      ...colsAttrs[col],  // Column attributes override row attributes
-      ...cell,  // Cell attributes override everything
+      ...filteredAttrs,  // Spread filtered row attributes
+      ...filteredColsAttrs,  // Column attributes override row attributes
+      ...filteredCell,  // Cell attributes override everything
     },
     "content": content,
   };
