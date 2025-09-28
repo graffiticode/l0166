@@ -2545,17 +2545,18 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
   let colspan = 1;
   let rowspan = 1;
   const colwidth = col === "_" && [40] || (colsAttrs[col]?.width ? [colsAttrs[col].width] : null);
-  let background = attrs.color;
-  const { text } = cell;
+  let background = attrs.backgroundColor || attrs.color;
+  const { text } = cell || {};
+  const textContent = text ? [
+    {
+      "type": "text",
+      text: String(text),
+    }
+  ] : [];
   content = [
     {
       "type": "paragraph",
-      "content": text && [
-        {
-          "type": "text",
-          text: String(text),
-        }
-      ]
+      "content": textContent
     }
   ];
   const isHeader = cell.type === "th";
@@ -2575,9 +2576,14 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
   }
 
   // Filter out font-size for header cells
-  const filteredAttrs = isHeader ? { ...attrs } : attrs;
-  const filteredColsAttrs = isHeader ? { ...colsAttrs[col] } : colsAttrs[col];
-  const filteredCell = isHeader ? { ...cell } : cell;
+  // Ensure we have valid objects to spread (handle undefined)
+  // Also filter out backgroundColor from attrs as it's handled separately as 'background'
+  const { backgroundColor: _bgColor, ...restAttrs } = attrs || {};
+  const filteredAttrs = isHeader ? { ...restAttrs } : restAttrs;
+  const filteredColsAttrs = isHeader ? { ...(colsAttrs[col] || {}) } : (colsAttrs[col] || {});
+  // Extract only the attributes from the cell, excluding text, type, and other non-attribute properties
+  const { text: _text, type: _type, ...cellAttrs } = cell || {};
+  const filteredCell = isHeader ? { ...(cell || {}) } : cellAttrs;
 
   if (isHeader) {
     // Remove font-size related properties from headers
@@ -2589,7 +2595,7 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
     delete filteredCell?.fontSize;
   }
 
-  return {
+  const result = {
     "type": isHeader && "table_header" || "table_cell",
     "attrs": {
       name: `${col}${row._.text || 0}`,
@@ -2607,6 +2613,7 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
     },
     "content": content,
   };
+  return result;
 };
 
 const buildRow = ({ cols, row, attrs, colsAttrs }) => {
@@ -2659,7 +2666,7 @@ const applyRules = ({ cols, rows, rowsAttrs }) => {
     if (rowsAttrs && rowsAttrs[rowIndex]) {
       rowAttrs[rowIndex] = { ...rowsAttrs[rowIndex] };
     } else {
-      rowAttrs[rowIndex].color = /*+row[totalCol] !== total && "#f99" ||*/ "#fff";
+      rowAttrs[rowIndex].backgroundColor = /*+row[totalCol] !== total && "#f99" ||*/ "#fff";
     }
   });
   return rowAttrs;
@@ -2688,14 +2695,17 @@ const getCell = (row, col, cells, columns, rows) => {
     };
   }
   if (row !== 0 && col !== "_") {
-    const cellData = cells[`${col}${row}`] || {};
+    const cellKey = `${col}${row}`;
+    const cellData = cells[cellKey] || {};
     const columnData = columns && columns[col] || {};
     const rowData = rows && rows[row] || {};
+    // Extract text separately to ensure it's not lost in attribute merging
+    const { text, ...cellAttrs } = cellData;
     // Merge row and column attributes with cell data, cell data takes precedence
-    const mergedAttrs = { ...rowData, ...columnData, ...cellData, ...cellData.attrs };
+    const mergedAttrs = { ...rowData, ...columnData, ...cellAttrs, ...cellData.attrs };
     return {
       type: "td",
-      ...cellData,
+      text: text || "",  // Explicitly preserve text property
       attrs: {
         // Extract attributes from merged attrs structure for ProseMirror
         underline: mergedAttrs?.underline,
@@ -2727,6 +2737,9 @@ const getCell = (row, col, cells, columns, rows) => {
 };
 
 const makeEditorState = ({ type, columns, cells, rows }) => {
+  if (!cells || Object.keys(cells).length === 0) {
+    return null;
+  }
   //x = x > 26 && 26 || x;  // Max col count is 26.
   const { x, y } = Object.keys(cells).reduce((dims, cellName) => {
     const x = letters.indexOf(cellName.slice(0, 1));
@@ -2740,9 +2753,9 @@ const makeEditorState = ({ type, columns, cells, rows }) => {
   case "table": {
     const cols = Array.apply(null, Array(x + 1)).map((_, col) => letters[col])
     const rowsData = Array.apply(null, Array(y + 1)).map((_, row) =>
-      cols.reduce((rows, col) =>
+      cols.reduce((rowAccum, col) =>
         ({
-          ...rows,
+          ...rowAccum,
           [col]: getCell(row, col, cells || {}, columns, rows)
         }), {}
       )
@@ -2768,6 +2781,7 @@ const makeEditorState = ({ type, columns, cells, rows }) => {
 };
 
 export const TableEditor = ({ state, onEditorViewChange }) => {
+  const { type, columns, cells, rows } = state.data.interaction;
   const [ editorView, setEditorView ] = useState(null);
   const [ tooltipState, setTooltipState ] = useState({ visible: false, x: 0, y: 0 });
   const tooltipHandler = {
@@ -2820,10 +2834,27 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
     if (!editorRef.current) {
       return;
     }
-    let initEditorState = EditorState.create({
-      schema,
-      plugins,
-    });
+    // Create initial state with data if available
+    let initEditorState;
+    if (cells && Object.keys(cells).length > 0) {
+      const editorStateData = makeEditorState({type, columns, cells, rows});
+      if (editorStateData) {
+        initEditorState = EditorState.fromJSON({
+          schema,
+          plugins,
+        }, editorStateData);
+      } else {
+        initEditorState = EditorState.create({
+          schema,
+          plugins,
+        });
+      }
+    } else {
+      initEditorState = EditorState.create({
+        schema,
+        plugins,
+      });
+    }
     const fix = fixTables(initEditorState);
     if (fix) initEditorState = initEditorState.apply(fix.setMeta('addToHistory', false));
     const editorView = new EditorView(editorRef.current, {
@@ -2848,7 +2879,6 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
       }
     };
   }, []);
-  const { type, columns, cells, rows } = state.data.interaction;
   // const templateVariablesRecords = state.data.templateVariablesRecords || [];
   // const index = Math.floor(Math.random() * templateVariablesRecords.length);
   // const env = templateVariablesRecords[index];
