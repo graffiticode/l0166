@@ -60,63 +60,77 @@
       "properties": {
         "text": {
           "type": "string",
-          "description": "The text content of the cell"
+          "description": "The text content of the cell",
+          "group": ""
         },
-        "text-align": {
+        "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
-          "description": "Text alignment in the cell"
+          "description": "Text alignment in the cell",
+          "group": "text"
         },
-        "text-vertical-align": {
+        "vertical-align": {
           "type": "string",
           "enum": ["top", "middle", "bottom"],
-          "description": "Vertical alignment for the cell"
+          "description": "Vertical alignment for the cell",
+          "group": "text"
         },
         "text-decoration": {
           "type": "string",
           "enum": ["none", "underline", "overline", "line-through"],
-          "description": "Text decoration for the cell"
+          "description": "Text decoration for the cell",
+          "group": "text"
         },
         "background-color": {
           "type": "string",
-          "description": "Background color of the cell (hex, rgb, rgba, or named colors)"
+          "description": "Background color of the cell (hex, rgb, rgba, or named colors)",
+          "group": "cell"
         },
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the cell"
+          "description": "Font weight for the cell",
+          "group": "font"
         },
         "font-size": {
           "type": "string",
-          "description": "Font size for the cell (e.g., '12px', '14pt', '1.2em')"
+          "description": "Font size for the cell (e.g., '12px', '14pt', '1.2em')",
+          "group": "font"
         },
         "font-family": {
           "type": "string",
-          "description": "Font family for the cell (e.g., 'Arial', 'Helvetica', 'monospace')"
+          "description": "Font family for the cell (e.g., 'Arial', 'Helvetica', 'monospace')",
+          "group": "font"
         },
         "font-style": {
           "type": "string",
           "enum": ["normal", "italic", "oblique"],
-          "description": "Font style for the cell"
+          "description": "Font style for the cell",
+          "group": "font"
         },
         "color": {
           "type": "string",
-          "description": "Text color for the cell (hex, rgb, rgba, or named colors)"
+          "description": "Text color for the cell (hex, rgb, rgba, or named colors)",
+          "group": "text"
         },
         "border": {
           "type": "string",
-          "description": "Border specification for the cell (e.g., '1px solid black')"
+          "description": "Border specification for the cell (e.g., '1px solid black')",
+          "group": "cell"
         },
         "format": {
           "type": "string",
-          "description": "Format pattern for cell values (e.g., '#,##0', '0.00', 'date', 'currency')"
+          "description": "Format pattern for cell values (e.g., '#,##0', '0.00', 'date', 'currency')",
+          "group": "text"
         },
         "assess": {
-          "$ref": "#/definitions/assess"
+          "$ref": "#/definitions/assess",
+          "group": ""
         },
         "protected": {
           "type": "boolean",
-          "description": "Whether the cell is protected from editing"
+          "description": "Whether the cell is protected from editing",
+          "group": "cell"
         }
       },
       "required": [],
@@ -159,60 +173,73 @@
         "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
-          "description": "Default text alignment for the column"
+          "description": "Default text alignment for the column",
+          "group": "text"
         },
         "width": {
           "type": "integer",
           "minimum": 0,
-          "description": "Column width in pixels"
+          "description": "Column width in pixels",
+          "group": "column"
         },
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the column"
+          "description": "Font weight for the column",
+          "group": "font"
         },
         "font-size": {
           "type": "string",
-          "description": "Font size for the column (e.g., '12px', '14pt', '1.2em')"
+          "description": "Font size for the column (e.g., '12px', '14pt', '1.2em')",
+          "group": "font"
         },
         "font-family": {
           "type": "string",
-          "description": "Font family for the column (e.g., 'Arial', 'Helvetica', 'monospace')"
+          "description": "Font family for the column (e.g., 'Arial', 'Helvetica', 'monospace')",
+          "group": "font"
         },
         "font-style": {
           "type": "string",
           "enum": ["normal", "italic", "oblique"],
-          "description": "Font style for the column"
+          "description": "Font style for the column",
+          "group": "font"
         },
         "color": {
           "type": "string",
-          "description": "Text color for the column (hex, rgb, rgba, or named colors)"
+          "description": "Text color for the column (hex, rgb, rgba, or named colors)",
+          "group": "text"
         },
         "text-decoration": {
           "type": "string",
           "enum": ["none", "underline", "overline", "line-through"],
-          "description": "Text decoration for the column"
+          "description": "Text decoration for the column",
+          "group": "text"
         },
         "border": {
           "type": "string",
-          "description": "Border specification for the column (e.g., '1px solid black')"
+          "description": "Border specification for the column (e.g., '1px solid black')",
+          "group": "column"
         },
         "vertical-align": {
           "type": "string",
           "enum": ["top", "middle", "bottom"],
-          "description": "Vertical alignment for the column"
+          "description": "Vertical alignment for the column",
+          "group": "text"
         },
         "format": {
           "type": "string",
-          "description": "Default format pattern for all cells in the column"
+          "description": "Default format pattern for all cells in the column",
+          "group": "text"
         },
         "background-color": {
           "type": "string",
-          "description": "Background color for all cells in the column (hex, rgb, rgba, or named colors)"
+          "description": "Background color for all cells in the column (hex, rgb, rgba, or named colors)",
+          "group": "column"
         },
         "protected": {
           "type": "boolean",
-          "description": "Whether all cells in the column are protected from editing"
+          "description": "Whether all cells in the column are protected from editing",
+          "group": "column"
         }
       },
       "additionalProperties": true
@@ -224,55 +251,67 @@
         "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
-          "description": "Default text alignment for the row"
+          "description": "Default text alignment for the row",
+          "group": "text"
         },
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the row"
+          "description": "Font weight for the row",
+          "group": "font"
         },
         "font-size": {
           "type": "string",
-          "description": "Font size for the row (e.g., '12px', '14pt', '1.2em')"
+          "description": "Font size for the row (e.g., '12px', '14pt', '1.2em')",
+          "group": "font"
         },
         "font-family": {
           "type": "string",
-          "description": "Font family for the row (e.g., 'Arial', 'Helvetica', 'monospace')"
+          "description": "Font family for the row (e.g., 'Arial', 'Helvetica', 'monospace')",
+          "group": "font"
         },
         "font-style": {
           "type": "string",
           "enum": ["normal", "italic", "oblique"],
-          "description": "Font style for the row"
+          "description": "Font style for the row",
+          "group": "font"
         },
         "color": {
           "type": "string",
-          "description": "Text color for the row (hex, rgb, rgba, or named colors)"
+          "description": "Text color for the row (hex, rgb, rgba, or named colors)",
+          "group": "text"
         },
         "text-decoration": {
           "type": "string",
           "enum": ["none", "underline", "overline", "line-through"],
-          "description": "Text decoration for the row"
+          "description": "Text decoration for the row",
+          "group": "text"
         },
         "border": {
           "type": "string",
-          "description": "Border specification for the row (e.g., '1px solid black')"
+          "description": "Border specification for the row (e.g., '1px solid black')",
+          "group": "row"
         },
         "vertical-align": {
           "type": "string",
           "enum": ["top", "middle", "bottom"],
-          "description": "Vertical alignment for the row"
+          "description": "Vertical alignment for the row",
+          "group": "text"
         },
         "format": {
           "type": "string",
-          "description": "Default format pattern for all cells in the row"
+          "description": "Default format pattern for all cells in the row",
+          "group": "text"
         },
         "background-color": {
           "type": "string",
-          "description": "Background color for all cells in the row (hex, rgb, rgba, or named colors)"
+          "description": "Background color for all cells in the row (hex, rgb, rgba, or named colors)",
+          "group": "row"
         },
         "protected": {
           "type": "boolean",
-          "description": "Whether the row is protected from editing"
+          "description": "Whether the row is protected from editing",
+          "group": "row"
         }
       },
       "additionalProperties": true
@@ -284,60 +323,73 @@
         "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
-          "description": "Default text alignment for the range"
+          "description": "Default text alignment for the range",
+          "group": "text"
         },
         "width": {
           "type": "integer",
           "minimum": 0,
-          "description": "Column width in pixels for cells in the range"
+          "description": "Column width in pixels for cells in the range",
+          "group": "range"
         },
         "protected": {
           "type": "boolean",
-          "description": "Whether the range is protected from editing"
+          "description": "Whether the range is protected from editing",
+          "group": "range"
         },
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the range"
+          "description": "Font weight for the range",
+          "group": "font"
         },
         "font-size": {
           "type": "string",
-          "description": "Font size for the range (e.g., '12px', '14pt', '1.2em')"
+          "description": "Font size for the range (e.g., '12px', '14pt', '1.2em')",
+          "group": "font"
         },
         "font-family": {
           "type": "string",
-          "description": "Font family for the range (e.g., 'Arial', 'Helvetica', 'monospace')"
+          "description": "Font family for the range (e.g., 'Arial', 'Helvetica', 'monospace')",
+          "group": "font"
         },
         "font-style": {
           "type": "string",
           "enum": ["normal", "italic", "oblique"],
-          "description": "Font style for the range"
+          "description": "Font style for the range",
+          "group": "font"
         },
         "color": {
           "type": "string",
-          "description": "Text color for the range (hex, rgb, rgba, or named colors)"
+          "description": "Text color for the range (hex, rgb, rgba, or named colors)",
+          "group": "text"
         },
         "text-decoration": {
           "type": "string",
           "enum": ["none", "underline", "overline", "line-through"],
-          "description": "Text decoration for the range"
+          "description": "Text decoration for the range",
+          "group": "text"
         },
         "border": {
           "type": "string",
-          "description": "Border specification for the range (e.g., '1px solid black')"
+          "description": "Border specification for the range (e.g., '1px solid black')",
+          "group": "range"
         },
         "vertical-align": {
           "type": "string",
           "enum": ["top", "middle", "bottom"],
-          "description": "Vertical alignment for the range"
+          "description": "Vertical alignment for the range",
+          "group": "text"
         },
         "format": {
           "type": "string",
-          "description": "Default format pattern for all cells in the range"
+          "description": "Default format pattern for all cells in the range",
+          "group": "text"
         },
         "background-color": {
           "type": "string",
-          "description": "Background color for all cells in the range (hex, rgb, rgba, or named colors)"
+          "description": "Background color for all cells in the range (hex, rgb, rgba, or named colors)",
+          "group": "range"
         }
       },
       "additionalProperties": true
