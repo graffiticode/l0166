@@ -3,22 +3,7 @@
   outline: none;
 }
 
-/* Simple custom border classes */
-.ProseMirror .custom-border-top {
-  border-top: 2px solid #666 !important;
-}
-
-.ProseMirror .custom-border-right {
-  border-right: 2px solid #666 !important;
-}
-
-.ProseMirror .custom-border-bottom {
-  border-bottom: 2px solid #666 !important;
-}
-
-.ProseMirror .custom-border-left {
-  border-left: 2px solid #666 !important;
-}
+/* Custom borders now handled via inset box-shadow in TableEditor */
 
 main {
   margin: auto;

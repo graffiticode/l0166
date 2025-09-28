@@ -920,13 +920,6 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     } else if (cell.row === 1) {
       defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
-    } else if (isFocused) {
-      defaultBorders = {
-        top: '2px solid #1a73e8',    // Google Sheets blue for selected cell
-        right: '2px solid #1a73e8',
-        bottom: cell.underline ? '2px solid #333' : '2px solid #1a73e8',
-        left: '2px solid #1a73e8'
-      };
     } else {
       defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     }
@@ -938,9 +931,9 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       styleStr += `border-bottom: ${defaultBorders.bottom}; `;
       styleStr += `border-left: ${defaultBorders.left}; `;
     }
-    // Add focus class if focused
+    // Add inset box-shadow for focused cells instead of changing borders
     if (isFocused) {
-      borderClass = borderClass ? borderClass + ' focus-border' : 'focus-border';
+      styleStr += 'box-shadow: inset 0 0 0 2px #1a73e8; z-index: 10; ';
     }
     // Add text alignment and font weight
     if (cell.col === 1 || cell.row === 1) {
@@ -1306,17 +1299,23 @@ const schema = new Schema({
                   value.includes('blue') || value.includes('red') ||
                   value.includes('green') || value.includes('black') ||
                   value.includes('gray') || value.includes('grey')) {
-                // It's a CSS border string - apply it directly
-                attrs.style = (attrs.style || '') + `border: ${value} !important; `;
+                // It's a CSS border string - extract width and color for box-shadow
+                const borderMatch = value.match(/(\d+(?:\.\d+)?px)\s+\w+\s+(.+)/);
+                if (borderMatch) {
+                  const [, width, color] = borderMatch;
+                  // Use inset box-shadow instead of border
+                  attrs.style = (attrs.style || '') + `box-shadow: inset 0 0 0 ${width} ${color} !important; `;
+                } else {
+                  // Fallback to box-shadow with default 2px if pattern doesn't match exactly
+                  attrs.style = (attrs.style || '') + `box-shadow: inset 0 0 0 2px #666 !important; `;
+                }
               } else {
-                // It's a comma-separated list of sides
+                // It's a comma-separated list of sides - use box-shadow
+                // For simplicity, apply full border with box-shadow when any side is specified
                 const sides = value.split(',').map(s => s.trim());
-                let borderStyle = '';
-                if (sides.includes('top')) borderStyle += 'border-top: 2px solid #666; ';
-                if (sides.includes('right')) borderStyle += 'border-right: 2px solid #666; ';
-                if (sides.includes('bottom')) borderStyle += 'border-bottom: 2px solid #666; ';
-                if (sides.includes('left')) borderStyle += 'border-left: 2px solid #666; ';
-                attrs.style = (attrs.style || '') + borderStyle;
+                if (sides.length > 0) {
+                  attrs.style = (attrs.style || '') + 'box-shadow: inset 0 0 0 2px #666 !important; ';
+                }
               }
             }
           },
