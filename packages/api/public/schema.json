@@ -56,6 +56,7 @@
     "cell": {
       "type": "object",
       "description": "Individual cell configuration",
+      "template": "cell name prop-name prop-value {}",
       "properties": {
         "text": {
           "type": "string",
@@ -74,6 +75,37 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the cell"
+        },
+        "font-size": {
+          "type": "string",
+          "description": "Font size for the cell (e.g., '12px', '14pt', '1.2em')"
+        },
+        "font-family": {
+          "type": "string",
+          "description": "Font family for the cell (e.g., 'Arial', 'Helvetica', 'monospace')"
+        },
+        "font-style": {
+          "type": "string",
+          "enum": ["normal", "italic", "oblique"],
+          "description": "Font style for the cell"
+        },
+        "color": {
+          "type": "string",
+          "description": "Text color for the cell (hex, rgb, rgba, or named colors)"
+        },
+        "text-decoration": {
+          "type": "string",
+          "enum": ["none", "underline", "overline", "line-through"],
+          "description": "Text decoration for the cell"
+        },
+        "border": {
+          "type": "string",
+          "description": "Border specification for the cell (e.g., '1px solid black')"
+        },
+        "vertical-align": {
+          "type": "string",
+          "enum": ["top", "middle", "bottom"],
+          "description": "Vertical alignment for the cell"
         },
         "format": {
           "type": "string",
@@ -139,6 +171,37 @@
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the column"
         },
+        "font-size": {
+          "type": "string",
+          "description": "Font size for the column (e.g., '12px', '14pt', '1.2em')"
+        },
+        "font-family": {
+          "type": "string",
+          "description": "Font family for the column (e.g., 'Arial', 'Helvetica', 'monospace')"
+        },
+        "font-style": {
+          "type": "string",
+          "enum": ["normal", "italic", "oblique"],
+          "description": "Font style for the column"
+        },
+        "color": {
+          "type": "string",
+          "description": "Text color for the column (hex, rgb, rgba, or named colors)"
+        },
+        "text-decoration": {
+          "type": "string",
+          "enum": ["none", "underline", "overline", "line-through"],
+          "description": "Text decoration for the column"
+        },
+        "border": {
+          "type": "string",
+          "description": "Border specification for the column (e.g., '1px solid black')"
+        },
+        "vertical-align": {
+          "type": "string",
+          "enum": ["top", "middle", "bottom"],
+          "description": "Vertical alignment for the column"
+        },
         "format": {
           "type": "string",
           "description": "Default format pattern for all cells in the column"
@@ -167,6 +230,37 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the row"
+        },
+        "font-size": {
+          "type": "string",
+          "description": "Font size for the row (e.g., '12px', '14pt', '1.2em')"
+        },
+        "font-family": {
+          "type": "string",
+          "description": "Font family for the row (e.g., 'Arial', 'Helvetica', 'monospace')"
+        },
+        "font-style": {
+          "type": "string",
+          "enum": ["normal", "italic", "oblique"],
+          "description": "Font style for the row"
+        },
+        "color": {
+          "type": "string",
+          "description": "Text color for the row (hex, rgb, rgba, or named colors)"
+        },
+        "text-decoration": {
+          "type": "string",
+          "enum": ["none", "underline", "overline", "line-through"],
+          "description": "Text decoration for the row"
+        },
+        "border": {
+          "type": "string",
+          "description": "Border specification for the row (e.g., '1px solid black')"
+        },
+        "vertical-align": {
+          "type": "string",
+          "enum": ["top", "middle", "bottom"],
+          "description": "Vertical alignment for the row"
         },
         "format": {
           "type": "string",
@@ -205,6 +299,37 @@
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
           "description": "Font weight for the range"
+        },
+        "font-size": {
+          "type": "string",
+          "description": "Font size for the range (e.g., '12px', '14pt', '1.2em')"
+        },
+        "font-family": {
+          "type": "string",
+          "description": "Font family for the range (e.g., 'Arial', 'Helvetica', 'monospace')"
+        },
+        "font-style": {
+          "type": "string",
+          "enum": ["normal", "italic", "oblique"],
+          "description": "Font style for the range"
+        },
+        "color": {
+          "type": "string",
+          "description": "Text color for the range (hex, rgb, rgba, or named colors)"
+        },
+        "text-decoration": {
+          "type": "string",
+          "enum": ["none", "underline", "overline", "line-through"],
+          "description": "Text decoration for the range"
+        },
+        "border": {
+          "type": "string",
+          "description": "Border specification for the range (e.g., '1px solid black')"
+        },
+        "vertical-align": {
+          "type": "string",
+          "enum": ["top", "middle", "bottom"],
+          "description": "Vertical alignment for the range"
         },
         "format": {
           "type": "string",

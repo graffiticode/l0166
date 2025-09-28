@@ -363,6 +363,55 @@ export const lexicon = {
     "length": 2,
     "arity": 2
   },
+  "font-size": {
+    "tk": 1,
+    "name": "FONT_SIZE",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "font-family": {
+    "tk": 1,
+    "name": "FONT_FAMILY",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "font-style": {
+    "tk": 1,
+    "name": "FONT_STYLE",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "color": {
+    "tk": 1,
+    "name": "COLOR",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "text-decoration": {
+    "tk": 1,
+    "name": "TEXT_DECORATION",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "border": {
+    "tk": 1,
+    "name": "BORDER",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "vertical-align": {
+    "tk": 1,
+    "name": "VERTICAL_ALIGN",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
   "format": {
     "tk": 1,
     "name": "FORMAT",

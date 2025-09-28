@@ -73,8 +73,15 @@ The following functions are available in L0166 with their specified arity (numbe
 - `assess` - Defines assessment rules for validation
 - `width` - Sets column width
 - `align` - Sets text alignment (left, center, right)
-- `background-color` - Sets background color
+- `background-color` - Sets background color (hex, rgb, rgba, or named colors)
 - `font-weight` - Sets font weight (normal, bold, lighter, bolder)
+- `font-size` - Sets font size (e.g., "12px", "14pt", "1.2em")
+- `font-family` - Sets font family (e.g., "Arial", "Helvetica", "monospace")
+- `font-style` - Sets font style (normal, italic, oblique)
+- `color` - Sets text color (hex, rgb, rgba, or named colors)
+- `text-decoration` - Sets text decoration (none, underline, overline, line-through)
+- `border` - Sets cell borders (e.g., "1px solid black" or "top,right,bottom,left")
+- `vertical-align` - Sets vertical alignment (top, middle, bottom)
 - `format` - Sets format pattern for cell values (#,##0.00, currency, date, etc.)
 - `protected` - Sets whether cell is protected from editing
 - `column` - Defines column properties
@@ -83,6 +90,51 @@ The following functions are available in L0166 with their specified arity (numbe
 ### Assessment functions (arity 1):
 - `method` - Assessment method (value or formula)
 - `expected` - Expected value for validation
+
+## Formatting Examples
+
+### Cell Formatting
+```
+cells [
+  cell A1 text "Header"
+    font-weight "bold"
+    font-size "16px"
+    color "#0000FF"
+    background-color "#E6F3FF" {}
+  cell B2 text "100"
+    font-family "monospace"
+    text-decoration "underline"
+    border "2px solid red" {}
+]
+```
+
+### Column Formatting
+```
+columns [
+  column A width 150
+    font-style "italic"
+    align "center" {}
+  column B width 100
+    background-color "#FFFFCC"
+    border "1px solid #666" {}
+]
+```
+
+### Row Formatting
+```
+rows [
+  row 1 font-weight "bold"
+    background-color "#DDDDDD"
+    font-size "14px" {}
+  row 2 color "#FF0000"
+    vertical-align "middle" {}
+]
+```
+
+### Border Styles
+The `border` function accepts two formats:
+1. **CSS border string**: `border "1px solid black" {}` - Applies to all sides
+2. **Comma-separated sides**: `border "top,bottom" {}` - Applies 2px solid borders to specified sides (top, right, bottom, left, all)
 
 ## Formula Function Usage
 

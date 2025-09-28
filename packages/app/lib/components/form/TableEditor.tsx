@@ -1153,14 +1153,131 @@ const schema = new Schema({
               attrs.style = (attrs.style || '') + `font-weight: ${value};`;
           },
         },
+        'font-size': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontSize || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-size: ${value};`;
+          },
+        },
+        fontSize: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontSize || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-size: ${value};`;
+          },
+        },
+        'font-family': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontFamily || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-family: ${value};`;
+          },
+        },
+        fontFamily: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontFamily || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-family: ${value};`;
+          },
+        },
+        'font-style': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontStyle || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-style: ${value};`;
+          },
+        },
+        fontStyle: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.fontStyle || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `font-style: ${value};`;
+          },
+        },
+        color: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.color || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `color: ${value};`;
+          },
+        },
+        'text-decoration': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.textDecoration || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `text-decoration: ${value};`;
+          },
+        },
+        textDecoration: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.textDecoration || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `text-decoration: ${value};`;
+          },
+        },
+        'vertical-align': {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.verticalAlign || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `vertical-align: ${value};`;
+          },
+        },
+        verticalAlign: {
+          default: null,
+          getFromDOM(dom) {
+            return dom.style.verticalAlign || null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs.style = (attrs.style || '') + `vertical-align: ${value};`;
+          },
+        },
         height: {
           default: null,
           getFromDOM(dom) {
             return dom.style.height || null;
           },
           setDOMAttr(value, attrs) {
-            if (value)
-              attrs.style = (attrs.style || '') + `height: ${"24px"};`;
+            if (value) {
+              // Use 'auto' for height to allow content to determine height
+              // or use the specified value if provided
+              const heightValue = value === 'auto' ? 'auto' : value;
+              attrs.style = (attrs.style || '') + `height: ${heightValue}; min-height: 24px;`;
+            } else {
+              // Default behavior - let content determine height with minimum
+              attrs.style = (attrs.style || '') + `height: auto; min-height: 24px;`;
+            }
           },
         },
         underline: {
@@ -1181,13 +1298,26 @@ const schema = new Schema({
           setDOMAttr(value, attrs) {
             if (value && typeof value === 'string') {
               attrs['data-border'] = value;
-              const sides = value.split(',').map(s => s.trim());
-              let borderStyle = '';
-              if (sides.includes('top')) borderStyle += 'border-top: 2px solid #666; ';
-              if (sides.includes('right')) borderStyle += 'border-right: 2px solid #666; ';
-              if (sides.includes('bottom')) borderStyle += 'border-bottom: 2px solid #666; ';
-              if (sides.includes('left')) borderStyle += 'border-left: 2px solid #666; ';
-              attrs.style = (attrs.style || '') + borderStyle;
+
+              // Check if it's a CSS border string (contains px, solid, dashed, dotted, or color)
+              if (value.includes('px') || value.includes('solid') ||
+                  value.includes('dashed') || value.includes('dotted') ||
+                  value.includes('#') || value.includes('rgb') ||
+                  value.includes('blue') || value.includes('red') ||
+                  value.includes('green') || value.includes('black') ||
+                  value.includes('gray') || value.includes('grey')) {
+                // It's a CSS border string - apply it directly
+                attrs.style = (attrs.style || '') + `border: ${value} !important; `;
+              } else {
+                // It's a comma-separated list of sides
+                const sides = value.split(',').map(s => s.trim());
+                let borderStyle = '';
+                if (sides.includes('top')) borderStyle += 'border-top: 2px solid #666; ';
+                if (sides.includes('right')) borderStyle += 'border-right: 2px solid #666; ';
+                if (sides.includes('bottom')) borderStyle += 'border-bottom: 2px solid #666; ';
+                if (sides.includes('left')) borderStyle += 'border-left: 2px solid #666; ';
+                attrs.style = (attrs.style || '') + borderStyle;
+              }
             }
           },
         },
@@ -2434,6 +2564,21 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
     }
   ];
   const isHeader = cell.type === "th";
+
+  // Calculate dynamic height based on font size if present
+  let cellHeight = "auto"; // Default to auto height
+  const fontSize = attrs?.['font-size'] || colsAttrs[col]?.['font-size'] || cell?.['font-size'];
+  if (fontSize) {
+    // Extract numeric value from font size
+    const sizeMatch = fontSize.match(/(\d+(?:\.\d+)?)/);
+    if (sizeMatch) {
+      const size = parseFloat(sizeMatch[1]);
+      // Add minimal padding to font size for compact row height
+      // Using 1.2x for tighter spacing (was 1.5x)
+      cellHeight = `${Math.max(size * 1.2 + 4, 24)}px`; // size * 1.2 + 4px padding
+    }
+  }
+
   return {
     "type": isHeader && "table_header" || "table_cell",
     "attrs": {
@@ -2442,7 +2587,7 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
       rowspan,
       colwidth,
       width: "50px",
-      height: "24px",
+      height: cellHeight,
       background,
       // Set readonly attribute for header cells
       readonly: isHeader ? "true" : null,
@@ -2547,6 +2692,17 @@ const getCell = (row, col, cells, columns, rows) => {
         border: mergedAttrs?.border,
         'font-weight': mergedAttrs?.['font-weight'] || mergedAttrs?.fontWeight,
         fontWeight: mergedAttrs?.fontWeight || mergedAttrs?.['font-weight'], // Backward compatibility
+        'font-size': mergedAttrs?.['font-size'] || mergedAttrs?.fontSize,
+        fontSize: mergedAttrs?.fontSize || mergedAttrs?.['font-size'], // Backward compatibility
+        'font-family': mergedAttrs?.['font-family'] || mergedAttrs?.fontFamily,
+        fontFamily: mergedAttrs?.fontFamily || mergedAttrs?.['font-family'], // Backward compatibility
+        'font-style': mergedAttrs?.['font-style'] || mergedAttrs?.fontStyle,
+        fontStyle: mergedAttrs?.fontStyle || mergedAttrs?.['font-style'], // Backward compatibility
+        color: mergedAttrs?.color,
+        'text-decoration': mergedAttrs?.['text-decoration'] || mergedAttrs?.textDecoration,
+        textDecoration: mergedAttrs?.textDecoration || mergedAttrs?.['text-decoration'], // Backward compatibility
+        'vertical-align': mergedAttrs?.['vertical-align'] || mergedAttrs?.verticalAlign,
+        verticalAlign: mergedAttrs?.verticalAlign || mergedAttrs?.['vertical-align'], // Backward compatibility
         background: mergedAttrs?.background,
         'background-color': mergedAttrs?.['background-color'] || mergedAttrs?.backgroundColor,
         backgroundColor: mergedAttrs?.backgroundColor || mergedAttrs?.['background-color'], // Backward compatibility

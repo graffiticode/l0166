@@ -3,6 +3,23 @@
   outline: none;
 }
 
+/* Simple custom border classes */
+.ProseMirror .custom-border-top {
+  border-top: 2px solid #666 !important;
+}
+
+.ProseMirror .custom-border-right {
+  border-right: 2px solid #666 !important;
+}
+
+.ProseMirror .custom-border-bottom {
+  border-bottom: 2px solid #666 !important;
+}
+
+.ProseMirror .custom-border-left {
+  border-left: 2px solid #666 !important;
+}
+
 main {
   margin: auto;
   width: 80%;
@@ -73,23 +90,13 @@ main {
   box-sizing: border-box;
   position: relative;
   text-align: right;
-  padding: 4px;
+  padding: 6px 4px;
   border: 1px solid #eee;
-  height: 24px;
+  min-height: 24px;
+  line-height: 1.2;
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-variant-numeric: tabular-nums;
-}
-
-/* Custom border classes - use 0.25px outline for minimal artifacts */
-.ProseMirror td[class*="custom-border"]:not(.focus-border),
-.ProseMirror th[class*="custom-border"]:not(.focus-border) {
-  outline: 0.25px solid #999 !important;
-}
-
-/* Focus border takes priority over custom borders */
-.ProseMirror td.focus-border,
-.ProseMirror th.focus-border {
-  outline: 1px solid #4285f4 !important;
 }
 .ProseMirror p {
   margin: 0px;

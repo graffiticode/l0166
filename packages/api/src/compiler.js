@@ -245,6 +245,138 @@ export class Checker extends BasisChecker {
     });
   }
 
+  FONT_SIZE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: FONT_SIZE expects a string");
+        }
+        // Accept any string as a font size (e.g., "12px", "14pt", "1.2em")
+        const val = { type: t.record({ 'font-size': t.string() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
+  FONT_FAMILY(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: FONT_FAMILY expects a string");
+        }
+        // Accept any string as a font family
+        const val = { type: t.record({ 'font-family': t.string() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
+  FONT_STYLE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        const allowed = ['normal', 'italic', 'oblique'];
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: FONT_STYLE expects a string or tag literal");
+        } else if (!allowed.includes(value)) {
+          err.push(`E_INVALID_FONT_STYLE: '${value}' not in [${allowed.join(', ')}]`);
+        }
+        const val = { type: t.record({ 'font-style': t.enum(allowed) }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
+  COLOR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: COLOR expects a string");
+        }
+        // Accept any string as a color value (hex, rgb, named colors, etc.)
+        const val = { type: t.record({ color: t.string() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
+  TEXT_DECORATION(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        const allowed = ['none', 'underline', 'overline', 'line-through'];
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: TEXT_DECORATION expects a string or tag literal");
+        } else if (!allowed.includes(value)) {
+          err.push(`E_INVALID_TEXT_DECORATION: '${value}' not in [${allowed.join(', ')}]`);
+        }
+        const val = { type: t.record({ 'text-decoration': t.enum(allowed) }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
+  BORDER(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: BORDER expects a string");
+        }
+        // Accept any string as a border specification (e.g., "1px solid black")
+        const val = { type: t.record({ border: t.string() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
+  VERTICAL_ALIGN(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        const value =
+          (typeof v0 === 'string' && v0) ||
+          (v0 && typeof v0.tag === 'string' && v0.tag) ||
+          undefined;
+        const allowed = ['top', 'middle', 'bottom'];
+        if (value === undefined) {
+          err.push("E_ARG_TYPE: VERTICAL_ALIGN expects a string or tag literal");
+        } else if (!allowed.includes(value)) {
+          err.push(`E_INVALID_VERTICAL_ALIGN: '${value}' not in [${allowed.join(', ')}]`);
+        }
+        const val = { type: t.record({ 'vertical-align': t.enum(allowed) }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   CELL(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -485,6 +617,118 @@ export class Transformer extends BasisTransformer {
         const val = {
           ...v1,
           format: format
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  FONT_SIZE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the font-size value (string or tag)
+        // v1 is the continuation value
+        const fontSize = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          'font-size': fontSize
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  FONT_FAMILY(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the font-family value (string or tag)
+        // v1 is the continuation value
+        const fontFamily = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          'font-family': fontFamily
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  FONT_STYLE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the font-style value (string or tag)
+        // v1 is the continuation value
+        const fontStyle = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          'font-style': fontStyle
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  COLOR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the color value (string or tag)
+        // v1 is the continuation value
+        const color = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          color: color
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  TEXT_DECORATION(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the text-decoration value (string or tag)
+        // v1 is the continuation value
+        const textDecoration = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          'text-decoration': textDecoration
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  BORDER(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the border value (string or tag)
+        // v1 is the continuation value
+        const border = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          border: border
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  VERTICAL_ALIGN(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the vertical-align value (string or tag)
+        // v1 is the continuation value
+        const verticalAlign = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const val = {
+          ...v1,
+          'vertical-align': verticalAlign
         };
         resume(err, val);
       });
