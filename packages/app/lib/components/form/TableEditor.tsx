@@ -890,20 +890,36 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
     cellFontWeights[row][col] = fontWeight;
   });
   const getBorderStyle = (cell, isFocused) => {
-    // Parse custom border sides
-    const customBorderSides = cell.border && typeof cell.border === 'string'
-      ? cell.border.split(',').map(s => s.trim())
-      : [];
-    // Generate CSS class for custom borders
-    let borderClass = '';
-    if (customBorderSides.length > 0) {
-      const classNames = [];
-      if (customBorderSides.includes('top')) classNames.push('custom-border-top');
-      if (customBorderSides.includes('right')) classNames.push('custom-border-right');
-      if (customBorderSides.includes('bottom')) classNames.push('custom-border-bottom');
-      if (customBorderSides.includes('left')) classNames.push('custom-border-left');
-      borderClass = classNames.join(' ');
+    // Check if cell has a border property (CSS string or comma-separated sides)
+    let hasBorderProperty = false;
+    let borderPropertyStyle = '';
+
+    if (cell.border && typeof cell.border === 'string') {
+      hasBorderProperty = true;
+      // Check if it's a CSS border string
+      if (cell.border.includes('px') || cell.border.includes('solid') ||
+          cell.border.includes('dashed') || cell.border.includes('dotted') ||
+          cell.border.includes('#') || cell.border.includes('rgb') ||
+          cell.border.includes('blue') || cell.border.includes('red') ||
+          cell.border.includes('green') || cell.border.includes('black') ||
+          cell.border.includes('gray') || cell.border.includes('grey')) {
+        // Extract width and color for box-shadow
+        const borderMatch = cell.border.match(/(\d+(?:\.\d+)?px)\s+\w+\s+(.+)/);
+        if (borderMatch) {
+          const [, width, color] = borderMatch;
+          borderPropertyStyle = `box-shadow: inset 0 0 0 ${width} ${color}; `;
+        } else {
+          borderPropertyStyle = 'box-shadow: inset 0 0 0 2px #666; ';
+        }
+      } else {
+        // Comma-separated list of sides - for now, apply full border
+        borderPropertyStyle = 'box-shadow: inset 0 0 0 2px #666; ';
+      }
     }
+
+    // Generate CSS class for custom borders (legacy, not used with box-shadow)
+    let borderClass = '';
+
     // Define default borders for different cell types
     let defaultBorders = {
       top: '1px solid #e0e0e0',    // Google Sheets light gray for all grid lines
@@ -924,17 +940,21 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       defaultBorders.bottom = cell.underline ? '2px solid #333' : '1px solid #e0e0e0';
     }
     let styleStr = '';
-    if (customBorderSides.length === 0) {
-      // No custom borders, use default borders
-      styleStr += `border-top: ${defaultBorders.top}; `;
-      styleStr += `border-right: ${defaultBorders.right}; `;
-      styleStr += `border-bottom: ${defaultBorders.bottom}; `;
-      styleStr += `border-left: ${defaultBorders.left}; `;
-    }
-    // Add inset box-shadow for focused cells instead of changing borders
+    // Always apply default borders for the grid
+    styleStr += `border-top: ${defaultBorders.top}; `;
+    styleStr += `border-right: ${defaultBorders.right}; `;
+    styleStr += `border-bottom: ${defaultBorders.bottom}; `;
+    styleStr += `border-left: ${defaultBorders.left}; `;
+
+    // Apply box-shadow for border property or focus
     if (isFocused) {
-      styleStr += 'box-shadow: inset 0 0 0 2px #1a73e8; z-index: 10; ';
+      // Focus takes precedence with !important
+      styleStr += 'box-shadow: inset 0 0 0 2px #1a73e8 !important; z-index: 10; ';
+    } else if (hasBorderProperty) {
+      // Apply border property when not focused
+      styleStr += borderPropertyStyle;
     }
+
     // Add text alignment and font weight
     if (cell.col === 1 || cell.row === 1) {
       styleStr += 'text-align: center; ';
@@ -1290,33 +1310,9 @@ const schema = new Schema({
           },
           setDOMAttr(value, attrs) {
             if (value && typeof value === 'string') {
+              // Just store the border value as data attribute
+              // The actual rendering is handled in getBorderStyle
               attrs['data-border'] = value;
-
-              // Check if it's a CSS border string (contains px, solid, dashed, dotted, or color)
-              if (value.includes('px') || value.includes('solid') ||
-                  value.includes('dashed') || value.includes('dotted') ||
-                  value.includes('#') || value.includes('rgb') ||
-                  value.includes('blue') || value.includes('red') ||
-                  value.includes('green') || value.includes('black') ||
-                  value.includes('gray') || value.includes('grey')) {
-                // It's a CSS border string - extract width and color for box-shadow
-                const borderMatch = value.match(/(\d+(?:\.\d+)?px)\s+\w+\s+(.+)/);
-                if (borderMatch) {
-                  const [, width, color] = borderMatch;
-                  // Use inset box-shadow instead of border
-                  attrs.style = (attrs.style || '') + `box-shadow: inset 0 0 0 ${width} ${color} !important; `;
-                } else {
-                  // Fallback to box-shadow with default 2px if pattern doesn't match exactly
-                  attrs.style = (attrs.style || '') + `box-shadow: inset 0 0 0 2px #666 !important; `;
-                }
-              } else {
-                // It's a comma-separated list of sides - use box-shadow
-                // For simplicity, apply full border with box-shadow when any side is specified
-                const sides = value.split(',').map(s => s.trim());
-                if (sides.length > 0) {
-                  attrs.style = (attrs.style || '') + 'box-shadow: inset 0 0 0 2px #666 !important; ';
-                }
-              }
             }
           },
         },
