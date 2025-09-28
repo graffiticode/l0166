@@ -62,10 +62,20 @@
           "type": "string",
           "description": "The text content of the cell"
         },
-        "align": {
+        "text-align": {
           "type": "string",
           "enum": ["left", "center", "right"],
           "description": "Text alignment in the cell"
+        },
+        "text-vertical-align": {
+          "type": "string",
+          "enum": ["top", "middle", "bottom"],
+          "description": "Vertical alignment for the cell"
+        },
+        "text-decoration": {
+          "type": "string",
+          "enum": ["none", "underline", "overline", "line-through"],
+          "description": "Text decoration for the cell"
         },
         "background-color": {
           "type": "string",
@@ -93,19 +103,9 @@
           "type": "string",
           "description": "Text color for the cell (hex, rgb, rgba, or named colors)"
         },
-        "text-decoration": {
-          "type": "string",
-          "enum": ["none", "underline", "overline", "line-through"],
-          "description": "Text decoration for the cell"
-        },
         "border": {
           "type": "string",
           "description": "Border specification for the cell (e.g., '1px solid black')"
-        },
-        "vertical-align": {
-          "type": "string",
-          "enum": ["top", "middle", "bottom"],
-          "description": "Vertical alignment for the cell"
         },
         "format": {
           "type": "string",
