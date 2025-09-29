@@ -1,37 +1,11 @@
 columns [
   column A width 100 align "center" {}
   column B width 100 align "center" {}
-  column C width 100 align "center" {}
-] rows [
-  row 1 background-color "#eee" font-weight "bold" {}
 ] cells [
-  cell A1 text "Header A" {}
-  cell B1 text "Header B" {}
-  cell C1 text "Header C" {}
-  cell A2 text "100" assess [
-    method "value"
-    expected "100"
-  ] {}
-  cell B2 text "200" assess [
-    method "value"
-    expected "200"
-  ] {}
-  cell C2 text "300" assess [
-    method "value"
-    expected "300"
-  ] {}
-  cell A3 text "150" assess [
-    method "value"
-    expected "150"
-  ] {}
-  cell B3 text "250" assess [
-    method "value"
-    expected "250"
-  ] {}
-  cell C3 text "350" assess [
-    method "value"
-    expected "350"
-  ] {}
+  cell A1 text "A1" {}
+  cell B1 text "B1" {}
+  cell A2 text "A2" {}
+  cell B2 text "B2" {}
 ] {
   v: "0.0.1"
 }..
