@@ -2545,7 +2545,11 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
   let colspan = 1;
   let rowspan = 1;
   const colwidth = col === "_" && [40] || (colsAttrs[col]?.width ? [colsAttrs[col].width] : null);
-  let background = attrs.backgroundColor || attrs.color;
+  // Check cell's own background-color first (from attrs), then column's, then row's
+  let background = cell?.attrs?.['background-color'] || cell?.attrs?.backgroundColor ||
+                   colsAttrs[col]?.['background-color'] || colsAttrs[col]?.backgroundColor ||
+                   attrs?.['background-color'] || attrs?.backgroundColor;
+
   const { text } = cell || {};
   const textContent = text ? [
     {
@@ -2580,10 +2584,17 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
   // Also filter out backgroundColor from attrs as it's handled separately as 'background'
   const { backgroundColor: _bgColor, ...restAttrs } = attrs || {};
   const filteredAttrs = isHeader ? { ...restAttrs } : restAttrs;
-  const filteredColsAttrs = isHeader ? { ...(colsAttrs[col] || {}) } : (colsAttrs[col] || {});
-  // Extract only the attributes from the cell, excluding text, type, and other non-attribute properties
-  const { text: _text, type: _type, ...cellAttrs } = cell || {};
-  const filteredCell = isHeader ? { ...(cell || {}) } : cellAttrs;
+
+  // Filter out background-color from column attrs as it's handled separately
+  const { 'background-color': _colBg, backgroundColor: _colBgColor, ...restColsAttrs } = colsAttrs[col] || {};
+  const filteredColsAttrs = isHeader ? { ...restColsAttrs } : restColsAttrs;
+
+  // Extract only the attributes from the cell, excluding text and type
+  const { text: _text, type: _type, attrs: cellAttrsObj, ...cellRest } = cell || {};
+  // Filter out background properties from the cell's attrs since they're handled separately
+  const { 'background-color': _cellBg, backgroundColor: _cellBgColor, background: _cellBgProp, ...filteredCellAttrs } = cellAttrsObj || {};
+  const filteredCell = isHeader ? { ...(cell || {}) } : { ...cellRest, ...filteredCellAttrs };
+
 
   if (isHeader) {
     // Remove font-size related properties from headers
@@ -2613,6 +2624,8 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
     },
     "content": content,
   };
+
+
   return result;
 };
 
@@ -2665,9 +2678,8 @@ const applyRules = ({ cols, rows, rowsAttrs }) => {
     // rowsAttrs uses spreadsheet row numbers (1, 2, 3...) as keys
     if (rowsAttrs && rowsAttrs[rowIndex]) {
       rowAttrs[rowIndex] = { ...rowsAttrs[rowIndex] };
-    } else {
-      rowAttrs[rowIndex].backgroundColor = /*+row[totalCol] !== total && "#f99" ||*/ "#fff";
     }
+    // Don't set a default background color - let cells use their natural background
   });
   return rowAttrs;
 };
@@ -2703,6 +2715,8 @@ const getCell = (row, col, cells, columns, rows) => {
     const { text, ...cellAttrs } = cellData;
     // Merge row and column attributes with cell data, cell data takes precedence
     const mergedAttrs = { ...rowData, ...columnData, ...cellAttrs, ...cellData.attrs };
+
+
     return {
       type: "td",
       text: text || "",  // Explicitly preserve text property
