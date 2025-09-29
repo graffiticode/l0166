@@ -912,8 +912,31 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
           borderPropertyStyle = 'box-shadow: inset 0 0 0 2px #666; ';
         }
       } else {
-        // Comma-separated list of sides - for now, apply full border
-        borderPropertyStyle = 'box-shadow: inset 0 0 0 2px #666; ';
+        // Handle side specifications (e.g., "bottom", "top,left", "all")
+        const sides = cell.border.split(',').map(s => s.trim().toLowerCase());
+        const shadows = [];
+
+        if (sides.includes('all')) {
+          borderPropertyStyle = 'box-shadow: inset 0 0 0 2px #666; ';
+        } else {
+          // Create individual shadows for each side
+          if (sides.includes('top')) {
+            shadows.push('inset 0 2px 0 0 #666');
+          }
+          if (sides.includes('bottom')) {
+            shadows.push('inset 0 -2px 0 0 #666');
+          }
+          if (sides.includes('left')) {
+            shadows.push('inset 2px 0 0 0 #666');
+          }
+          if (sides.includes('right')) {
+            shadows.push('inset -2px 0 0 0 #666');
+          }
+
+          if (shadows.length > 0) {
+            borderPropertyStyle = `box-shadow: ${shadows.join(', ')}; `;
+          }
+        }
       }
     }
 
@@ -2604,6 +2627,10 @@ const buildCell = ({ col, row, attrs, colsAttrs }) => {
     delete filteredColsAttrs?.fontSize;
     delete filteredCell?.['font-size'];
     delete filteredCell?.fontSize;
+
+    // Remove border properties from headers to prevent row/column borders from appearing on labels
+    delete filteredAttrs?.border;
+    delete filteredColsAttrs?.border;
   }
 
   const result = {
@@ -2684,6 +2711,38 @@ const applyRules = ({ cols, rows, rowsAttrs }) => {
   return rowAttrs;
 };
 
+// Helper function to merge border specifications from multiple sources
+const mergeBorders = (border1, border2) => {
+  if (!border1) return border2;
+  if (!border2) return border1;
+
+  // If either is a CSS border string (e.g., "1px solid black"), use the most specific one
+  if (border1.includes('px') || border2.includes('px')) {
+    // Cell borders take precedence over column/row borders for CSS styles
+    return border2;
+  }
+
+  // Parse side specifications
+  const parseSides = (border) => {
+    if (border === 'all') return ['top', 'bottom', 'left', 'right'];
+    return border.split(',').map(s => s.trim().toLowerCase());
+  };
+
+  const sides1 = parseSides(border1);
+  const sides2 = parseSides(border2);
+
+  // Merge unique sides
+  const mergedSides = [...new Set([...sides1, ...sides2])];
+
+  // If all sides are present, return 'all'
+  if (mergedSides.includes('top') && mergedSides.includes('bottom') &&
+      mergedSides.includes('left') && mergedSides.includes('right')) {
+    return 'all';
+  }
+
+  return mergedSides.join(',');
+};
+
 const getCell = (row, col, cells, columns, rows) => {
   if (row === 0 && col === "_") {
     return {
@@ -2713,8 +2772,28 @@ const getCell = (row, col, cells, columns, rows) => {
     const rowData = rows && rows[row] || {};
     // Extract text separately to ensure it's not lost in attribute merging
     const { text, ...cellAttrs } = cellData;
-    // Merge row and column attributes with cell data, cell data takes precedence
-    const mergedAttrs = { ...rowData, ...columnData, ...cellAttrs, ...cellData.attrs };
+
+    // Extract borders to merge them specially
+    const rowBorder = rowData?.border;
+    const columnBorder = columnData?.border;
+    const cellBorder = cellAttrs?.border || cellData.attrs?.border;
+
+    // Merge borders from all sources
+    const mergedBorder = mergeBorders(mergeBorders(rowBorder, columnBorder), cellBorder);
+
+    // Merge other attributes with spread operator (cell data takes precedence)
+    const { border: _rb, ...rowAttrsNoBorder } = rowData;
+    const { border: _cb, ...columnAttrsNoBorder } = columnData;
+    const { border: _cellb, ...cellAttrsNoBorder } = cellAttrs;
+    const { border: _cellAttrsb, ...cellDataAttrsNoBorder } = cellData.attrs || {};
+
+    const mergedAttrs = {
+      ...rowAttrsNoBorder,
+      ...columnAttrsNoBorder,
+      ...cellAttrsNoBorder,
+      ...cellDataAttrsNoBorder,
+      ...(mergedBorder ? { border: mergedBorder } : {})
+    };
 
 
     return {
