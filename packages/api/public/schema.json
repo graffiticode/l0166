@@ -130,7 +130,7 @@
         "protected": {
           "type": "boolean",
           "description": "Whether the cell is protected from editing",
-          "group": "cell"
+          "group": ""
         }
       },
       "required": [],
@@ -239,7 +239,7 @@
         "protected": {
           "type": "boolean",
           "description": "Whether all cells in the column are protected from editing",
-          "group": "column"
+          "group": ""
         }
       },
       "additionalProperties": true
@@ -311,7 +311,7 @@
         "protected": {
           "type": "boolean",
           "description": "Whether the row is protected from editing",
-          "group": "row"
+          "group": ""
         }
       },
       "additionalProperties": true
@@ -335,7 +335,7 @@
         "protected": {
           "type": "boolean",
           "description": "Whether the range is protected from editing",
-          "group": "range"
+          "group": ""
         },
         "font-weight": {
           "type": "string",
