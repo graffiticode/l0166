@@ -803,7 +803,8 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       if (cell.row === 1 && cell.col > 1) {
         // Column header (A0, B0, C0, etc.)
         const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
-        if (focus.type === "column" && cellColumn === focus.name) {
+        const selectedColumns = focus?.columns || (focus?.name ? [focus?.name] : []);
+        if (focus?.type === "column" && (cellColumn === focus?.name || selectedColumns.includes(cellColumn))) {
           color = "#1a73e8"; // Google Sheets selected header blue
           textColor = "#ffffff"; // White text for selected header
           fontWeight = "600"; // Semibold weight when selected
@@ -857,7 +858,8 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
           } else if (focus.type === "column") {
             // Check if this cell is in any of the focused columns
             const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
-            if (cellColumn === focus.name) {
+            const selectedColumns = focus?.columns || (focus?.name ? [focus?.name] : []);
+            if (cellColumn === focus?.name || selectedColumns.includes(cellColumn)) {
               color = "#e6f3ff"; // Light blue for focused column
             }
           } else if (focus.type === "row") {
