@@ -535,7 +535,6 @@ const applyDecoration = ({ doc, cells }) => {
 const getCellColor = (cell) => {
   const { row, col, name, background, 'background-color': bgColorKebab, backgroundColor: bgColorCamel, lastFocusedCell, score } = cell;
   const backgroundColor = bgColorKebab || bgColorCamel; // Support both kebab-case and camelCase
-  //const { expected } = assess || {};
 
   // Don't apply colors to header cells (row 1 or column 1)
   if (row <= 1 || col <= 1) {
@@ -577,21 +576,21 @@ const getActualOrder = ({cells, primaryColumn}) => {
   }).filter(x => x !== null);
 }
 
-const sortAssessRowsToMatchActual = ({ cells, range }) => {
-  const { primaryColumn, rows } = range;
+const sortAssessRowsToMatchActual = ({ cells, region }) => {
+  const { primaryColumn, rows } = region;
   const order = getActualOrder({cells, primaryColumn});
   const dataMap = new Map(rows.map(row => [getExpectedCellValue(row[primaryColumn]), row]));
   const sortedRows = order.map(id => (id !== null ? dataMap.get(id) || null : null));
   return sortedRows;
 }
 
-const getCellsValidationFromRangeValidation = ({ cells, range }) => {
+const getCellsValidationFromRegionValidation = ({ cells, region }) => {
   const rows = (
-    range?.order === "actual" &&
-      sortAssessRowsToMatchActual({cells, range}) as [{id}] ||
-      range?.rows || []
+    region?.order === "actual" &&
+      sortAssessRowsToMatchActual({cells, region}) as [{id}] ||
+      region?.rows || []
   );
-  assert(range, "getCellsValidationFromRangeValidation() missing range value");
+  assert(region, "getCellsValidationFromRegionValidation() missing region value");
   const cellsValidation = rows.reduce((cells, row, index) => (
     // TODO mark holes as errors.
     index = row?.id || index + 1,
@@ -603,20 +602,14 @@ const getCellsValidationFromRangeValidation = ({ cells, range }) => {
   return cellsValidation;
 };
 
-const getRangeValidations = ({ cells, validation }) => {
-  if (!validation || !validation.ranges) {
-    return [{
-      range: {},
-      cells,
-    }];
-  }
-  const { ranges } = validation;
-  const rangeName = Object.keys(ranges).find(key => (
-    key    // return the first range name for now.
+const getRegionValidations = ({ cells, validation }) => {
+  const regions = validation.regions || validation.ranges; // ranges for backward compat
+  const regionName = Object.keys(regions).find(key => (
+    key    // return the first region name for now.
   ));
-  // TODO Handle multiple ranges. Split cells by range.
+  // TODO Handle multiple regions. Split cells by region.
   return [{
-    range: ranges[rangeName] || {},
+    region: regions[regionName] || {},
     cells,
   }];
 };
@@ -758,14 +751,11 @@ const skipHeadersGoToNextCell = dir => (state, dispatch) => {
 
 
 export const getCellsValidation = ({ cells, validation }) => {
-  if (!validation) {
-    return {};
-  }
-  const rangeValidations = getRangeValidations({cells, validation});
-  const cellsValidations = rangeValidations.map(rangeValidation => (
-    getCellsValidationFromRangeValidation(rangeValidation)
+  const regionValidations = getRegionValidations({cells, validation});
+  const cellsValidations = regionValidations.map(regionValidation => (
+    getCellsValidationFromRegionValidation(regionValidation)
   ));
-  return cellsValidations[0] || {};
+  return cellsValidations[0];
 };
 
 export const scoreCells = ({ cells, validation }) => {
@@ -813,8 +803,7 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       if (cell.row === 1 && cell.col > 1) {
         // Column header (A0, B0, C0, etc.)
         const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
-        const selectedColumns = focus?.columns || (focus?.name ? [focus?.name] : []);
-        if (focus?.type === "column" && (cellColumn === focus?.name || selectedColumns.includes(cellColumn))) {
+        if (focus.type === "column" && cellColumn === focus.name) {
           color = "#1a73e8"; // Google Sheets selected header blue
           textColor = "#ffffff"; // White text for selected header
           fontWeight = "600"; // Semibold weight when selected
@@ -868,8 +857,7 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
           } else if (focus.type === "column") {
             // Check if this cell is in any of the focused columns
             const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
-            const selectedColumns = focus?.columns || (focus?.name ? [focus?.name] : []);
-            if (cellColumn === focus?.name || selectedColumns.includes(cellColumn)) {
+            if (cellColumn === focus.name) {
               color = "#e6f3ff"; // Light blue for focused column
             }
           } else if (focus.type === "row") {
@@ -1785,10 +1773,6 @@ const getCellDependencies = ({ env, names }) => {
   }
   return Array.from(allDeps);
 };
-
-
-
-
 
 const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
   view(editorView) {
