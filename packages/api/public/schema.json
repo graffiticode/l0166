@@ -39,12 +39,12 @@
           },
           "additionalProperties": false
         },
-        "ranges": {
+        "regions": {
           "type": "object",
-          "description": "Range definitions keyed by range notation (e.g., 'A1:B10' or '*' for all cells)",
+          "description": "Region definitions keyed by region notation (e.g., 'A1:B10' or '*' for all cells)",
           "patternProperties": {
             "^([A-Z]+[0-9]+:[A-Z]+[0-9]+|\\*)$": {
-              "$ref": "#/definitions/range"
+              "$ref": "#/definitions/region"
             }
           },
           "additionalProperties": false
@@ -316,80 +316,80 @@
       },
       "additionalProperties": true
     },
-    "range": {
+    "region": {
       "type": "object",
-      "description": "Range configuration - can have any row or column properties",
+      "description": "Region configuration - can have any row or column properties",
       "properties": {
         "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
-          "description": "Default text alignment for the range",
+          "description": "Default text alignment for the region",
           "group": "text"
         },
         "width": {
           "type": "integer",
           "minimum": 0,
-          "description": "Column width in pixels for cells in the range",
-          "group": "range"
+          "description": "Column width in pixels for cells in the region",
+          "group": "region"
         },
         "protected": {
           "type": "boolean",
-          "description": "Whether the range is protected from editing",
+          "description": "Whether the region is protected from editing",
           "group": ""
         },
         "font-weight": {
           "type": "string",
           "enum": ["normal", "bold", "lighter", "bolder"],
-          "description": "Font weight for the range",
+          "description": "Font weight for the region",
           "group": "font"
         },
         "font-size": {
           "type": "string",
-          "description": "Font size for the range (e.g., '12px', '14pt', '1.2em')",
+          "description": "Font size for the region (e.g., '12px', '14pt', '1.2em')",
           "group": "font"
         },
         "font-family": {
           "type": "string",
-          "description": "Font family for the range (e.g., 'Arial', 'Helvetica', 'monospace')",
+          "description": "Font family for the region (e.g., 'Arial', 'Helvetica', 'monospace')",
           "group": "font"
         },
         "font-style": {
           "type": "string",
           "enum": ["normal", "italic", "oblique"],
-          "description": "Font style for the range",
+          "description": "Font style for the region",
           "group": "font"
         },
         "color": {
           "type": "string",
-          "description": "Text color for the range (hex, rgb, rgba, or named colors)",
+          "description": "Text color for the region (hex, rgb, rgba, or named colors)",
           "group": "text"
         },
         "text-decoration": {
           "type": "string",
           "enum": ["none", "underline", "overline", "line-through"],
-          "description": "Text decoration for the range",
+          "description": "Text decoration for the region",
           "group": "text"
         },
         "border": {
           "type": "string",
-          "description": "Border specification for the range (e.g., '1px solid black')",
-          "group": "range"
+          "description": "Border specification for the region (e.g., '1px solid black')",
+          "group": "region"
         },
         "vertical-align": {
           "type": "string",
           "enum": ["top", "middle", "bottom"],
-          "description": "Vertical alignment for the range",
+          "description": "Vertical alignment for the region",
           "group": "text"
         },
         "format": {
           "type": "string",
-          "description": "Default format pattern for all cells in the range",
+          "description": "Default format pattern for all cells in the region",
           "group": "text"
         },
         "background-color": {
           "type": "string",
-          "description": "Background color for all cells in the range (hex, rgb, rgba, or named colors)",
-          "group": "range"
+          "description": "Background color for all cells in the region (hex, rgb, rgba, or named colors)",
+          "group": "region"
         }
       },
       "additionalProperties": true

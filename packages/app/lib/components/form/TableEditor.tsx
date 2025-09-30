@@ -604,6 +604,12 @@ const getCellsValidationFromRangeValidation = ({ cells, range }) => {
 };
 
 const getRangeValidations = ({ cells, validation }) => {
+  if (!validation || !validation.ranges) {
+    return [{
+      range: {},
+      cells,
+    }];
+  }
   const { ranges } = validation;
   const rangeName = Object.keys(ranges).find(key => (
     key    // return the first range name for now.
@@ -752,11 +758,14 @@ const skipHeadersGoToNextCell = dir => (state, dispatch) => {
 
 
 export const getCellsValidation = ({ cells, validation }) => {
+  if (!validation) {
+    return {};
+  }
   const rangeValidations = getRangeValidations({cells, validation});
   const cellsValidations = rangeValidations.map(rangeValidation => (
     getCellsValidationFromRangeValidation(rangeValidation)
   ));
-  return cellsValidations[0];
+  return cellsValidations[0] || {};
 };
 
 export const scoreCells = ({ cells, validation }) => {
@@ -804,7 +813,8 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       if (cell.row === 1 && cell.col > 1) {
         // Column header (A0, B0, C0, etc.)
         const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
-        if (focus.type === "column" && cellColumn === focus.name) {
+        const selectedColumns = focus?.columns || (focus?.name ? [focus?.name] : []);
+        if (focus?.type === "column" && (cellColumn === focus?.name || selectedColumns.includes(cellColumn))) {
           color = "#1a73e8"; // Google Sheets selected header blue
           textColor = "#ffffff"; // White text for selected header
           fontWeight = "600"; // Semibold weight when selected
@@ -856,9 +866,10 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
             // Highlight all data cells for sheet focus
             color = "#e6f3ff"; // Light blue for entire sheet
           } else if (focus.type === "column") {
-            // Check if this cell is in the focused column
+            // Check if this cell is in any of the focused columns
             const cellColumn = cell.name.match(/^([A-Z]+)/)?.[1];
-            if (cellColumn === focus.name) {
+            const selectedColumns = focus?.columns || (focus?.name ? [focus?.name] : []);
+            if (cellColumn === focus?.name || selectedColumns.includes(cellColumn)) {
               color = "#e6f3ff"; // Light blue for focused column
             }
           } else if (focus.type === "row") {
@@ -1780,12 +1791,87 @@ const getCellDependencies = ({ env, names }) => {
 
 
 const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
+  view(editorView) {
+    // Add a capture phase event listener to catch shift-clicks on headers
+    const handleHeaderShiftClick = (event) => {
+      if (!event.shiftKey) return;
+
+      // Find if we clicked on a header
+      const target = event.target;
+      let headerElement = target;
+
+      // Walk up the DOM tree to find a table header
+      while (headerElement && headerElement !== editorView.dom) {
+        if (headerElement.nodeName === 'TH' || headerElement.classList?.contains('ProseMirror-tableheader')) {
+          // Get position in ProseMirror document
+          const pos = editorView.posAtDOM(headerElement, 0);
+          const $pos = editorView.state.doc.resolve(pos);
+
+          // Find the header node
+          for (let depth = $pos.depth; depth > 0; depth--) {
+            const node = $pos.node(depth);
+            if (node.type.name === "table_header") {
+              const name = node.attrs.name;
+              const colPart = name?.match(/^([_A-Z]+)/)?.[1];
+              const rowPart = name?.match(/(\d+)$/)?.[1];
+
+              if (colPart && colPart !== "_" && rowPart === "0") {
+                // Column header with shift-click
+                const currentFocus = formState.data.focus;
+
+                if (currentFocus && currentFocus.type === "column") {
+                  const selectedColumns = currentFocus?.columns || (currentFocus?.name ? [currentFocus?.name] : []);
+                  const newColumns = selectedColumns.includes(colPart)
+                    ? selectedColumns.filter(col => col !== colPart)
+                    : [...selectedColumns, colPart];
+
+                  formState.apply({
+                    type: "focus",
+                    args: {
+                      type: "column",
+                      columns: newColumns,
+                    },
+                  });
+
+                  // Update decorations
+                  const tr = editorView.state.tr;
+                  tr.setMeta("focusChanged", true);
+                  tr.setMeta("headerClick", true);
+                  editorView.dispatch(tr);
+
+                  event.preventDefault();
+                  event.stopPropagation();
+                  return;
+                }
+              }
+              break;
+            }
+          }
+          break;
+        }
+        headerElement = headerElement.parentElement;
+      }
+    };
+
+    // Add listener in capture phase to intercept before ProseMirror
+    editorView.dom.addEventListener('mousedown', handleHeaderShiftClick, true);
+
+    return {
+      destroy() {
+        editorView.dom.removeEventListener('mousedown', handleHeaderShiftClick, true);
+      }
+    };
+  },
   props: {
-    handleClickOn(view, _pos, node, _nodePos, _event, _direct) {
+    handleClickOn(view, _pos, node, _nodePos, event, _direct) {
       const { state, dispatch } = view;
 
       // Check if the clicked node is a `table_header`
       if (node.type.name === "table_header") {
+        // If shift is held, let the capture phase handler deal with it
+        if (event && event.shiftKey) {
+          return false; // Let other handlers process this
+        }
         // Create a selection for the adjacent cell instead
         const name = node.attrs.name || "_0";
 
@@ -1810,11 +1896,13 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
             dispatch(updateTr);
           } else if (colPart && colPart !== "_" && rowPart === "0") {
             // Column header (e.g., A0, B0, C0)
+            // Single column selection (replace existing)
             formState.apply({
               type: "focus",
               args: {
                 type: "column",
                 name: colPart,
+                columns: [colPart], // Also store as array for consistency
               },
             });
             // Force re-render to update decorations with new focus
@@ -1857,6 +1945,72 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
     },
 
     handleDOMEvents: {
+      mousedown(view, event) {
+        // This handler is now redundant since we use capture phase listener
+        // But keeping it for backward compatibility with non-shift clicks
+        if (!event.shiftKey) return false;
+
+        // Get the position in the document from the mouse event
+        const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+        if (!pos) {
+          return false;
+        }
+
+        // Get the node at this position
+        const $pos = view.state.doc.resolve(pos.pos);
+        let headerNode = null;
+        let headerName = null;
+
+        // Find the table header node
+        for (let depth = $pos.depth; depth > 0; depth--) {
+          const node = $pos.node(depth);
+          if (node.type.name === "table_header") {
+            headerNode = node;
+            headerName = node.attrs.name;
+            break;
+          }
+        }
+
+        if (headerNode && headerName) {
+          const { state, dispatch } = view;
+          const name = headerName;
+
+          // Parse the cell name to determine column and row
+          const colPart = name.match(/^([_A-Z]+)/)?.[1];
+          const rowPart = name.match(/(\d+)$/)?.[1];
+
+          if (colPart && colPart !== "_" && rowPart === "0") {
+            // Column header (e.g., A0, B0, C0)
+            const currentFocus = formState.data.focus;
+
+            // Check if shift key is held for discontiguous selection
+            if (event.shiftKey && currentFocus && currentFocus.type === "column") {
+              // Add to existing column selection
+              const selectedColumns = currentFocus?.columns || (currentFocus?.name ? [currentFocus?.name] : []);
+              const newColumns = selectedColumns.includes(colPart)
+                ? selectedColumns.filter(col => col !== colPart) // Toggle off if already selected
+                : [...selectedColumns, colPart]; // Add to selection
+
+              formState.apply({
+                type: "focus",
+                args: {
+                  type: "column",
+                  columns: newColumns,
+                },
+              });
+
+              // Force re-render to update decorations with new focus
+              const updateTr = state.tr;
+              updateTr.setMeta("focusChanged", true);
+              updateTr.setMeta("headerClick", true);
+              dispatch(updateTr);
+              event.preventDefault();
+              return true; // Prevent default handleClickOn from running
+            }
+          }
+        }
+        return false; // Let normal processing continue
+      },
       beforeinput(view, event) {
         if (isInsideTableHeader(view.state)) {
           event.preventDefault();
@@ -2297,7 +2451,7 @@ const buildCellPlugin = formState => {
           dirtyCells,
           cells: allCells,
         };
-        const { validation } = formState.data;
+        const validation = formState.data?.validation || null;
         const decorations = applyModelRules(cellExprs, state, value, validation, formState);
         return {
           ...value,
@@ -2442,7 +2596,7 @@ const buildCellPlugin = formState => {
           };
         }
         const cellExprs = self.getState(state);
-        const { validation } = formState.data;
+        const validation = formState.data?.validation || null;
         const decorations = applyModelRules(cellExprs, state, value, validation, formState);
         return {
           ...value,
@@ -2494,9 +2648,12 @@ const buildCellPlugin = formState => {
               if (currentFocus.type === "sheet") {
                 // Any data cell click clears sheet focus
                 isInHighlightedArea = true;
-              } else if (currentFocus.type === "column" && cellColumn === currentFocus.name) {
-                // Clicking any cell in the highlighted column
-                isInHighlightedArea = true;
+              } else if (currentFocus.type === "column") {
+                // Clicking any cell in any of the highlighted columns
+                const selectedColumns = currentFocus?.columns || (currentFocus?.name ? [currentFocus?.name] : []);
+                if (cellColumn === currentFocus?.name || selectedColumns.includes(cellColumn)) {
+                  isInHighlightedArea = true;
+                }
               } else if (currentFocus.type === "row" && cellRow === currentFocus.name) {
                 // Clicking any cell in the highlighted row
                 isInHighlightedArea = true;
@@ -2978,6 +3135,15 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
   useEffect(() => {
     if (editorView && cells) {
       const editorStateData = makeEditorState({type, columns, cells, rows});
+      if (!editorStateData) {
+        // If no editor state data, create an empty state
+        const newEditorState = EditorState.create({
+          schema,
+          plugins,
+        });
+        editorView.updateState(newEditorState);
+        return;
+      }
       const newEditorState = EditorState.fromJSON({
         schema,
         plugins,

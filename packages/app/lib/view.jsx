@@ -97,18 +97,70 @@ export const View = () => {
       // Extract value from the focused element in interaction data
       let focusValue = {};
 
-      if (data.interaction && args.type && args.name) {
-        const { type, name } = args;
+      if (data.interaction && args.type) {
+        const { type, name, startCell, endCell } = args;
 
         // Get value based on the type of focused element
-        if (type === 'cell' && data.interaction.cells && data.interaction.cells[name]) {
+        if (type === 'cell' && name && data.interaction.cells && data.interaction.cells[name]) {
           focusValue = data.interaction.cells[name];
-        } else if (type === 'column' && data.interaction.columns && data.interaction.columns[name]) {
-          focusValue = data.interaction.columns[name];
-        } else if (type === 'row' && data.interaction.rows && data.interaction.rows[name]) {
+        } else if (type === 'column') {
+          // Handle both single column (name) and multiple columns (columns array)
+          if (args.columns && args.columns.length > 0) {
+            // Multiple columns selected - collect all their values
+            focusValue = {};
+            args.columns.forEach(colName => {
+              if (data.interaction.columns && data.interaction.columns[colName]) {
+                focusValue[colName] = data.interaction.columns[colName];
+              }
+            });
+          } else if (name && data.interaction.columns && data.interaction.columns[name]) {
+            // Single column selected
+            focusValue = data.interaction.columns[name];
+          }
+        } else if (type === 'row' && name && data.interaction.rows && data.interaction.rows[name]) {
           focusValue = data.interaction.rows[name];
         } else if (type === 'sheet' && data.interaction.sheets && data.interaction.sheets[name]) {
           focusValue = data.interaction.sheets[name];
+        } else if (type === 'region' && startCell && endCell) {
+          // For region selection, collect all cell values in the range
+          focusValue = {
+            startCell,
+            endCell,
+            cells: {}
+          };
+
+          // Parse cell names to get column and row
+          const parseCell = (cellName) => {
+            const match = cellName.match(/^([A-Z]+)(\d+)$/);
+            if (!match) return null;
+            return { col: match[1], row: parseInt(match[2]) };
+          };
+
+          const start = parseCell(startCell);
+          const end = parseCell(endCell);
+
+          if (start && end && data.interaction.cells) {
+            // Get column range
+            const startColCode = start.col.charCodeAt(0);
+            const endColCode = end.col.charCodeAt(0);
+            const minCol = Math.min(startColCode, endColCode);
+            const maxCol = Math.max(startColCode, endColCode);
+
+            // Get row range
+            const minRow = Math.min(start.row, end.row);
+            const maxRow = Math.max(start.row, end.row);
+
+            // Collect all cells in the region
+            for (let colCode = minCol; colCode <= maxCol; colCode++) {
+              const col = String.fromCharCode(colCode);
+              for (let row = minRow; row <= maxRow; row++) {
+                const cellName = `${col}${row}`;
+                if (data.interaction.cells[cellName]) {
+                  focusValue.cells[cellName] = data.interaction.cells[cellName];
+                }
+              }
+            }
+          }
         }
       }
 
@@ -118,7 +170,16 @@ export const View = () => {
       }
 
       if (targetOrigin) {
-        window.parent.postMessage({focus: {...args, value: focusValue}}, targetOrigin);
+        // Add name field for region type in the format "startCell:endCell"
+        const focusData = {...args, value: focusValue};
+        if (args.type === 'region' && args.startCell && args.endCell) {
+          focusData.name = `${args.startCell}:${args.endCell}`;
+        } else if (args.type === 'column' && args.columns && args.columns.length > 0) {
+          // For multi-column selection, join column names with commas
+          focusData.name = args.columns.join(',');
+        }
+        console.log('[L0166] Sending focus event:', focusData);
+        window.parent.postMessage({focus: focusData}, targetOrigin);
       }
       return {
         ...data,

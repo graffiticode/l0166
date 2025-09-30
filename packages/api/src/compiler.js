@@ -8,8 +8,8 @@ import {
 } from '@graffiticode/basis';
 import { t } from './types.js';
 
-const rowInRange = (range, cellName) => {
-  const [min, max] = range.split("..");
+const rowInRegion = (region, cellName) => {
+  const [min, max] = region.split("..");
   const row = cellName.slice(1);
   return +row >= +min || +row <= +max;
 };
@@ -17,10 +17,10 @@ const rowInRange = (range, cellName) => {
 const getPrimaryColumn = (rows, cellName) => {
   // Check rows to see if cellName is included.
   // If so, return the index col.
-  const range = rows && Object.keys(rows).find(key =>
-    (key === "*" || rowInRange(key, cellName)) && key
+  const region = rows && Object.keys(rows).find(key =>
+    (key === "*" || rowInRegion(key, cellName)) && key
   ) || "*";
-  return [range, rows && rows[range]?.assess?.index || null];
+  return [region, rows && rows[region]?.assess?.index || null];
 };
 
 const getIndexCell = (cells, colName, cellName) => (
@@ -37,14 +37,14 @@ const getIndexCell = (cells, colName, cellName) => (
 const getValidation = ({rows = {}, cells = {}}) => (
   // TODO compile the index column and value for each validated cell.
   Object.keys(cells).reduce((obj, key) => {
-    const [rowRange, primaryColumn] = getPrimaryColumn(rows, key);
+    const [rowRegion, primaryColumn] = getPrimaryColumn(rows, key);
     const cell = cells[key];
     const col = key.slice(0, 1);
     const rowIndex = +key.slice(1) - 1;
-    const order = rows[rowRange]?.assess?.order || "expected";  // "actual", "asc", "desc", "expected" (default)
-    const row = obj.ranges[rowRange]?.rows[rowIndex] || {}
+    const order = rows[rowRegion]?.assess?.order || "expected";  // "actual", "asc", "desc", "expected" (default)
+    const row = obj.regions[rowRegion]?.rows[rowIndex] || {}
     // Replace the current row in rows
-    const newRows = obj.ranges[rowRange]?.rows || [];
+    const newRows = obj.regions[rowRegion]?.rows || [];
     newRows[rowIndex] = {
       ...row,
       id: order !== "actual" && rowIndex + 1 || undefined,
@@ -56,16 +56,16 @@ const getValidation = ({rows = {}, cells = {}}) => (
     return {
       ...obj,
       points: obj.points + (typeof points === "number" ? points : 1),
-      ranges: {
-        ...obj.ranges,
-        [rowRange]: {
+      regions: {
+        ...obj.regions,
+        [rowRegion]: {
           primaryColumn: primaryColumn,
           order,
           rows: newRows,
         },
       },
     }
-  }, {points: 0, ranges: {}, cells: {}})
+  }, {points: 0, regions: {}, cells: {}})
 );
 
 export class Checker extends BasisChecker {
