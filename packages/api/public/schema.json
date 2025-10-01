@@ -63,6 +63,15 @@
           "description": "The text content of the cell",
           "group": ""
         },
+        "assess": {
+          "$ref": "#/definitions/assess",
+          "group": ""
+        },
+        "protected": {
+          "type": "boolean",
+          "description": "Whether the cell is protected from editing",
+          "group": ""
+        },
         "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
@@ -75,16 +84,21 @@
           "description": "Vertical alignment for the cell",
           "group": "text"
         },
+        "format": {
+          "type": "string",
+          "description": "Format pattern for cell values (e.g., '#,##0', '0.00', 'date', 'currency')",
+          "group": "text"
+        },
         "text-decoration": {
           "type": "string",
           "enum": ["none", "underline", "overline", "line-through"],
           "description": "Text decoration for the cell",
           "group": "text"
         },
-        "background-color": {
+        "color": {
           "type": "string",
-          "description": "Background color of the cell (hex, rgb, rgba, or named colors)",
-          "group": "cell"
+          "description": "Text color for the cell (hex, rgb, rgba, or named colors)",
+          "group": "text"
         },
         "font-weight": {
           "type": "string",
@@ -108,29 +122,15 @@
           "description": "Font style for the cell",
           "group": "font"
         },
-        "color": {
+        "background-color": {
           "type": "string",
-          "description": "Text color for the cell (hex, rgb, rgba, or named colors)",
-          "group": "text"
+          "description": "Background color of the cell (hex, rgb, rgba, or named colors)",
+          "group": "cell"
         },
         "border": {
           "type": "string",
           "description": "Border specification for the cell (e.g., '1px solid black')",
           "group": "cell"
-        },
-        "format": {
-          "type": "string",
-          "description": "Format pattern for cell values (e.g., '#,##0', '0.00', 'date', 'currency')",
-          "group": "text"
-        },
-        "assess": {
-          "$ref": "#/definitions/assess",
-          "group": ""
-        },
-        "protected": {
-          "type": "boolean",
-          "description": "Whether the cell is protected from editing",
-          "group": ""
         }
       },
       "required": [],
