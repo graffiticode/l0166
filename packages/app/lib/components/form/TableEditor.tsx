@@ -1852,9 +1852,13 @@ const getCellDependencies = ({ env, names }) => {
 
 const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
   view(editorView) {
-    // Add a capture phase event listener to catch shift-clicks on headers and cells
-    const handleShiftClick = (event) => {
-      if (!event.shiftKey) return;
+    // Add a capture phase event listener to catch shift-clicks and cmd/ctrl-clicks on headers and cells
+    const handleModifierClick = (event) => {
+      // Check for shift-click (range selection) or cmd/ctrl-click (toggle selection)
+      const isShiftClick = event.shiftKey;
+      const isToggleClick = event.metaKey || event.ctrlKey; // metaKey for Mac, ctrlKey for Windows/Linux
+
+      if (!isShiftClick && !isToggleClick) return;
 
       // Find if we clicked on a header or cell
       const target = event.target;
@@ -1872,11 +1876,64 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
           for (let depth = $pos.depth; depth > 0; depth--) {
             const node = $pos.node(depth);
             if (node.type.name === "table_cell") {
-              // Handle shift-click on table cells
+              // Handle modifier-click on table cells
               const cellName = node.attrs.name;
               const currentFocus = formState.data.focus;
 
-              if (currentFocus && currentFocus.type === "cell") {
+              if (isToggleClick) {
+                // Cmd/Ctrl-click: Toggle selection of individual cells
+                let selectedCells = [];
+
+                if (currentFocus && currentFocus.type === "cell") {
+                  if (currentFocus.cells && currentFocus.cells.length > 0) {
+                    // Already have multiple cells selected
+                    selectedCells = [...currentFocus.cells];
+                  } else if (currentFocus.name) {
+                    // Single cell selected - convert to array
+                    selectedCells = currentFocus.name.split(',').map(c => c.trim());
+                  }
+                }
+
+                // Toggle the clicked cell
+                const cellIndex = selectedCells.indexOf(cellName);
+                if (cellIndex > -1) {
+                  // Remove cell if already selected
+                  selectedCells.splice(cellIndex, 1);
+                } else {
+                  // Add cell if not selected
+                  selectedCells.push(cellName);
+                }
+
+                if (selectedCells.length > 0) {
+                  formState.apply({
+                    type: "focus",
+                    args: {
+                      type: "cell",
+                      name: selectedCells.join(','),
+                      cells: selectedCells,
+                      isRange: false,  // Not a contiguous range
+                      isMultiple: true,  // Multiple individual selections
+                    },
+                  });
+                } else {
+                  // No cells selected - clear focus
+                  formState.apply({
+                    type: "focus",
+                    args: null,
+                  });
+                }
+
+                // Update decorations
+                const tr = editorView.state.tr;
+                tr.setMeta("focusChanged", true);
+                editorView.dispatch(tr);
+
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+
+              } else if (isShiftClick && currentFocus && currentFocus.type === "cell") {
+                // Shift-click: Create range selection
                 let startCell = null;
 
                 if (currentFocus.isRange && currentFocus.cells && currentFocus.cells.length > 0) {
@@ -1919,11 +1976,58 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
               const rowPart = name?.match(/(\d+)$/)?.[1];
 
               if (colPart && colPart !== "_" && rowPart === "0") {
-                // Column header with shift-click - create range selection
+                // Column header click
                 const currentFocus = formState.data.focus;
 
-                if (currentFocus && currentFocus.type === "column" && currentFocus.name) {
-                  // Create range from anchor column to clicked column
+                if (isToggleClick) {
+                  // Cmd/Ctrl-click: Toggle column selection
+                  let selectedColumns = [];
+
+                  if (currentFocus && currentFocus.type === "column") {
+                    if (currentFocus.columns && currentFocus.columns.length > 0) {
+                      selectedColumns = [...currentFocus.columns];
+                    } else if (currentFocus.name) {
+                      selectedColumns = [currentFocus.name];
+                    }
+                  }
+
+                  // Toggle the clicked column
+                  const colIndex = selectedColumns.indexOf(colPart);
+                  if (colIndex > -1) {
+                    selectedColumns.splice(colIndex, 1);
+                  } else {
+                    selectedColumns.push(colPart);
+                  }
+
+                  if (selectedColumns.length > 0) {
+                    formState.apply({
+                      type: "focus",
+                      args: {
+                        type: "column",
+                        name: selectedColumns[0], // First column as anchor
+                        columns: selectedColumns,
+                        isMultiple: true,
+                      },
+                    });
+                  } else {
+                    formState.apply({
+                      type: "focus",
+                      args: null,
+                    });
+                  }
+
+                  // Update decorations
+                  const tr = editorView.state.tr;
+                  tr.setMeta("focusChanged", true);
+                  tr.setMeta("headerClick", true);
+                  editorView.dispatch(tr);
+
+                  event.preventDefault();
+                  event.stopPropagation();
+                  return;
+
+                } else if (isShiftClick && currentFocus && currentFocus.type === "column" && currentFocus.name) {
+                  // Shift-click: Create range from anchor column to clicked column
                   const rangeColumns = getColumnRange(currentFocus.name, colPart);
 
                   formState.apply({
@@ -1946,11 +2050,57 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
                   return;
                 }
               } else if (colPart === "_" && rowPart && rowPart !== "0") {
-                // Row header with shift-click - create range selection
+                // Row header click
                 const currentFocus = formState.data.focus;
 
-                if (currentFocus && currentFocus.type === "row" && currentFocus.name) {
-                  // Create range from anchor row to clicked row
+                if (isToggleClick) {
+                  // Cmd/Ctrl-click: Toggle row selection
+                  let selectedRows = [];
+
+                  if (currentFocus && currentFocus.type === "row") {
+                    if (currentFocus.rows && currentFocus.rows.length > 0) {
+                      selectedRows = [...currentFocus.rows];
+                    } else if (currentFocus.name) {
+                      selectedRows = [currentFocus.name];
+                    }
+                  }
+
+                  // Toggle the clicked row
+                  const rowIndex = selectedRows.indexOf(rowPart);
+                  if (rowIndex > -1) {
+                    selectedRows.splice(rowIndex, 1);
+                  } else {
+                    selectedRows.push(rowPart);
+                  }
+
+                  if (selectedRows.length > 0) {
+                    formState.apply({
+                      type: "focus",
+                      args: {
+                        type: "row",
+                        name: selectedRows[0], // First row as anchor
+                        rows: selectedRows,
+                        isMultiple: true,
+                      },
+                    });
+                  } else {
+                    formState.apply({
+                      type: "focus",
+                      args: null,
+                    });
+                  }
+
+                  // Update decorations
+                  const tr = editorView.state.tr;
+                  tr.setMeta("focusChanged", true);
+                  tr.setMeta("headerClick", true);
+                  editorView.dispatch(tr);
+
+                  event.preventDefault();
+                  event.stopPropagation();
+                  return;
+                } else if (isShiftClick && currentFocus && currentFocus.type === "row" && currentFocus.name) {
+                  // Shift-click: Create range selection
                   const rangeRows = getRowRange(currentFocus.name, rowPart);
 
                   formState.apply({
@@ -1983,11 +2133,11 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
     };
 
     // Add listener in capture phase to intercept before ProseMirror
-    editorView.dom.addEventListener('mousedown', handleShiftClick, true);
+    editorView.dom.addEventListener('mousedown', handleModifierClick, true);
 
     return {
       destroy() {
-        editorView.dom.removeEventListener('mousedown', handleShiftClick, true);
+        editorView.dom.removeEventListener('mousedown', handleModifierClick, true);
       }
     };
   },
