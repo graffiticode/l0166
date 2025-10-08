@@ -99,6 +99,73 @@ const isDateLike = text => {
   return datePatterns.some(pattern => pattern.test(trimmed)) && !isNaN(Date.parse(trimmed));
 }
 
+// Helper functions for range selection
+const columnToNumber = (col) => {
+  let num = 0;
+  for (let i = 0; i < col.length; i++) {
+    num = num * 26 + (col.charCodeAt(i) - 'A'.charCodeAt(0) + 1);
+  }
+  return num;
+};
+
+const numberToColumn = (num) => {
+  let col = '';
+  while (num > 0) {
+    num--;
+    col = String.fromCharCode('A'.charCodeAt(0) + (num % 26)) + col;
+    num = Math.floor(num / 26);
+  }
+  return col;
+};
+
+const getColumnRange = (startCol, endCol) => {
+  const start = columnToNumber(startCol);
+  const end = columnToNumber(endCol);
+  const min = Math.min(start, end);
+  const max = Math.max(start, end);
+  const columns = [];
+  for (let i = min; i <= max; i++) {
+    columns.push(numberToColumn(i));
+  }
+  return columns;
+};
+
+const getRowRange = (startRow, endRow) => {
+  const start = parseInt(startRow);
+  const end = parseInt(endRow);
+  const min = Math.min(start, end);
+  const max = Math.max(start, end);
+  const rows = [];
+  for (let i = min; i <= max; i++) {
+    rows.push(String(i));
+  }
+  return rows;
+};
+
+const getCellRange = (startCell, endCell) => {
+  // Parse cell names (e.g., "B2" -> col: "B", row: "2")
+  const parseCell = (cell) => {
+    const match = cell.match(/^([A-Z]+)(\d+)$/);
+    if (!match) return null;
+    return { col: match[1], row: match[2] };
+  };
+
+  const start = parseCell(startCell);
+  const end = parseCell(endCell);
+  if (!start || !end) return [];
+
+  const columns = getColumnRange(start.col, end.col);
+  const rows = getRowRange(start.row, end.row);
+
+  const cells = [];
+  for (const row of rows) {
+    for (const col of columns) {
+      cells.push(col + row);
+    }
+  }
+  return cells;
+};
+
 const wrapPlainTextInLatex = text => {
   // Convert to string if it's not already
   if (typeof text !== 'string') {
@@ -820,7 +887,8 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
       } else if (cell.row > 1 && cell.col === 1) {
         // Row header (_1, _2, _3, etc.)
         const cellRow = cell.name.match(/(\d+)$/)?.[1];
-        if (focus.type === "row" && cellRow === focus.name) {
+        const selectedRows = focus?.rows || (focus?.name ? [focus?.name] : []);
+        if (focus.type === "row" && (cellRow === focus.name || selectedRows.includes(cellRow))) {
           color = "#1a73e8"; // Google Sheets selected header blue
           textColor = "#ffffff"; // White text for selected header
           fontWeight = "600"; // Semibold weight when selected
@@ -863,10 +931,16 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
               color = "#e6f3ff"; // Light blue for focused column
             }
           } else if (focus.type === "row") {
-            // Check if this cell is in the focused row
+            // Check if this cell is in any of the focused rows
             const cellRow = cell.name.match(/(\d+)$/)?.[1];
-            if (cellRow === focus.name) {
-              color = "#e6f3ff"; // Light blue for focused row
+            const selectedRows = focus?.rows || (focus?.name ? [focus?.name] : []);
+            if (cellRow === focus.name || selectedRows.includes(cellRow)) {
+              color = "#e6f3ff"; // Light blue for focused rows
+            }
+          } else if (focus.type === "cell" && focus.isRange) {
+            // Check if this cell is in the selected range
+            if (focus.cells && focus.cells.includes(cell.name)) {
+              color = "#e6f3ff"; // Light blue for cells in range
             }
           }
         }
@@ -1778,44 +1852,113 @@ const getCellDependencies = ({ env, names }) => {
 
 const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
   view(editorView) {
-    // Add a capture phase event listener to catch shift-clicks on headers
-    const handleHeaderShiftClick = (event) => {
+    // Add a capture phase event listener to catch shift-clicks on headers and cells
+    const handleShiftClick = (event) => {
       if (!event.shiftKey) return;
 
-      // Find if we clicked on a header
+      // Find if we clicked on a header or cell
       const target = event.target;
       let headerElement = target;
 
-      // Walk up the DOM tree to find a table header
+      // Walk up the DOM tree to find a table header or cell
       while (headerElement && headerElement !== editorView.dom) {
-        if (headerElement.nodeName === 'TH' || headerElement.classList?.contains('ProseMirror-tableheader')) {
+        if (headerElement.nodeName === 'TH' || headerElement.classList?.contains('ProseMirror-tableheader') ||
+            headerElement.nodeName === 'TD' || headerElement.classList?.contains('ProseMirror-tablecell')) {
           // Get position in ProseMirror document
           const pos = editorView.posAtDOM(headerElement, 0);
           const $pos = editorView.state.doc.resolve(pos);
 
-          // Find the header node
+          // Find the header or cell node
           for (let depth = $pos.depth; depth > 0; depth--) {
             const node = $pos.node(depth);
-            if (node.type.name === "table_header") {
+            if (node.type.name === "table_cell") {
+              // Handle shift-click on table cells
+              const cellName = node.attrs.name;
+              const currentFocus = formState.data.focus;
+
+              if (currentFocus && currentFocus.type === "cell") {
+                let startCell = null;
+
+                if (currentFocus.isRange && currentFocus.cells && currentFocus.cells.length > 0) {
+                  // Use the first cell of the range as the anchor
+                  startCell = currentFocus.cells[0];
+                } else if (currentFocus.name && !currentFocus.name.includes(',')) {
+                  // Single cell selected
+                  startCell = currentFocus.name;
+                }
+
+                if (startCell && startCell !== cellName) {
+                  const rangeCells = getCellRange(startCell, cellName);
+
+                  if (rangeCells.length > 0) {
+                    formState.apply({
+                      type: "focus",
+                      args: {
+                        type: "cell",
+                        name: rangeCells.join(','),  // Send as comma-separated list
+                        cells: rangeCells,  // Also include array for internal use
+                        isRange: true,  // Flag to indicate this is a range
+                      },
+                    });
+
+                    // Update decorations
+                    const tr = editorView.state.tr;
+                    tr.setMeta("focusChanged", true);
+                    editorView.dispatch(tr);
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                  }
+                }
+              }
+              break;
+            } else if (node.type.name === "table_header") {
               const name = node.attrs.name;
               const colPart = name?.match(/^([_A-Z]+)/)?.[1];
               const rowPart = name?.match(/(\d+)$/)?.[1];
 
               if (colPart && colPart !== "_" && rowPart === "0") {
-                // Column header with shift-click
+                // Column header with shift-click - create range selection
                 const currentFocus = formState.data.focus;
 
-                if (currentFocus && currentFocus.type === "column") {
-                  const selectedColumns = currentFocus?.columns || (currentFocus?.name ? [currentFocus?.name] : []);
-                  const newColumns = selectedColumns.includes(colPart)
-                    ? selectedColumns.filter(col => col !== colPart)
-                    : [...selectedColumns, colPart];
+                if (currentFocus && currentFocus.type === "column" && currentFocus.name) {
+                  // Create range from anchor column to clicked column
+                  const rangeColumns = getColumnRange(currentFocus.name, colPart);
 
                   formState.apply({
                     type: "focus",
                     args: {
                       type: "column",
-                      columns: newColumns,
+                      name: currentFocus.name, // Keep original anchor
+                      columns: rangeColumns,
+                    },
+                  });
+
+                  // Update decorations
+                  const tr = editorView.state.tr;
+                  tr.setMeta("focusChanged", true);
+                  tr.setMeta("headerClick", true);
+                  editorView.dispatch(tr);
+
+                  event.preventDefault();
+                  event.stopPropagation();
+                  return;
+                }
+              } else if (colPart === "_" && rowPart && rowPart !== "0") {
+                // Row header with shift-click - create range selection
+                const currentFocus = formState.data.focus;
+
+                if (currentFocus && currentFocus.type === "row" && currentFocus.name) {
+                  // Create range from anchor row to clicked row
+                  const rangeRows = getRowRange(currentFocus.name, rowPart);
+
+                  formState.apply({
+                    type: "focus",
+                    args: {
+                      type: "row",
+                      name: currentFocus.name, // Keep original anchor
+                      rows: rangeRows,
                     },
                   });
 
@@ -1840,11 +1983,11 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
     };
 
     // Add listener in capture phase to intercept before ProseMirror
-    editorView.dom.addEventListener('mousedown', handleHeaderShiftClick, true);
+    editorView.dom.addEventListener('mousedown', handleShiftClick, true);
 
     return {
       destroy() {
-        editorView.dom.removeEventListener('mousedown', handleHeaderShiftClick, true);
+        editorView.dom.removeEventListener('mousedown', handleShiftClick, true);
       }
     };
   },
@@ -1903,6 +2046,7 @@ const makeTableHeadersReadOnlyPlugin = (formState) => new Plugin({
               args: {
                 type: "row",
                 name: rowPart,
+                rows: [rowPart], // Store as array for consistency
               },
             });
             // Force re-render to update decorations with new focus
@@ -2616,16 +2760,51 @@ const buildCellPlugin = formState => {
           }
 
           if (cellNode && cellName) {
-            const pluginState = this.getState(view.state);
             const currentFocus = formState.data.focus;
 
-            console.log("Cell clicked:", cellName,
-                       "Currently focused:", pluginState.focusedCell,
-                       "Current focus state:", currentFocus);
+            // Handle shift-click for cell range selection
+            if (event.shiftKey && currentFocus) {
+              let startCell = null;
 
-            // If there's row/column/sheet highlighting and we click on ANY cell (focused or not),
+              if (currentFocus.type === "cell") {
+                if (currentFocus.isRange && currentFocus.cells && currentFocus.cells.length > 0) {
+                  // Use the first cell of the range as the anchor
+                  startCell = currentFocus.cells[0];
+                } else if (currentFocus.name && !currentFocus.name.includes(',')) {
+                  // Single cell selected
+                  startCell = currentFocus.name;
+                }
+              }
+
+              if (startCell) {
+                const rangeCells = getCellRange(startCell, cellName);
+
+                if (rangeCells.length > 0) {
+                  formState.apply({
+                    type: "focus",
+                    args: {
+                      type: "cell",
+                      name: rangeCells.join(','),  // Send as comma-separated list
+                      cells: rangeCells,  // Also include array for internal use
+                      isRange: true,  // Flag to indicate this is a range
+                    },
+                  });
+
+                  // Update decorations
+                  const tr = view.state.tr;
+                  tr.setMeta("focusChanged", true);
+                  view.dispatch(tr);
+
+                  event.preventDefault();
+                  return true;
+                }
+              }
+            }
+
+            // If there's row/column/sheet highlighting or multi-cell selection and we click on ANY cell (focused or not),
             // we should clear the highlighting
-            if (currentFocus && (currentFocus.type === "row" || currentFocus.type === "column" || currentFocus.type === "sheet")) {
+            if (currentFocus && (currentFocus.type === "row" || currentFocus.type === "column" || currentFocus.type === "sheet" ||
+                (currentFocus.type === "cell" && currentFocus.isRange))) {
               // Check if this cell is in the highlighted area
               const cellColumn = cellName.match(/^([A-Z]+)/)?.[1];
               const cellRow = cellName.match(/(\d+)$/)?.[1];
@@ -2640,14 +2819,21 @@ const buildCellPlugin = formState => {
                 if (cellColumn === currentFocus?.name || selectedColumns.includes(cellColumn)) {
                   isInHighlightedArea = true;
                 }
-              } else if (currentFocus.type === "row" && cellRow === currentFocus.name) {
-                // Clicking any cell in the highlighted row
-                isInHighlightedArea = true;
+              } else if (currentFocus.type === "row") {
+                // Clicking any cell in the highlighted rows
+                const selectedRows = currentFocus?.rows || (currentFocus?.name ? [currentFocus?.name] : []);
+                if (cellRow === currentFocus?.name || selectedRows.includes(cellRow)) {
+                  isInHighlightedArea = true;
+                }
+              } else if (currentFocus.type === "cell" && currentFocus.isRange && currentFocus.cells) {
+                // Clicking any cell in the highlighted range
+                if (currentFocus.cells.includes(cellName)) {
+                  isInHighlightedArea = true;
+                }
               }
 
               // If we're clicking on any cell in the highlighted area, clear the highlight
               if (isInHighlightedArea) {
-                console.log("Clearing focus, setting cell focus:", cellName);
                 formState.apply({
                   type: "focus",
                   args: {

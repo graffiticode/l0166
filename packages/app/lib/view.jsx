@@ -101,8 +101,20 @@ export const View = () => {
         const { type, name, startCell, endCell } = args;
 
         // Get value based on the type of focused element
-        if (type === 'cell' && name && data.interaction.cells && data.interaction.cells[name]) {
-          focusValue = data.interaction.cells[name];
+        if (type === 'cell' && name) {
+          if (name.includes(',')) {
+            // Multiple cells selected (comma-separated list)
+            const cellNames = name.split(',');
+            focusValue = {};
+            cellNames.forEach(cellName => {
+              if (data.interaction.cells && data.interaction.cells[cellName.trim()]) {
+                focusValue[cellName.trim()] = data.interaction.cells[cellName.trim()];
+              }
+            });
+          } else if (data.interaction.cells && data.interaction.cells[name]) {
+            // Single cell selected
+            focusValue = data.interaction.cells[name];
+          }
         } else if (type === 'column') {
           // Handle both single column (name) and multiple columns (columns array)
           if (args.columns && args.columns.length > 0) {
@@ -117,50 +129,22 @@ export const View = () => {
             // Single column selected
             focusValue = data.interaction.columns[name];
           }
-        } else if (type === 'row' && name && data.interaction.rows && data.interaction.rows[name]) {
-          focusValue = data.interaction.rows[name];
+        } else if (type === 'row') {
+          // Handle both single row (name) and multiple rows (rows array)
+          if (args.rows && args.rows.length > 0) {
+            // Multiple rows selected - collect all their values
+            focusValue = {};
+            args.rows.forEach(rowName => {
+              if (data.interaction.rows && data.interaction.rows[rowName]) {
+                focusValue[rowName] = data.interaction.rows[rowName];
+              }
+            });
+          } else if (name && data.interaction.rows && data.interaction.rows[name]) {
+            // Single row selected
+            focusValue = data.interaction.rows[name];
+          }
         } else if (type === 'sheet' && data.interaction.sheets && data.interaction.sheets[name]) {
           focusValue = data.interaction.sheets[name];
-        } else if (type === 'region' && startCell && endCell) {
-          // For region selection, collect all cell values in the range
-          focusValue = {
-            startCell,
-            endCell,
-            cells: {}
-          };
-
-          // Parse cell names to get column and row
-          const parseCell = (cellName) => {
-            const match = cellName.match(/^([A-Z]+)(\d+)$/);
-            if (!match) return null;
-            return { col: match[1], row: parseInt(match[2]) };
-          };
-
-          const start = parseCell(startCell);
-          const end = parseCell(endCell);
-
-          if (start && end && data.interaction.cells) {
-            // Get column range
-            const startColCode = start.col.charCodeAt(0);
-            const endColCode = end.col.charCodeAt(0);
-            const minCol = Math.min(startColCode, endColCode);
-            const maxCol = Math.max(startColCode, endColCode);
-
-            // Get row range
-            const minRow = Math.min(start.row, end.row);
-            const maxRow = Math.max(start.row, end.row);
-
-            // Collect all cells in the region
-            for (let colCode = minCol; colCode <= maxCol; colCode++) {
-              const col = String.fromCharCode(colCode);
-              for (let row = minRow; row <= maxRow; row++) {
-                const cellName = `${col}${row}`;
-                if (data.interaction.cells[cellName]) {
-                  focusValue.cells[cellName] = data.interaction.cells[cellName];
-                }
-              }
-            }
-          }
         }
       }
 
@@ -170,15 +154,15 @@ export const View = () => {
       }
 
       if (targetOrigin) {
-        // Add name field for region type in the format "startCell:endCell"
+        // Prepare focus data with value
         const focusData = {...args, value: focusValue};
-        if (args.type === 'region' && args.startCell && args.endCell) {
-          focusData.name = `${args.startCell}:${args.endCell}`;
-        } else if (args.type === 'column' && args.columns && args.columns.length > 0) {
+        if (args.type === 'column' && args.columns && args.columns.length > 0) {
           // For multi-column selection, join column names with commas
           focusData.name = args.columns.join(',');
+        } else if (args.type === 'row' && args.rows && args.rows.length > 0) {
+          // For multi-row selection, join row names with commas
+          focusData.name = args.rows.join(',');
         }
-        console.log('[L0166] Sending focus event:', focusData);
         window.parent.postMessage({focus: focusData}, targetOrigin);
       }
       return {
