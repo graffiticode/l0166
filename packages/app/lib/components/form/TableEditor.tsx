@@ -937,10 +937,20 @@ const applyModelRules = (cellExprs, state, value, validation, formState) => {
             if (cellRow === focus.name || selectedRows.includes(cellRow)) {
               color = "#e6f3ff"; // Light blue for focused rows
             }
-          } else if (focus.type === "cell" && focus.isRange) {
-            // Check if this cell is in the selected range
+          } else if (focus.type === "cell") {
+            // Check if this cell is in the selection (either range or multiple individual cells)
+            // First check if we have a cells array
             if (focus.cells && focus.cells.includes(cell.name)) {
-              color = "#e6f3ff"; // Light blue for cells in range
+              color = "#e6f3ff"; // Light blue for selected cells
+            } else if (focus.name && focus.name.includes(',')) {
+              // For comma-separated list of cells
+              const selectedCells = focus.name.split(',').map(c => c.trim());
+              if (selectedCells.includes(cell.name)) {
+                color = "#e6f3ff"; // Light blue for selected cells
+              }
+            } else if (focus.name === cell.name) {
+              // Single cell selection
+              color = "#e6f3ff"; // Light blue for selected cell
             }
           }
         }
