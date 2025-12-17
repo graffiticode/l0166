@@ -137,6 +137,51 @@ params {
 }
 ```
 
+## Spreadsheet Formula Functions
+
+The following functions are available for use in cell formulas (prefixed with `=`):
+
+| Function | Syntax | Description |
+| :------- | :----- | :---------- |
+| `SUM` | `=SUM(range)` | Adds all numeric values in a range |
+| `AVERAGE` | `=AVERAGE(range)` | Computes the arithmetic mean of numeric values |
+| `ROUND` | `=ROUND(value,places)` | Rounds a number to specified decimal places |
+| `IF` | `=IF(condition,true_val,false_val)` | Returns value based on condition |
+
+### SUM
+
+Adds all numeric values in a range.
+
+```
+=SUM(A1:A10)
+=SUM(B1,B2,B3)
+```
+
+### AVERAGE
+
+Computes the arithmetic mean of numeric values in a range.
+
+```
+=AVERAGE(A1:A10)
+=AVERAGE(B1,B2,B3)
+```
+
+### ROUND
+
+Rounds a number to a specified number of decimal places.
+
+```
+=ROUND(A1,2)
+```
+
+### IF
+
+Returns one value if a condition is true, another if false.
+
+```
+=IF(A1,B1,C1)
+```
+
 ## Program Examples
 
 Create a 2 by 2 spreadsheet assessment where the rows are sorted to match the

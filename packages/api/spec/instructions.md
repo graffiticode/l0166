@@ -138,4 +138,33 @@ The `border` function accepts two formats:
 
 ## Formula Function Usage
 
+The following spreadsheet functions are available for use in cell formulas:
+
+### SUM
+Adds all numeric values in a range.
+```
+=SUM(A1:A10)
+=SUM(B1,B2,B3)
+```
+
+### AVERAGE
+Computes the arithmetic mean of numeric values in a range.
+```
+=AVERAGE(A1:A10)
+=AVERAGE(B1,B2,B3)
+```
+
+### ROUND
+Rounds a number to a specified number of decimal places.
+```
+=ROUND(A1,2)
+```
+
+### IF
+Returns one value if a condition is true, another if false.
+```
+=IF(A1,B1,C1)
+```
+
 - IMPORTANT: Use the SUM function when adding or subtracting contiguous numeric cells with a formula
+- IMPORTANT: Use the AVERAGE function when computing the mean of contiguous numeric cells
