@@ -59,7 +59,7 @@ import { MenuView } from './MenuView';
 import { ProtectedCellTooltip } from './ProtectedCellTooltip';
 //import { debounce } from "lodash";
 
-import { TransLaTeX } from "@artcompiler/translatex";
+import { TransLaTeX, spreadsheetExpanders } from "@graffiticode/translatex";
 import { evalRules, cellNameRules, formatRules, normalizeRules } from './translatex-rules.js';
 
 // Removed unused Decimal import and isValidDecimal function
@@ -459,15 +459,13 @@ const normalizeValue = value => {
     };
     if (text && text.length > 0) {
       const processedText = text.indexOf("=") === 0 ? toUpperCase(text) : wrapPlainTextInLatex(text);
-      TransLaTeX.translate(
-        options,
-        processedText, (err, val) => {
-          if (err && err.length) {
-            console.error(err);
-          }
-          result = text.indexOf("=") === 0 ? val.split(",") : [val];
+      const translate = TransLaTeX.buildTranslator(options, spreadsheetExpanders);
+      translate(processedText, (err, val) => {
+        if (err && err.length) {
+          console.error(err);
         }
-      );
+        result = text.indexOf("=") === 0 ? val.split(",") : [val];
+      });
     }
   } catch (x) {
     console.log("parse error: " + x.stack);
@@ -1610,55 +1608,53 @@ const evalCell = ({ env, name }) => {
         ...evalRules,
       };
       const processedText = toUpperCase(text);
-      TransLaTeX.translate(
-        options,
-        processedText, (err, val) => {
-          if (err && err.length) {
-            console.error(err);
-          }
-          // Store val as string but set appropriate type
-          // Helper to check if a value is truly numeric
-          const isNumericValue = (v) => {
-            if (typeof v === 'number') return true;
-            if (typeof v === 'string') {
-              const trimmed = v.trim();
-              if (trimmed === '') return false;
-              // Use Number() for the conversion which handles the full string
-              const num = Number(trimmed);
-              // Check if it's a valid number and the conversion consumed the whole string
-              return !isNaN(num) && isFinite(num);
-            }
-            return false;
-          };
-
-          // Check if it's a date format first
-          if (isDateFormat(format) && isNumericValue(val)) {
-            // Keep as string but mark as date type
-            result = {
-              ...result,
-              val: String(val),
-              type: 'date', // Formula result is a date
-            };
-          }
-          // Check if it's a number
-          else if (isNumericValue(val)) {
-            // Convert to string for storage but mark as number type
-            result = {
-              ...result,
-              val: String(val),
-              type: 'number', // Formula result is a number
-            };
-          }
-          // Otherwise it's text
-          else {
-            result = {
-              ...result,
-              val: String(val),
-              type: 'text', // Formula result is text
-            };
-          }
+      const translate = TransLaTeX.buildTranslator(options, spreadsheetExpanders);
+      translate(processedText, (err, val) => {
+        if (err && err.length) {
+          console.error(err);
         }
-      );
+        // Store val as string but set appropriate type
+        // Helper to check if a value is truly numeric
+        const isNumericValue = (v) => {
+          if (typeof v === 'number') return true;
+          if (typeof v === 'string') {
+            const trimmed = v.trim();
+            if (trimmed === '') return false;
+            // Use Number() for the conversion which handles the full string
+            const num = Number(trimmed);
+            // Check if it's a valid number and the conversion consumed the whole string
+            return !isNaN(num) && isFinite(num);
+          }
+          return false;
+        };
+
+        // Check if it's a date format first
+        if (isDateFormat(format) && isNumericValue(val)) {
+          // Keep as string but mark as date type
+          result = {
+            ...result,
+            val: String(val),
+            type: 'date', // Formula result is a date
+          };
+        }
+        // Check if it's a number
+        else if (isNumericValue(val)) {
+          // Convert to string for storage but mark as number type
+          result = {
+            ...result,
+            val: String(val),
+            type: 'number', // Formula result is a number
+          };
+        }
+        // Otherwise it's text
+        else {
+          result = {
+            ...result,
+            val: String(val),
+            type: 'text', // Formula result is text
+          };
+        }
+      });
     }
   } catch (x) {
     console.log("parse error: " + x.stack);
@@ -1747,15 +1743,13 @@ const formatCellValue = ({ env, name }) => {
         ...formatRules,
       };
       const processedVal = wrapPlainTextInLatex(result);
-      TransLaTeX.translate(
-        options,
-        processedVal, (err, val) => {
-          if (err && err.length) {
-            console.error(err);
-          }
-          result = val;
+      const translate = TransLaTeX.buildTranslator(options, spreadsheetExpanders);
+      translate(processedVal, (err, val) => {
+        if (err && err.length) {
+          console.error(err);
         }
-      );
+        result = val;
+      });
     }
   } catch (x) {
     console.log("parse error: " + x.stack);
@@ -1775,15 +1769,13 @@ const getSingleCellDependencies = ({ env, name }) => {
     };
     if (text && text.length > 0 && text.indexOf("=") === 0) {
       // FIXME this condition is brittle.
-      TransLaTeX.translate(
-        options,
-        text, (err, val) => {
-          if (err && err.length) {
-            console.error(err);
-          }
-          result = val.split(",").map(name => name.toUpperCase());
+      const translate = TransLaTeX.buildTranslator(options, spreadsheetExpanders);
+      translate(text, (err, val) => {
+        if (err && err.length) {
+          console.error(err);
         }
-      );
+        result = val.split(",").map(name => name.toUpperCase());
+      });
     } else {
       result = [];
     }

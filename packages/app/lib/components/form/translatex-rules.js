@@ -1,4 +1,11 @@
 export const evalRules = {
+  "words": {
+    "AVERAGE": "AVERAGE",
+    "IF": "IF",
+    "MUL": "MUL",
+    "ROUND": "ROUND",
+    "SUM": "SUM",
+  },
   "types": {
     "args": [
       "\\type{cellName}:\\type{cellName}",
@@ -11,11 +18,11 @@ export const evalRules = {
       "\\type{cellName}:\\type{cellName}"
     ],
     "fn": [
-      "SUM",
+      "AVERAGE",
+      "IF",
       "MUL",
       "ROUND",
-      "IF",
-      "AVERAGE"
+      "SUM",
     ]
   },
   "rules": {
