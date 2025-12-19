@@ -1545,13 +1545,13 @@ const evalCell = ({ env, name }) => {
     const undefinedNames = [];
     while ((match = namePattern.exec(text)) !== null) {
       const name = match[1];
-      const nameUpper = name.toUpperCase();
+      const nameLower = name.toLowerCase();
       // Skip if it's a valid cell reference (letters followed by numbers)
       if (cellNamePattern.test(name)) {
         continue;
       }
       // Skip if it's a supported function
-      if (supportedFunctions.includes(nameUpper)) {
+      if (supportedFunctions.includes(nameLower)) {
         continue;
       }
       // It's an undefined name
