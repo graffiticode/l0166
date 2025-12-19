@@ -25,7 +25,7 @@
     "pack": "rm *.tgz; npm run build; npm pack ."
   },
   "dependencies": {
-    "@graffiticode/translatex": "^0.23.0",
+    "@graffiticode/translatex": "^0.24.0",
     "assert": "^2.1.0",
     "bent": "^7.3.12",
     "prosemirror-example-setup": "^1.2.3",

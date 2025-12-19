@@ -1,10 +1,10 @@
 export const evalRules = {
   "words": {
-    "AVERAGE": "AVERAGE",
-    "IF": "IF",
-    "MUL": "MUL",
-    "ROUND": "ROUND",
-    "SUM": "SUM",
+    "average": "average",
+    "if": "if",
+    "mul": "mul",
+    "round": "round",
+    "sum": "sum",
   },
   "types": {
     "args": [
@@ -18,11 +18,11 @@ export const evalRules = {
       "\\type{cellName}:\\type{cellName}"
     ],
     "fn": [
-      "AVERAGE",
-      "IF",
-      "MUL",
-      "ROUND",
-      "SUM",
+      "average",
+      "if",
+      "mul",
+      "round",
+      "sum",
     ]
   },
   "rules": {
@@ -80,11 +80,11 @@ export const cellNameRules = {
       "\\type{cellName}:\\type{cellName}"
     ],
     "fn": [
-      "SUM",
-      "MUL",
-      "ROUND",
-      "IF",
-      "AVERAGE"
+      "average",
+      "if",
+      "mul",
+      "round",
+      "sum",
     ]
   },
   "rules": {
@@ -145,11 +145,11 @@ export const normalizeRules = {
       "\\type{cellName}:\\type{cellName}"
     ],
     "fn": [
-      "SUM",
-      "MUL",
-      "ROUND",
-      "IF",
-      "AVERAGE"
+      "average",
+      "if",
+      "mul",
+      "round",
+      "sum",
     ]
   },
   "rules": {
