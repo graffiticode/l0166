@@ -2,43 +2,41 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## TODO: Google Sheets-style Edit Behavior
-When implementing row/column/sheet selection, consider that in Google Sheets:
-- The focused cell in a selection is not immediately editable (prevents accidental edits)
-- Editing is only enabled through explicit actions:
-  - Clicking in the formula bar
-  - Double-clicking the cell
-  - Pressing F2 or Enter
-  - Starting to type (replaces content)
-- This maintains visual clarity of the selection and separates "selection mode" from "edit mode"
-
 ## Architecture
 
 This is a Graffiticode language implementation (L0166) for creating spreadsheet-based assessments. The codebase is a monorepo with two packages:
 
 - **packages/api**: Express.js server that compiles L0166 code and serves the application
-- **packages/app**: React component library built with Vite that provides spreadsheet UI components
+- **packages/app**: React component library (`@graffiticode/l0166`) built with Vite that provides spreadsheet UI components
 
-### Core Components
+### Package Structure
 
 **API Server (packages/api)**:
 - Express server running on port 50166 (configurable via PORT env var)
-- Compiler pipeline that transforms L0166 language code into executable spreadsheet configurations
-- Authentication integration with Graffiticode auth service
-- Static file serving for the built app
+- Compiler in `src/compiler.js` uses `@graffiticode/basis` with Checker and Transformer classes
+- Each L0166 language function (CELLS, ROWS, COLUMNS, etc.) has corresponding methods in both Checker and Transformer
+- Routes in `src/routes/` handle compilation and authentication
+- Authentication integrates with Graffiticode auth service
 
 **React Library (packages/app)**:
-- Reusable spreadsheet components using ProseMirror for rich text editing
-- Form components including TableEditor, TextEditor, FormulaBar
-- Exports as both ES module and UMD bundle
+- Entry point: `lib/index.ts` exports `Form`, `View`, `scoreCells`, `getCellsValidation`
+- `View` component (`lib/view.jsx`) manages state and handles iframe/message communication with host
+- `Form` component renders title, instructions (markdown), and the Editor
+- `TableEditor` (`lib/components/form/TableEditor.tsx`) is the core spreadsheet component using ProseMirror
+- Uses `@graffiticode/translatex` with spreadsheet expanders for formula evaluation
+- Outputs ESM and UMD bundles to dist/
 
-### L0166 Language
+### L0166 Language Functions
 
-L0166 is a domain-specific language for defining spreadsheet assessments with these key functions:
-- `cells`: Define cell content and assessment rules
-- `rows`: Configure row properties and assessment ordering
-- `columns`: Set column widths and justification
-- `params`: Define parameter templates for cell population
+The compiler transforms these language constructs into spreadsheet configurations:
+- `cells`, `cell`: Define cell content, styling, and assessment rules
+- `rows`, `row`: Configure row properties and assessment ordering
+- `columns`, `column`: Set column widths, alignment, and styling
+- `params`: Define parameter templates for randomized cell population
+- `assess`, `method`, `expected`: Define assessment/validation criteria
+- Styling: `width`, `align`, `protected`, `font-weight`, `font-size`, `format`, `background-color`, `color`, `border`
+
+Spreadsheet formulas (prefixed with `=`): `SUM`, `AVERAGE`, `ROUND`, `IF`
 
 ## Development Commands
 
@@ -50,6 +48,13 @@ npm run start          # Start API server in production mode
 npm run lint           # Lint all packages
 npm run lint:fix       # Auto-fix linting issues
 npm run pack           # Package the app for distribution
+npm test               # Run Jest tests (from root)
+```
+
+**Running a single test**:
+```bash
+npx jest packages/api/src/routes/compile.spec.js
+npx jest --testPathPattern="compile"
 ```
 
 **API package (packages/api)**:
@@ -57,23 +62,28 @@ npm run pack           # Package the app for distribution
 npm run dev            # Start with Firestore emulator and local auth
 npm run build-lexicon  # Generate lexicon.js from source
 npm run build-spec     # Generate spec.html from markdown
-npm run lint           # Lint API source code
 ```
 
 **App package (packages/app)**:
 ```bash
 npm run dev            # Start Vite dev server
 npm run build          # Build library for distribution
-npm run lint           # Lint TypeScript/React code
 ```
 
 ## Development Environment
 
 - Uses Firebase Firestore emulator on 127.0.0.1:8080 for local development
 - Auth service runs on local port 4100 during development
-- API serves both compiled application and static assets from dist/ and public/
-- Lexicon is auto-generated from compiler source during build process
+- API serves compiled application and static assets from dist/ and public/
+- Tests use Jest with supertest; spec files are colocated with source (e.g., `compile.spec.js`)
 
-## Testing
+## TODO: Google Sheets-style Edit Behavior
 
-Tests use Jest framework configured at the root level. Test files are ignored in packages/ directories and run from the root test/ directory.
+When implementing row/column/sheet selection, consider that in Google Sheets:
+- The focused cell in a selection is not immediately editable (prevents accidental edits)
+- Editing is only enabled through explicit actions:
+  - Clicking in the formula bar
+  - Double-clicking the cell
+  - Pressing F2 or Enter
+  - Starting to type (replaces content)
+- This maintains visual clarity of the selection and separates "selection mode" from "edit mode"
