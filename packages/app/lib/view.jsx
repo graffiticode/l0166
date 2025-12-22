@@ -101,13 +101,18 @@ export const View = () => {
             formattedValue: args.cells[name].formattedValue,
           },
         }), data.interaction.cells);
-        return {
+        const newData = {
           ...data,
           interaction: {
             ...data.interaction,
             cells: updatedCells,
           },
         };
+        // Post full updated state to parent
+        if (targetOrigin) {
+          window.parent.postMessage(newData, targetOrigin);
+        }
+        return newData;
       }
       return {
         ...data,
