@@ -2572,6 +2572,19 @@ const getResponses = cells => (
   )
 );
 
+const getChangedCells = (cells, changedNames) => (
+  changedNames.reduce((acc, name) => {
+    const cell = cells[name];
+    if (!cell) return acc;
+    const { text } = cell;
+    const formattedValue = formatCellValue({ env: { cells }, name });
+    return {
+      ...acc,
+      [name]: { text, formattedValue },
+    };
+  }, {})
+);
+
 const buildCellPlugin = formState => {
   const self = new Plugin({
     view(editorView) {
@@ -2845,6 +2858,19 @@ const buildCellPlugin = formState => {
               cells,
             },
           });
+          // Dispatch update for changed cells and their dependents
+          if (lastFocusedCell) {
+            const changedCellNames = [
+              lastFocusedCell,
+              ...(value.cells[lastFocusedCell]?.deps || []),
+            ];
+            formState.apply({
+              type: "update",
+              args: {
+                cells: getChangedCells(value.cells, changedCellNames),
+              },
+            });
+          }
           // Apply focus action only for explicit (non-synthetic) cell focus changes
           if (node.attrs.name && !tr.getMeta("syntheticFocus")) {
             // Clear any row/column focus by setting cell focus

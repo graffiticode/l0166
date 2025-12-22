@@ -86,8 +86,29 @@ export const View = () => {
       //   ...args,
       // };
     case "response":
+      return {
+        ...data,
+        ...args,
+      };
     case "update":
-      // setDoRecompile(true);
+      // Merge args.cells into interaction.cells
+      if (args.cells && data.interaction?.cells) {
+        const updatedCells = Object.keys(args.cells).reduce((acc, name) => ({
+          ...acc,
+          [name]: {
+            ...acc[name],
+            text: args.cells[name].text,
+            formattedValue: args.cells[name].formattedValue,
+          },
+        }), data.interaction.cells);
+        return {
+          ...data,
+          interaction: {
+            ...data.interaction,
+            cells: updatedCells,
+          },
+        };
+      }
       return {
         ...data,
         ...args,
