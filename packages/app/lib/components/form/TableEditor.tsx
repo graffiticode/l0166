@@ -2705,6 +2705,9 @@ const buildCellPlugin = formState => {
     state: {
       init(config, state) {
         config = config;
+        // Reset initialUpdateSent so that when editor is reinitialized with new cells,
+        // the initial update will be sent again
+        initialUpdateSent = false;
         const cellExprs = self.getState(state);
         const cells = getCells(cellExprs, state).reduce((cells, cell) => (
           cell.row > 1 && cell.col > 1 && {
