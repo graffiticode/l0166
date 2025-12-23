@@ -110,6 +110,7 @@ export const View = () => {
         };
         console.log(
           "apply() update",
+          "targetOrigin=" + targetOrigin,
           "newData=" + JSON.stringify(newData, null, 2),
         );
         // Post full updated state to parent
