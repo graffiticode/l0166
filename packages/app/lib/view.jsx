@@ -109,9 +109,13 @@ export const View = () => {
             cells: updatedCells,
           },
         };
-        // Post full updated state to parent
-        if (targetOrigin) {
-          window.parent.postMessage(newData, targetOrigin);
+        // Post full updated state to parent in expected format
+        if (targetOrigin && id) {
+          window.parent.postMessage({
+            type: 'data-updated',
+            itemId: id,
+            data: newData,
+          }, targetOrigin);
         }
         return newData;
       }
