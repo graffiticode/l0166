@@ -1682,6 +1682,11 @@ const isDateFormat = (format) => {
 };
 
 const formatCellValue = ({ env, name }) => {
+  console.log(
+    "formatCellValue()",
+    "name=" + name,
+    "env=" + JSON.stringify(env),
+  );
   const cell = env.cells[name] || {};
   const val = cell.val;
   const type = cell.type || 'text';
@@ -2578,6 +2583,9 @@ const getChangedCells = (cells, changedNames) => (
     if (!cell) return acc;
     const { text } = cell;
     const formattedValue = formatCellValue({ env: { cells }, name });
+    console.log(
+      "formattedValue=" + formattedValue,
+    );
     return {
       ...acc,
       [name]: { text, formattedValue },
@@ -3473,6 +3481,18 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
     });
     setEditorView(editorView);
     onEditorViewChange?.(editorView);
+    // Apply initial update with all cells from plugin state
+    const pluginState = cellPlugin.getState(editorView.state);
+    const pluginCells = pluginState?.cells || {};
+    const allCellNames = Object.keys(pluginCells);
+    if (allCellNames.length > 0) {
+      state.apply({
+        type: "update",
+        args: {
+          cells: getChangedCells(pluginCells, allCellNames),
+        },
+      });
+    }
     return () => {
       if (editorView) {
         editorView.destroy();
