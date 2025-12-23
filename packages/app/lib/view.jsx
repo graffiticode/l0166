@@ -92,7 +92,8 @@ export const View = () => {
       };
     case "update":
       // Merge args.cells into interaction.cells
-      if (args.cells && data.interaction?.cells) {
+      if (args.cells && data.interaction) {
+        const existingCells = data.interaction.cells || {};
         const updatedCells = Object.keys(args.cells).reduce((acc, name) => ({
           ...acc,
           [name]: {
@@ -100,7 +101,7 @@ export const View = () => {
             text: args.cells[name].text,
             formattedValue: args.cells[name].formattedValue,
           },
-        }), data.interaction.cells);
+        }), existingCells);
         const newData = {
           ...data,
           interaction: {
@@ -108,13 +109,13 @@ export const View = () => {
             cells: updatedCells,
           },
         };
-        console.log(
-          "apply() update",
-          "newData=" + JSON.stringify(newData, null, 2),
-        );
-        // Post full updated state to parent
-        if (targetOrigin) {
-          window.parent.postMessage(newData, targetOrigin);
+        // Post full updated state to parent in expected format
+        if (targetOrigin && id) {
+          window.parent.postMessage({
+            type: 'data-updated',
+            itemId: id,
+            data: newData,
+          }, targetOrigin);
         }
         return newData;
       }
@@ -223,12 +224,6 @@ export const View = () => {
       setDoInit(true);
     }
   }, [id]);
-
-  useEffect(() => {
-    if (targetOrigin) {
-      window.parent.postMessage(state.data, targetOrigin);
-    }
-  }, [JSON.stringify(state.data)]);
 
   const initResp = useSWR(
     doInit && id && {
