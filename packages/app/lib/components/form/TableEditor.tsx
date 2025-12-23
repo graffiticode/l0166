@@ -2594,6 +2594,7 @@ const getChangedCells = (cells, changedNames) => (
 );
 
 const buildCellPlugin = formState => {
+  let initialUpdateSent = false;
   const self = new Plugin({
     view(editorView) {
       editorView = editorView;
@@ -2605,6 +2606,19 @@ const buildCellPlugin = formState => {
             const tr = state.tr;
             tr.setMeta("updated", true);
             dispatch(tr);
+          } else if (!initialUpdateSent) {
+            // Send initial update after dirty cells are processed
+            initialUpdateSent = true;
+            const cells = pluginState.cells || {};
+            const allCellNames = Object.keys(cells);
+            if (allCellNames.length > 0) {
+              formState.apply({
+                type: "update",
+                args: {
+                  cells: getChangedCells(cells, allCellNames),
+                },
+              });
+            }
           }
           const cells = {...pluginState.cells};
           const { columns, cells: interactionCells, rows } = formState.data.interaction;
@@ -3481,18 +3495,6 @@ export const TableEditor = ({ state, onEditorViewChange }) => {
     });
     setEditorView(editorView);
     onEditorViewChange?.(editorView);
-    // Apply initial update with all cells from plugin state
-    const pluginState = cellPlugin.getState(editorView.state);
-    const pluginCells = pluginState?.cells || {};
-    const allCellNames = Object.keys(pluginCells);
-    if (allCellNames.length > 0) {
-      state.apply({
-        type: "update",
-        args: {
-          cells: getChangedCells(pluginCells, allCellNames),
-        },
-      });
-    }
     return () => {
       if (editorView) {
         editorView.destroy();
