@@ -24,6 +24,10 @@
     "preview": "vite preview",
     "pack": "rm *.tgz; npm run build; npm pack ."
   },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
   "dependencies": {
     "@graffiticode/translatex": "^0.24.0",
     "assert": "^2.1.0",
@@ -34,8 +38,6 @@
     "prosemirror-state": "^1.4.3",
     "prosemirror-tables": "^1.6.1",
     "prosemirror-view": "^1.35.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "react-markdown": "^10.1.0",
     "swr": "^2.2.5"
   },
@@ -43,6 +45,8 @@
     "@types/node": "^20.12.4",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
     "@vitejs/plugin-react": "^4.2.1",
