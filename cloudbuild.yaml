@@ -5,12 +5,6 @@ steps:
     args:
       - 'ci'
 
-  # Run tests (if you have them)
-  # - name: 'node'
-  #   entrypoint: 'npm'
-  #   args:
-  #     - 'test'
-
   # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
