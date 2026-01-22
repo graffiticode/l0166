@@ -13,7 +13,7 @@ Use it for quizzes, exercises, and any assessment where you need a grid of input
 
 ## Documentation
 
-See [`spec/`](./spec/) for the full language specification and examples.
+See [`packages/api/spec/`](./packages/api/spec/) for the full language specification and examples.
 
 ## Getting started
 
