@@ -1,30 +1,25 @@
-# React + TypeScript + Vite
+# L0166
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+L0166 is a **spreadsheet-based assessment language**. It creates interactive spreadsheets where users fill in cells and their answers are validated against expected values.
 
-Currently, two official plugins are available:
+Use it for quizzes, exercises, and any assessment where you need a grid of inputs with grading.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- Cell validation with expected values
+- Formulas (`=SUM`, `=AVERAGE`, `=ROUND`, `=IF`)
+- Parameterized templates for randomized assessments
+- Rich styling (fonts, colors, borders)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Documentation
 
-- Configure the top-level `parserOptions` property like this:
+See [`spec/`](./spec/) for the full language specification and examples.
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+## Getting started
+
+```bash
+npm install
+npm start
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Runs on port 50166.
