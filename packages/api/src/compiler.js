@@ -1013,7 +1013,15 @@ t;
       const data = options?.data || {};
       const err = e0;
       v0 = v0.pop();  // Get last expression.
-      const { templateVariablesRecords, title, instructions, ...tableData } = v0;
+      const {
+        templateVariablesRecords,
+        title,
+        instructions,
+        columns,
+        rows,
+        cells,
+        errors,
+      } = v0;
       const val = {
         title: title || "",
         instructions: instructions || "",
@@ -1021,8 +1029,11 @@ t;
         validation: getValidation(v0),
         interaction: {
           type: "table",
-          ...tableData,
+          rows,
+          columns,
+          cells,
         },
+        errors,
       };
       resume(err, {
         ...val,

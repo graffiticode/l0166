@@ -218,6 +218,20 @@ export const View = () => {
     }
   }, [window.location.search]);
 
+  // Post onload message when view first renders
+  useEffect(() => {
+    if (targetOrigin) {
+      window.parent.postMessage({ type: "onload", data: state.data }, targetOrigin);
+    }
+  }, []);
+
+  // Post state data to parent whenever it changes
+  useEffect(() => {
+    if (targetOrigin) {
+      window.parent.postMessage({ type: "data-updated", data: state.data }, targetOrigin);
+    }
+  }, [JSON.stringify(state.data)]);
+
   useEffect(() => {
     // If `id` changes, then get data to init state.
     if (id) {
