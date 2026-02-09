@@ -62,8 +62,6 @@ import { ProtectedCellTooltip } from './ProtectedCellTooltip';
 import { TransLaTeX, spreadsheetExpanders } from "@graffiticode/translatex";
 import { evalRules, cellNameRules, formatRules, normalizeRules } from './translatex-rules.js';
 
-// Removed unused Decimal import and isValidDecimal function
-
 const isQuoteChar = c => (
   ["\"", "'", "`"].includes(c)
 );
@@ -188,40 +186,15 @@ const wrapPlainTextInLatex = text => {
     return text;
   }
 
-  // Check if text has numeric/date prefix with additional text
-  // Examples: "35% of total", "100 items", "2024 forecast"
-  const trimmed = text.trim();
-
-  // Check for percentage with additional text
-  if (/%\s+\S/.test(trimmed)) {
-    // Has percentage followed by more text, wrap it
-    return `\\text{${text}}`;
-  }
-
-  // Check for number followed by text (not just units)
-  // Match: number (with optional decimals/commas) followed by space and text
-  const numberWithTextPattern = /^[\d,.$€£¥₹₽-]+\s+[a-zA-Z]{4,}/;
-  if (numberWithTextPattern.test(trimmed)) {
-    // Has number followed by significant text (4+ chars to avoid units), wrap it
-    return `\\text{${text}}`;
-  }
-
-  // Check for date-like pattern followed by text
-  const dateWithTextPattern = /^(\d{1,4}[-\/]\d{1,2}[-\/]\d{1,4}|\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})\s+\S/;
-  if (dateWithTextPattern.test(trimmed)) {
-    // Has date followed by text, wrap it
-    return `\\text{${text}}`;
-  }
-
-  // If it's a pure number, don't wrap (Excel can format numbers)
+  // If it's a pure number, don't wrap
   if (isNumeric(text)) {
     return text;
   }
-  // If it's a pure date, don't wrap (Excel can format dates)
+  // If it's a pure date, don't wrap
   if (isDateLike(text)) {
     return text;
   }
-  // Wrap plain text in \text{}
+  // Wrap everything else in \text{}
   return `\\text{${text}}`;
 }
 
@@ -309,11 +282,11 @@ const normalizeNumberInput = (text) => {
     // Period is after comma, US format (e.g., "1,234.56")
     cleanedNumber = normalized.replace(/,/g, '');
   }
-  // Check if the result is a valid number
-  const num = parseFloat(cleanedNumber);
-  if (isNaN(num)) {
+  // Check if the result is a valid number (must parse the entire string)
+  if (!isNumeric(cleanedNumber)) {
     return null;
   }
+  const num = parseFloat(cleanedNumber);
   // Apply modifiers
   let result = num;
   // Apply negative
@@ -1585,14 +1558,12 @@ const evalCell = ({ env, name }) => {
     // Try to normalize as date first
     const normalizedDate = normalizeDateInput(text);
     if (normalizedDate) {
-      // Store as string but mark type as date
       result.val = String(normalizedDate);
       result.type = 'date';
     } else {
       // Try to normalize as number
       const normalizedNumber = normalizeNumberInput(text);
       if (normalizedNumber !== null) {
-        // Store as string but mark type as number
         result.val = String(normalizedNumber);
         result.type = 'number';
       }
@@ -1614,36 +1585,20 @@ const evalCell = ({ env, name }) => {
           console.error(err);
         }
         // Store val as string but set appropriate type
-        // Helper to check if a value is truly numeric
-        const isNumericValue = (v) => {
-          if (typeof v === 'number') return true;
-          if (typeof v === 'string') {
-            const trimmed = v.trim();
-            if (trimmed === '') return false;
-            // Use Number() for the conversion which handles the full string
-            const num = Number(trimmed);
-            // Check if it's a valid number and the conversion consumed the whole string
-            return !isNaN(num) && isFinite(num);
-          }
-          return false;
-        };
-
         // Check if it's a date format first
-        if (isDateFormat(format) && isNumericValue(val)) {
-          // Keep as string but mark as date type
+        if (isDateFormat(format) && isNumeric(String(val))) {
           result = {
             ...result,
             val: String(val),
-            type: 'date', // Formula result is a date
+            type: 'date',
           };
         }
         // Check if it's a number
-        else if (isNumericValue(val)) {
-          // Convert to string for storage but mark as number type
+        else if (isNumeric(String(val))) {
           result = {
             ...result,
             val: String(val),
-            type: 'number', // Formula result is a number
+            type: 'number',
           };
         }
         // Otherwise it's text
@@ -1651,7 +1606,7 @@ const evalCell = ({ env, name }) => {
           result = {
             ...result,
             val: String(val),
-            type: 'text', // Formula result is text
+            type: 'text',
           };
         }
       });
@@ -1682,11 +1637,6 @@ const isDateFormat = (format) => {
 };
 
 const formatCellValue = ({ env, name }) => {
-  console.log(
-    "formatCellValue()",
-    "name=" + name,
-    "env=" + JSON.stringify(env),
-  );
   const cell = env.cells[name] || {};
   const val = cell.val;
   const type = cell.type || 'text';
@@ -2583,9 +2533,6 @@ const getChangedCells = (cells, changedNames) => (
     if (!cell) return acc;
     const { text } = cell;
     const formattedValue = formatCellValue({ env: { cells }, name });
-    console.log(
-      "formattedValue=" + formattedValue,
-    );
     return {
       ...acc,
       [name]: { text, formattedValue },
