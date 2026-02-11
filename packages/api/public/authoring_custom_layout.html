@@ -257,8 +257,8 @@
 
         // Special debug for Graffiticode messages
         const parsedOrigin = event.origin.split(".");
-        console.log("parseOrigin=" + JSON.stringify(parsedOrigin));
-        const isGraffiticodeMessage = parsedOrigin.length > 1 && parsedOrigin[parsedOrigin.length - 1] === "graffiticode";
+        const isGraffiticodeMessage = parsedOrigin.length > 1 && parsedOrigin[parsedOrigin.length - 2] === "graffiticode";
+        console.log("isGraffiticodeMessage=" + isGraffiticodeMessage + " parseOrigin=" + JSON.stringify(parsedOrigin));
         if (isGraffiticodeMessage || event.origin === 'http://localhost:3000') {
           console.log("*** RECEIVED GRAFFITICODE MESSAGE ***", event.data);
         }
