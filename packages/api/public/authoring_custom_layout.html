@@ -102,12 +102,15 @@
         const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
         let hasItemId = false;
 
+        console.log('updateButtonText() dataContainer=', !!dataContainer, 'button=', !!button);
+
         if (dataContainer) {
           // Try multiple ways to get the actual input value
           let dataValue = null;
 
           // Method 1: Look for input/textarea inside container
           const input = dataContainer.querySelector('input, textarea');
+          console.log('updateButtonText() input=', !!input, 'input.value=', input ? input.value?.substring(0, 100) : 'n/a');
           if (input && input.value) {
             dataValue = input.value;
           }
@@ -141,10 +144,12 @@
             }
             hasItemId = data && !!data.gcItemId;
           }
+          console.log('updateButtonText() hasItemId=', hasItemId, 'dataValue=', dataValue?.substring(0, 100));
         }
 
         if (button) {
           const newText = hasItemId ? 'Edit Spreadsheet →' : 'Create Spreadsheet →';
+          console.log('updateButtonText() setting text to:', newText);
           button.textContent = newText;
         }
       }
@@ -279,8 +284,10 @@
         if (event.data.type === 'graffiticode-ready') {
           // Graffiticode editor is ready
         } else if (event.data.type === 'item-created') {
+          console.log('[item-created] Processing itemId:', event.data.itemId);
           // Prevent processing the same message twice
           if (lastProcessedItemId === event.data.itemId) {
+            console.log('[item-created] Skipping duplicate');
             return;
           }
           lastProcessedItemId = event.data.itemId;
@@ -300,12 +307,16 @@
               dataInput = dataContainer;
             }
           }
+          console.log('[item-created] dataContainer=', !!dataContainer, 'dataInput=', !!dataInput);
           if (dataInput) {
             // Serialize the object to JSON string for the input field
             dataInput.value = JSON.stringify(currentData);
+            console.log('[item-created] Set dataInput.value to', dataInput.value.substring(0, 100));
             // Trigger events to notify Learnosity of the change
             dataInput.dispatchEvent(new Event('input', { bubbles: true }));
             dataInput.dispatchEvent(new Event('change', { bubbles: true }));
+          } else {
+            console.error('[item-created] Could not find data input field!');
           }
           // Update button text after creating item
           updateButtonText();
