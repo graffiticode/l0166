@@ -698,8 +698,24 @@
 
         // Send a message to Graffiticode once it's loaded to establish communication
         if (graffiticodeWindow) {
+          let communicationEstablished = false;
+
+          // Listen for acknowledgment from the popup
+          const handleReady = (event) => {
+            if (event.data?.type === 'graffiticode-ready') {
+              console.log('Received graffiticode-ready acknowledgment');
+              communicationEstablished = true;
+              clearInterval(checkLoaded);
+              window.removeEventListener('message', handleReady);
+            }
+          };
+          window.addEventListener('message', handleReady);
 
           const checkLoaded = setInterval(() => {
+            if (communicationEstablished) {
+              clearInterval(checkLoaded);
+              return;
+            }
             try {
               graffiticodeWindow.postMessage({
                 type: 'establish-communication',
@@ -710,8 +726,11 @@
             }
           }, 1000);
 
-          // Stop trying after 10 seconds
-          setTimeout(() => clearInterval(checkLoaded), 10000);
+          // Stop trying after 60 seconds
+          setTimeout(() => {
+            clearInterval(checkLoaded);
+            window.removeEventListener('message', handleReady);
+          }, 60000);
         }
       });
       }
