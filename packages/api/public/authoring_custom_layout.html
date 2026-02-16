@@ -5,8 +5,13 @@
       let graffiticodeWindow = null;
       const LANG = '0166'; // Fixed language for this question type
       let lastProcessedItemId = null; // Track last processed item to avoid duplicates
+      let currentGcItemId = null; // Track gcItemId when DOM input is unavailable
       // Function to update Learnosity question data properly
       function updateLearnosityQuestion(newData) {
+        console.trace(
+          "updateLearnosityQuestion()",
+          "newData=" + JSON.stringify(newData, null, 2),
+        );
         // Try to find the Question Editor API through various paths
         let questionEditor = null;
         // Method 1: Direct access to questionEditorApp
@@ -147,6 +152,11 @@
           console.log('updateButtonText() hasItemId=', hasItemId, 'dataValue=', dataValue?.substring(0, 100));
         }
 
+        // Fallback: check module-level variable when DOM lookup fails
+        if (!hasItemId && currentGcItemId) {
+          hasItemId = true;
+        }
+
         if (button) {
           const newText = hasItemId ? 'Edit Spreadsheet →' : 'Create Spreadsheet →';
           console.log('updateButtonText() setting text to:', newText);
@@ -154,8 +164,18 @@
         }
       }
 
-      // Update button text on page load
-      setTimeout(updateButtonText, 100);
+      // Update button text on page load, also try to restore gcItemId from Learnosity API
+      setTimeout(function() {
+        try {
+          if (window.questionEditorApp) {
+            const q = window.questionEditorApp.getQuestion();
+            if (q && q.data && q.data.gcItemId) {
+              currentGcItemId = q.data.gcItemId;
+            }
+          }
+        } catch (e) {}
+        updateButtonText();
+      }, 100);
 
       // Set up observer to watch for changes to the data input field
       function setupDataObserver() {
@@ -292,13 +312,20 @@
           }
           lastProcessedItemId = event.data.itemId;
           // New item was created in Graffiticode
+          // Track gcItemId locally so updateButtonText() works even without DOM input
+          currentGcItemId = event.data.itemId;
           // Initialize data structure
           let currentData = {
             gcItemId: event.data.itemId,
-            validation: { points: 0, ranges: {}, cells: {} },
-            interaction: { type: "table", v: "0.0.1", cells: {}, columns: {} }
+            data: {
+              validation: { points: 0, ranges: {}, cells: {} },
+              interaction: { type: "table", v: "0.0.1", cells: {}, columns: {} }
+            }
           };
-          // Find the actual data input field
+          // Try Learnosity Question Editor API first (most reliable)
+          const updatedViaAPI = updateLearnosityQuestion(currentData.data);
+          console.log('[item-created] updatedViaAPI=', updatedViaAPI);
+          // Also try DOM input as fallback
           const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
           let dataInput = null;
           if (dataContainer) {
@@ -309,14 +336,12 @@
           }
           console.log('[item-created] dataContainer=', !!dataContainer, 'dataInput=', !!dataInput);
           if (dataInput) {
-            // Serialize the object to JSON string for the input field
             dataInput.value = JSON.stringify(currentData);
             console.log('[item-created] Set dataInput.value to', dataInput.value.substring(0, 100));
-            // Trigger events to notify Learnosity of the change
             dataInput.dispatchEvent(new Event('input', { bubbles: true }));
             dataInput.dispatchEvent(new Event('change', { bubbles: true }));
-          } else {
-            console.error('[item-created] Could not find data input field!');
+          } else if (!updatedViaAPI) {
+            console.warn('[item-created] Could not persist data via API or DOM. gcItemId tracked locally.');
           }
           // Update button text after creating item
           updateButtonText();
@@ -384,7 +409,7 @@
               currentData.gcItemId = event.data.itemId;
             }
             // Serialize the object to JSON string for the input field
-            const newValue = JSON.stringify(currentData);
+            const newValue = JSON.stringify(currentData.data);
             // Update the input field
             // Focus the field
             dataInput.focus();
@@ -607,13 +632,15 @@
 
           if (dataValue) {
             try {
-              // Handle data as either object or string
               currentData = typeof dataValue === 'string' ? JSON.parse(dataValue) : dataValue;
               gcItemId = currentData.gcItemId || null;
             } catch (e) {
             }
-          } else {
           }
+        }
+        // Fallback: use locally tracked gcItemId
+        if (!gcItemId && currentGcItemId) {
+          gcItemId = currentGcItemId;
         }
         // Build URL with parameters
         // Determine the correct origin for message communication
