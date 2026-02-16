@@ -1,747 +1,228 @@
 <div class="lrn-qe-edit-form">
   <script>
     (function() {
-      console.log('Graffiticode integration script starting');
       let graffiticodeWindow = null;
-      const LANG = '0166'; // Fixed language for this question type
-      let lastProcessedItemId = null; // Track last processed item to avoid duplicates
-      let currentGcItemId = null; // Track gcItemId when DOM input is unavailable
-      // Function to update Learnosity question data properly
-      function updateLearnosityQuestion(newData) {
-        console.trace(
-          "updateLearnosityQuestion()",
-          "newData=" + JSON.stringify(newData, null, 2),
-        );
-        // Try to find the Question Editor API through various paths
-        let questionEditor = null;
-        // Method 1: Direct access to questionEditorApp
-        if (window.questionEditorApp) {
-          questionEditor = window.questionEditorApp;
-        }
-        // Method 2: Through parent window's authorApp
-        if (!questionEditor) {
-          try {
-            if (window.parent && window.parent !== window && window.parent.authorApp) {
-              const widget = window.parent.authorApp.getWidget();
-              if (widget && widget.questionEditorApp) {
-                questionEditor = widget.questionEditorApp();
-              }
-            }
-          } catch (e) {
-            // Cross-origin or access error
-          }
-        }
-        // Method 3: Through global LearnosityQuestionEditor
-        if (!questionEditor && window.LearnosityQuestionEditor) {
-          questionEditor = window.LearnosityQuestionEditor;
-        }
-        // Method 4: Look for it in frames
-        if (!questionEditor) {
-          const frames = window.frames;
-          for (let i = 0; i < frames.length; i++) {
-            try {
-              if (frames[i].questionEditorApp) {
-                questionEditor = frames[i].questionEditorApp;
-                break;
-              }
-            } catch (e) {
-              // Cross-origin frame, skip
-            }
-          }
-        }
-        if (questionEditor) {
-          try {
-            // Get current question data
-            const currentQuestion = questionEditor.getQuestion();
-            // Update the data field
-            currentQuestion.data = newData;
-            // Set the updated question back
-            questionEditor.setQuestion(currentQuestion);
-            // Also try to trigger validation
-            if (questionEditor.validate) {
-              questionEditor.validate();
-            }
-            return true;
-          } catch (e) {
-          }
-        } else {
-        }
-        return false;
+      const LANG = '0166';
+      let lastProcessedMessageId = null;
+      let currentGcItemId = null;
+
+      // --- Shared helpers ---
+
+      function isLocal() {
+        const h = window.location.hostname;
+        return h === 'localhost' || h === '127.0.0.1';
       }
 
-      // Function to force preview refresh
-      function forcePreviewRefresh() {
-
-        // Method 1: Click the preview refresh button if it exists
-        const refreshBtn = document.querySelector('.lrn-qe-preview-refresh, [data-lrn-qe-refresh-preview], button[title*="refresh" i]');
-        if (refreshBtn) {
-          refreshBtn.click();
-        }
-
-        // Method 2: Look for preview iframe and reload it
-        const previewIframe = document.querySelector('.lrn-qe-preview-pane iframe, iframe[name*="preview"]');
-        if (previewIframe) {
-          const src = previewIframe.src;
-          previewIframe.src = '';
-          setTimeout(() => {
-            previewIframe.src = src;
-          }, 100);
-        }
-
-        // Method 3: Simulate clicking the preview tab to force refresh
-        const previewTab = document.querySelector('[data-lrn-qe-tab="preview"], .lrn-qe-tab-preview');
-        if (previewTab) {
-          const currentTab = document.querySelector('.lrn-qe-tab-active, [data-lrn-qe-tab].active');
-          if (currentTab && currentTab !== previewTab) {
-            previewTab.click();
-            setTimeout(() => {
-              currentTab.click();
-            }, 500);
-          }
-        }
+      function graffiticodeOrigin() {
+        return isLocal() ? 'http://localhost:3000' : 'https://graffiticode.org';
       }
 
-      // Function to update button text based on whether itemId exists
-      function updateButtonText() {
-        const button = document.getElementById('editQuestionBtn');
-        const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-        let hasItemId = false;
-
-        console.log('updateButtonText() dataContainer=', !!dataContainer, 'button=', !!button);
-
-        if (dataContainer) {
-          // Try multiple ways to get the actual input value
-          let dataValue = null;
-
-          // Method 1: Look for input/textarea inside container
-          const input = dataContainer.querySelector('input, textarea');
-          console.log('updateButtonText() input=', !!input, 'input.value=', input ? input.value?.substring(0, 100) : 'n/a');
-          if (input && input.value) {
-            dataValue = input.value;
-          }
-
-          // Method 2: Check if container itself has value
-          if (!dataValue && dataContainer.value) {
-            dataValue = dataContainer.value;
-          }
-
-          // Method 3: Check for any visible text input that might be the data field
-          if (!dataValue) {
-            const allInputs = document.querySelectorAll('input[type="text"], textarea');
-            for (let inp of allInputs) {
-              if (inp.value && inp.value.includes('gcItemId')) {
-                dataValue = inp.value;
-                break;
-              }
-            }
-          }
-
-          if (dataValue) {
-            // Handle data as either object or JSON string for backward compatibility
-            let data = dataValue;
-            if (typeof dataValue === 'string') {
-              try {
-                data = JSON.parse(dataValue);
-              } catch (e) {
-                // Failed to parse, assume no itemId
-                data = null;
-              }
-            }
-            hasItemId = data && !!data.gcItemId;
-          }
-          console.log('updateButtonText() hasItemId=', hasItemId, 'dataValue=', dataValue?.substring(0, 100));
-        }
-
-        // Fallback: check module-level variable when DOM lookup fails
-        if (!hasItemId && currentGcItemId) {
-          hasItemId = true;
-        }
-
-        if (button) {
-          const newText = hasItemId ? 'Edit Spreadsheet →' : 'Create Spreadsheet →';
-          console.log('updateButtonText() setting text to:', newText);
-          button.textContent = newText;
-        }
+      function parseDataValue(raw) {
+        if (!raw) return null;
+        if (typeof raw === 'object') return raw;
+        try { return JSON.parse(raw); } catch (e) { return null; }
       }
 
-      // Update button text on page load, also try to restore gcItemId from Learnosity API
-      setTimeout(function() {
+      // --- Learnosity Question Editor API ---
+      // The editor exposes: init, reset, getMetadata, getJson, setJson, safeToUnload
+
+      function findQuestionEditor() {
+        if (window.questionEditorApp) return window.questionEditorApp;
         try {
-          if (window.questionEditorApp) {
-            const q = window.questionEditorApp.getQuestion();
-            if (q && q.data && q.data.gcItemId) {
-              currentGcItemId = q.data.gcItemId;
-            }
+          if (window.parent && window.parent !== window && window.parent.authorApp) {
+            const widget = window.parent.authorApp.getWidget();
+            if (widget && widget.questionEditorApp) return widget.questionEditorApp();
           }
         } catch (e) {}
+        if (window.LearnosityQuestionEditor) return window.LearnosityQuestionEditor;
+        for (let i = 0; i < window.frames.length; i++) {
+          try {
+            if (window.frames[i].questionEditorApp) return window.frames[i].questionEditorApp;
+          } catch (e) {}
+        }
+        return null;
+      }
+
+      // Read the current question data from the editor API
+      function getQuestionData() {
+        try {
+          const editor = findQuestionEditor();
+          if (editor) return editor.getJson();
+        } catch (e) {}
+        return null;
+      }
+
+      // Update the question data and trigger a preview refresh.
+      // The "data" attribute is type "string" in the editor schema,
+      // so Learnosity expects a JSON string, not an object.
+      function updateLearnosityQuestion(newData) {
+        const editor = findQuestionEditor();
+        if (!editor) return false;
+        try {
+          const q = editor.getJson();
+          q.data = typeof newData === 'string' ? newData : JSON.stringify(newData);
+          editor.setJson(q);
+          return true;
+        } catch (e) {
+          console.warn('updateLearnosityQuestion() failed', e);
+          return false;
+        }
+      }
+
+      // --- Button text ---
+
+      function updateButtonText() {
+        const button = document.getElementById('editQuestionBtn');
+        if (!button) return;
+        let hasItemId = !!currentGcItemId;
+        if (!hasItemId) {
+          const q = getQuestionData();
+          if (q && q.data) {
+            const parsed = parseDataValue(q.data);
+            hasItemId = parsed && !!parsed.gcItemId;
+          }
+        }
+        button.textContent = hasItemId ? 'Edit Spreadsheet \u2192' : 'Create Spreadsheet \u2192';
+      }
+
+      // Restore gcItemId from Learnosity API on load
+      setTimeout(function() {
+        const q = getQuestionData();
+        if (q && q.data) {
+          const parsed = parseDataValue(q.data);
+          if (parsed && parsed.gcItemId) {
+            currentGcItemId = parsed.gcItemId;
+          }
+        }
         updateButtonText();
       }, 100);
 
-      // Set up observer to watch for changes to the data input field
-      function setupDataObserver() {
-        const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-        if (!dataContainer) {
-          // Try again if the element isn't ready yet
-          setTimeout(setupDataObserver, 500);
-          return;
+      // --- Graffiticode message handling ---
+
+      function handleDataUpdate(eventData) {
+        if (!eventData.data && !eventData.itemId) return;
+        if (eventData.itemId) currentGcItemId = eventData.itemId;
+
+        let currentData = {};
+        const q = getQuestionData();
+        if (q && q.data) {
+          currentData = parseDataValue(q.data) || {};
+        }
+        if (eventData.data) {
+          currentData = { ...currentData, ...eventData.data };
+        }
+        if (eventData.itemId) {
+          currentData.gcItemId = eventData.itemId;
         }
 
-        // Create observer to watch for changes
-        const observer = new MutationObserver(function(mutations) {
-          // Check if the value has changed
-          mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-              updateButtonText();
-            }
-          });
-
-          // Also check for changes to child elements (input/textarea)
-          const input = dataContainer.querySelector('input, textarea');
-          if (input) {
-            updateButtonText();
-          }
-        });
-
-        // Observe the container and its subtree
-        observer.observe(dataContainer, {
-          attributes: true,
-          attributeFilter: ['value'],
-          childList: true,
-          subtree: true,
-          characterData: true
-        });
-
-        // Also add event listeners to catch programmatic changes
-        const input = dataContainer.querySelector('input, textarea') || dataContainer;
-        if (input) {
-          ['input', 'change', 'blur'].forEach(eventType => {
-            input.addEventListener(eventType, updateButtonText);
-          });
-        }
+        updateLearnosityQuestion(currentData.data);
+        updateButtonText();
       }
 
-      // Start observing for data changes
-      setupDataObserver();
-
-      // Also set up a periodic check as a fallback
-      let lastKnownItemId = null;
-      setInterval(function() {
-        const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-        if (dataContainer) {
-          // Try to find the actual input value
-          let dataValue = null;
-          const input = dataContainer.querySelector('input, textarea');
-          if (input) {
-            dataValue = input.value;
-          } else if (dataContainer.value) {
-            dataValue = dataContainer.value;
-          }
-
-          // Also check all text inputs for one containing gcItemId
-          if (!dataValue) {
-            const allInputs = document.querySelectorAll('input[type="text"], textarea');
-            for (let inp of allInputs) {
-              if (inp.value && inp.value.includes('"gcItemId"')) {
-                dataValue = inp.value;
-                break;
-              }
-            }
-          }
-
-          if (dataValue) {
-            // Handle data as either object or JSON string
-            let data = dataValue;
-            if (typeof dataValue === 'string') {
-              try {
-                data = JSON.parse(dataValue);
-              } catch (e) {
-                // Invalid JSON
-                data = null;
-              }
-            }
-            if (data) {
-              const currentItemId = data.gcItemId || null;
-              if (currentItemId !== lastKnownItemId) {
-                lastKnownItemId = currentItemId;
-                updateButtonText();
-              }
-            }
-          }
-        }
-      }, 500); // Check every 500ms for better responsiveness
-
-      // Handle messages from Graffiticode - listen on multiple contexts
-      function handleGraffiticodeMessage(event) {
-        // Log ALL messages for debugging origin issues
-        console.log(
-          "handleGraffiticodeMessage()",
-          "origin=" + event.origin,
-          "current window origin=" + window.location.origin,
-          "event type=" + (event.data ? event.data.type : 'unknown')
-        );
-
-        // Special debug for Graffiticode messages
-        const parsedOrigin = event.origin.split(".");
-        const isGraffiticodeMessage = parsedOrigin.length > 1 && parsedOrigin[parsedOrigin.length - 2] === "graffiticode";
-        console.log("isGraffiticodeMessage=" + isGraffiticodeMessage + " parseOrigin=" + JSON.stringify(parsedOrigin));
-        if (isGraffiticodeMessage || event.origin === 'http://localhost:3000') {
-          console.log("*** RECEIVED GRAFFITICODE MESSAGE ***", event.data);
-        }
-
-        // Verify origin for security (allow both production and local)
-        if (isGraffiticodeMessage && event.origin !== 'http://localhost:3000') {
-          return;
-        }
-        // If we're in an iframe, also propagate the message to parent
+      function isAllowedOrigin(origin) {
+        if (origin === 'http://localhost:3000') return true;
         try {
-          if (window.parent && window.parent !== window) {
-            window.parent.postMessage(event.data, '*');
-          }
+          const hostname = new URL(origin).hostname;
+          return hostname === 'graffiticode.org' || hostname.endsWith('.graffiticode.org');
         } catch (e) {
-          // Cross-origin access denied
-        }
-        // Handle different message types from Graffiticode
-        if (event.data.type === 'graffiticode-ready') {
-          // Graffiticode editor is ready
-        } else if (event.data.type === 'item-created') {
-          console.log('[item-created] Processing itemId:', event.data.itemId);
-          // Prevent processing the same message twice
-          if (lastProcessedItemId === event.data.itemId) {
-            console.log('[item-created] Skipping duplicate');
-            return;
-          }
-          lastProcessedItemId = event.data.itemId;
-          // New item was created in Graffiticode
-          // Track gcItemId locally so updateButtonText() works even without DOM input
-          currentGcItemId = event.data.itemId;
-          // Initialize data structure
-          let currentData = {
-            gcItemId: event.data.itemId,
-            data: {
-              validation: { points: 0, ranges: {}, cells: {} },
-              interaction: { type: "table", v: "0.0.1", cells: {}, columns: {} }
-            }
-          };
-          // Try Learnosity Question Editor API first (most reliable)
-          const updatedViaAPI = updateLearnosityQuestion(currentData.data);
-          console.log('[item-created] updatedViaAPI=', updatedViaAPI);
-          // Also try DOM input as fallback
-          const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-          let dataInput = null;
-          if (dataContainer) {
-            dataInput = dataContainer.querySelector('input, textarea');
-            if (!dataInput && dataContainer.value !== undefined) {
-              dataInput = dataContainer;
-            }
-          }
-          console.log('[item-created] dataContainer=', !!dataContainer, 'dataInput=', !!dataInput);
-          if (dataInput) {
-            dataInput.value = JSON.stringify(currentData);
-            console.log('[item-created] Set dataInput.value to', dataInput.value.substring(0, 100));
-            dataInput.dispatchEvent(new Event('input', { bubbles: true }));
-            dataInput.dispatchEvent(new Event('change', { bubbles: true }));
-          } else if (!updatedViaAPI) {
-            console.warn('[item-created] Could not persist data via API or DOM. gcItemId tracked locally.');
-          }
-          // Update button text after creating item
-          updateButtonText();
-        } else if (event.data.type === 'data-updated') {
-          // Compiled data was updated in Graffiticode editor
-          // Find the actual visible input element
-          const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-          // Look for all possible input elements
-          let dataInput = null;
-          // Method 1: Look inside the container for actual input/textarea
-          if (dataContainer) {
-            const inputs = dataContainer.querySelectorAll('input, textarea');
-            // Use the first visible input/textarea
-            dataInput = Array.from(inputs).find(input => input.offsetParent !== null) || inputs[0];
-          }
-          // Method 2: Look for nearby inputs that might be the actual field
-          if (!dataInput) {
-            // Get the parent of the container and look for inputs there
-            const parent = dataContainer?.parentElement;
-            if (parent) {
-              const nearbyInputs = parent.querySelectorAll('input, textarea');
-              dataInput = Array.from(nearbyInputs).find(input => input.offsetParent !== null);
-            }
-          }
-          // Method 3: Look for any visible text input with a label containing "data"
-          if (!dataInput) {
-            const allVisibleInputs = Array.from(document.querySelectorAll('input[type="text"], textarea')).filter(input => input.offsetParent !== null);
-            // Check if any of them are near a label with "data" or "spreadsheet"
-            for (let input of allVisibleInputs) {
-              const label = document.querySelector(`label[for="${input.id}"]`) ||
-                    input.closest('div')?.querySelector('label');
-              if (label && (label.textContent.toLowerCase().includes('data') ||
-                            label.textContent.toLowerCase().includes('spreadsheet'))) {
-                dataInput = input;
-                break;
-              }
-            }
-          }
-          // Last resort: use the container itself if it has a value property
-          if (!dataInput && dataContainer && dataContainer.value !== undefined) {
-            dataInput = dataContainer;
-          }
-          if (dataInput) {
-            let currentData = {};
-            // Try to parse existing data
-            try {
-              // Handle both object and string formats
-              if (dataInput.value) {
-                currentData = typeof dataInput.value === 'string' ? JSON.parse(dataInput.value) : dataInput.value;
-              } else {
-                currentData = {};
-              }
-            } catch (e) {
-              currentData = {};
-            }
-            // Merge the compiled data while preserving gcItemId
-            if (event.data.data) {
-              currentData = {
-                ...currentData,
-                ...event.data.data
-              };
-            }
-            // Make sure gcItemId is still set
-            if (event.data.itemId) {
-              currentData.gcItemId = event.data.itemId;
-            }
-            // Serialize the object to JSON string for the input field
-            const newValue = JSON.stringify(currentData.data);
-            // Update the input field
-            // Focus the field
-            dataInput.focus();
-            // Clear and set the value using the most compatible method
-            if (dataInput instanceof HTMLInputElement || dataInput instanceof HTMLTextAreaElement) {
-              // Use native setter for React compatibility
-              try {
-                const proto = dataInput instanceof HTMLInputElement ?
-                      window.HTMLInputElement.prototype :
-                      window.HTMLTextAreaElement.prototype;
-                const nativeSetter = Object.getOwnPropertyDescriptor(proto, "value").set;
-                if (nativeSetter) {
-                  // Clear first
-                  nativeSetter.call(dataInput, '');
-                  dataInput.dispatchEvent(new Event('input', { bubbles: true }));
-                  // Set new value
-                  nativeSetter.call(dataInput, newValue);
-                }
-              } catch (e) {
-                dataInput.value = newValue;
-              }
-            } else {
-              // Fallback to direct assignment
-              dataInput.value = newValue;
-            }
-            // Dispatch a single input event
-            const inputEvent = new InputEvent('input', {
-              bubbles: true,
-              cancelable: true,
-              inputType: 'insertReplacementText',
-              data: newValue
-            });
-            dataInput.dispatchEvent(inputEvent);
-            // Dispatch change event
-            dataInput.dispatchEvent(new Event('change', { bubbles: true }));
-            // Blur after a short delay to finalize
-            setTimeout(() => {
-              dataInput.blur();
-              // Verify the value stuck
-              if (dataInput.value !== newValue) {
-                // Try using execCommand as last resort
-                dataInput.focus();
-                dataInput.select();
-                document.execCommand('selectAll');
-                document.execCommand('insertText', false, newValue);
-                dataInput.blur();
-              }
-
-              // Try to update through Learnosity API first
-              let updatedViaAPI = false;
-              try {
-                const parsedData = typeof newValue === 'string' ? JSON.parse(newValue) : newValue;
-                updatedViaAPI = updateLearnosityQuestion(parsedData);
-              } catch (e) {
-              }
-
-              // If API update didn't work, try other methods
-              if (!updatedViaAPI) {
-                // Force Learnosity to refresh the preview
-                forcePreviewRefresh();
-
-                // Trigger a custom event that Learnosity might listen to
-                window.dispatchEvent(new CustomEvent('lrn:qe:data:changed', {
-                  detail: { field: 'data', value: newValue },
-                  bubbles: true
-                }));
-
-                // Dispatch a focus/blur on a different field to trigger validation
-                setTimeout(() => {
-                  const stimulusField = document.querySelector('[data-lrn-qe-input="stimulus"]');
-                  if (stimulusField) {
-                    stimulusField.focus();
-                    stimulusField.blur();
-                  }
-                }, 200);
-              }
-            }, 100);
-          }
-          // Update button text after data update
-          updateButtonText();
-        } else if (event.data.type === 'item-updated') {
-          // Existing item was updated in Graffiticode
-
-          // If we get data with this event, update it
-          if (event.data.data || event.data.itemId) {
-            const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-            let dataInput = null;
-
-            // Find the input field
-            if (dataContainer) {
-              dataInput = dataContainer.querySelector('input, textarea');
-              if (!dataInput && dataContainer.value !== undefined) {
-                dataInput = dataContainer;
-              }
-            }
-
-            if (dataInput) {
-              let currentData = {};
-              // Try to parse existing data
-              try {
-                // Handle both object and string formats
-              if (dataInput.value) {
-                currentData = typeof dataInput.value === 'string' ? JSON.parse(dataInput.value) : dataInput.value;
-              } else {
-                currentData = {};
-              }
-              } catch (e) {
-                currentData = {};
-              }
-
-              // Update with new data if provided
-              if (event.data.data) {
-                currentData = {
-                  ...currentData,
-                  ...event.data.data
-                };
-              }
-
-              // Make sure gcItemId is set
-              if (event.data.itemId) {
-                currentData.gcItemId = event.data.itemId;
-              }
-
-              // Serialize the object to JSON string for the input field
-              const newValue = JSON.stringify(currentData);
-              dataInput.value = newValue;
-
-              // Trigger events to notify Learnosity of the change
-              dataInput.dispatchEvent(new Event('input', { bubbles: true }));
-              dataInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-              // Update button text
-              updateButtonText();
-
-              // Try to update through Learnosity API
-              setTimeout(() => {
-                updateLearnosityQuestion(currentData);
-                forcePreviewRefresh();
-              }, 100);
-            }
-          }
+          return false;
         }
       }
 
-      // Listen for messages in the current window
+      function handleGraffiticodeMessage(event) {
+        if (!isAllowedOrigin(event.origin)) return;
+
+        const messageId = event.data?.itemId || null;
+        const messageType = event.data?.type;
+        const dedupKey = messageType + ':' + messageId;
+        if (messageId && lastProcessedMessageId === dedupKey) return;
+        if (messageId) lastProcessedMessageId = dedupKey;
+
+        if (messageType === 'item-created') {
+          currentGcItemId = event.data.itemId;
+          updateLearnosityQuestion({
+            validation: { points: 0, ranges: {}, cells: {} },
+            interaction: { type: 'table', v: '0.0.1', cells: {}, columns: {} }
+          });
+          updateButtonText();
+        } else if (messageType === 'data-updated' || messageType === 'item-updated') {
+          handleDataUpdate(event.data);
+        }
+      }
+
       window.addEventListener('message', handleGraffiticodeMessage);
 
-      // Also listen on parent and top windows if we're in an iframe
-      // Wrap in try-catch to avoid cross-origin errors
-      try {
-        if (window.parent && window.parent !== window) {
-          window.parent.addEventListener('message', handleGraffiticodeMessage);
-        }
-      } catch (e) {
-        // Cross-origin access denied, that's ok
-      }
-      try {
-        if (window.top && window.top !== window) {
-          window.top.addEventListener('message', handleGraffiticodeMessage);
-        }
-      } catch (e) {
-        // Cross-origin access denied, that's ok
-      }
-
-      // Send ready message to Graffiticode if window is already open
+      // Send ready message to Graffiticode if this page was opened by it
       setTimeout(() => {
         if (window.opener) {
-          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          window.opener.postMessage(
-            { type: 'learnosity-ready' },
-            isLocal ? 'http://localhost:3000' : 'https://graffiticode.org'
-          );
-          console.log('Sent learnosity-ready message to opener');
+          window.opener.postMessage({ type: 'learnosity-ready' }, graffiticodeOrigin());
         }
       }, 1000);
-      // Wait for DOM to be ready before attaching button handler
+
+      // --- Button click handler ---
+
       function attachButtonHandler() {
         const editBtn = document.getElementById('editQuestionBtn');
         if (!editBtn) {
-          console.error('Create/Edit Spreadsheet button not found, retrying...');
-          // Try again after a short delay
           setTimeout(attachButtonHandler, 500);
           return;
         }
-        console.log('Found button, attaching click handler');
-        editBtn.addEventListener('click', function(e) {
-          console.log('Button clicked');
-        // Reset last processed item ID when opening editor to allow re-processing messages
-        lastProcessedItemId = null;
-        // Get current data to check if we have an existing item
-        const dataContainer = document.querySelector('[data-lrn-qe-input="data"]');
-        let currentData = {};
-        let gcItemId = null;
+        editBtn.addEventListener('click', function() {
+          lastProcessedMessageId = null;
 
-        if (dataContainer) {
-          // Try multiple ways to get the actual input value
-          let dataValue = null;
-
-          // Method 1: Look for input/textarea inside container
-          const input = dataContainer.querySelector('input, textarea');
-          if (input && input.value) {
-            dataValue = input.value;
-          }
-
-          // Method 2: Check if container itself has value
-          if (!dataValue && dataContainer.value) {
-            dataValue = dataContainer.value;
-          }
-
-          // Method 3: Check for any text input containing gcItemId
-          if (!dataValue) {
-            const allInputs = document.querySelectorAll('input[type="text"], textarea');
-            for (let inp of allInputs) {
-              if (inp.value && inp.value.includes('"gcItemId"')) {
-                dataValue = inp.value;
-                break;
-              }
+          // Determine gcItemId from API or local tracking
+          let gcItemId = currentGcItemId || null;
+          if (!gcItemId) {
+            const q = getQuestionData();
+            if (q && q.data) {
+              const parsed = parseDataValue(q.data);
+              gcItemId = parsed && parsed.gcItemId || null;
             }
           }
 
-          if (dataValue) {
-            try {
-              currentData = typeof dataValue === 'string' ? JSON.parse(dataValue) : dataValue;
-              gcItemId = currentData.gcItemId || null;
-            } catch (e) {
-            }
-          }
-        }
-        // Fallback: use locally tracked gcItemId
-        if (!gcItemId && currentGcItemId) {
-          gcItemId = currentGcItemId;
-        }
-        // Build URL with parameters
-        // Determine the correct origin for message communication
-        let messageOrigin = window.location.origin;
+          const messageOrigin = window.location.origin;
+          const params = new URLSearchParams({
+            lang: LANG,
+            mode: 'editor',
+            origin: messageOrigin,
+            editorMode: 'true',
+            editorOrigin: messageOrigin
+          });
 
-        // If we're in an iframe, we might need to use a different approach
-        try {
-          // Check if we're in an iframe and can access parent
-          if (window.parent && window.parent !== window) {
-            // We're in an iframe - use current window origin for messaging
-            messageOrigin = window.location.origin;
-            console.log('Running in iframe, using current window origin:', messageOrigin);
-          }
-        } catch (e) {
-          // Cross-origin iframe, use current origin
-          console.log('Cross-origin iframe detected, using current origin:', messageOrigin);
-        }
+          if (gcItemId) params.append('itemId', gcItemId);
 
-        const params = new URLSearchParams({
-          lang: LANG,
-          mode: 'editor',
-          origin: messageOrigin,
-          // Tell Graffiticode this is opened from an external editor
-          editorMode: 'true',
-          editorOrigin: messageOrigin
-        });
-
-        console.log('Using origin for Graffiticode communication:', messageOrigin);
-
-        // If we have an existing itemId, add it to the URL for editing
-        if (gcItemId) {
-          params.append('itemId', gcItemId);
-        }
-
-        // Add a target parameter to help Graffiticode know where to send messages
-        // Since we're in an iframe, we need to specify the parent origin
-        try {
-          if (window.parent && window.parent !== window && window.parent.location) {
-            params.append('parentOrigin', window.parent.location.origin);
-          }
-        } catch (e) {
-          // Can't access parent origin due to cross-origin restrictions
-        }
-
-        // Open Graffiticode with parameters
-        // Automatically detect if running locally
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-        // Always use the /editor page to ensure proper communication
-        // But we need a different approach for editing vs creating
-        const baseUrl = isLocal ? 'http://localhost:3000/editor' : 'https://graffiticode.org/editor';
-
-        const fullUrl = `${baseUrl}?${params.toString()}`;
-
-        // Check if window is already open and reuse it
-        if (graffiticodeWindow && !graffiticodeWindow.closed) {
-          // Reuse the existing window by navigating to the new URL
-          graffiticodeWindow.location.href = fullUrl;
-          graffiticodeWindow.focus();
-        } else {
-          // Try to open the window - this may show a security warning in console
-          // but should still work as it's a user-initiated action (button click)
           try {
-            graffiticodeWindow = window.open(
-              fullUrl,
-              'graffiticode-editor',
-              'width=1200,height=800'
-            );
+            if (window.parent && window.parent !== window && window.parent.location) {
+              params.append('parentOrigin', window.parent.location.origin);
+            }
+          } catch (e) {}
 
-          } catch (e) {
-            // If blocked, try alternative approach
-            graffiticodeWindow = window.open(
-              fullUrl,
-              'graffiticode-editor'
-            );
+          const baseUrl = graffiticodeOrigin() + '/editor';
+          const fullUrl = baseUrl + '?' + params.toString();
+
+          if (graffiticodeWindow && !graffiticodeWindow.closed) {
+            graffiticodeWindow.location.href = fullUrl;
+            graffiticodeWindow.focus();
+          } else {
+            graffiticodeWindow = window.open(fullUrl, 'graffiticode-editor', 'width=1200,height=800');
           }
-        }
-        if (!graffiticodeWindow) {
-          // If still blocked, alert the user
-          alert('Unable to open Graffiticode Console. Please check your popup blocker settings.');
-          return;
-        }
 
-        // Store reference globally so parent frames can access it
-        window.graffiticodeWindow = graffiticodeWindow;
-        try {
-          if (window.parent && window.parent !== window) {
-            window.parent.graffiticodeWindow = graffiticodeWindow;
+          if (!graffiticodeWindow) {
+            alert('Unable to open Graffiticode Console. Please check your popup blocker settings.');
+            return;
           }
-        } catch (e) {
-          // Cross-origin access denied, that's ok
-        }
 
-        // Send a message to Graffiticode once it's loaded to establish communication
-        if (graffiticodeWindow) {
+          window.graffiticodeWindow = graffiticodeWindow;
+          try {
+            if (window.parent && window.parent !== window) {
+              window.parent.graffiticodeWindow = graffiticodeWindow;
+            }
+          } catch (e) {}
+
+          // Poll until Graffiticode acknowledges communication
           let communicationEstablished = false;
-
-          // Listen for acknowledgment from the popup
           const handleReady = (event) => {
             if (event.data?.type === 'graffiticode-ready') {
-              console.log('Received graffiticode-ready acknowledgment');
               communicationEstablished = true;
               clearInterval(checkLoaded);
               window.removeEventListener('message', handleReady);
@@ -749,30 +230,24 @@
           };
           window.addEventListener('message', handleReady);
 
+          const target = graffiticodeOrigin();
           const checkLoaded = setInterval(() => {
-            if (communicationEstablished) {
-              clearInterval(checkLoaded);
-              return;
-            }
+            if (communicationEstablished) { clearInterval(checkLoaded); return; }
             try {
-              graffiticodeWindow.postMessage({
-                type: 'establish-communication',
-                origin: window.location.origin
-              }, isLocal ? 'http://localhost:3000' : 'https://graffiticode.org');
-            } catch (e) {
-              // Window not ready yet
-            }
+              graffiticodeWindow.postMessage(
+                { type: 'establish-communication', origin: messageOrigin },
+                target
+              );
+            } catch (e) {}
           }, 1000);
 
-          // Stop trying after 60 seconds
           setTimeout(() => {
             clearInterval(checkLoaded);
             window.removeEventListener('message', handleReady);
           }, 60000);
-        }
-      });
+        });
       }
-      // Start attaching button handler
+
       attachButtonHandler();
     })();
   </script>
