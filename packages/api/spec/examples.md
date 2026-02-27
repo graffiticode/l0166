@@ -38,8 +38,8 @@
 26. Make a spreadsheet with three cells containing the decimal values 3.14, 2.718, and 1.618.
 27. Create a spreadsheet with cells containing -50, -100, and -150.
 28. Make a spreadsheet with cells showing $1,000 and $2,500 and $10,000.
-29. Create a spreadsheet with date values: 2024-01-15, 2024-06-30, 2024-12-25.
-30. Make a spreadsheet with cells showing 25%, 50%, and 75%.
+29. Create a two-column spreadsheet where column A has category labels and column B has corresponding numeric values. Include 4 rows.
+30. Make a spreadsheet with a header row and 3 data rows. Column A is "Product", column B is "Qty", column C is "Price".
 
 ## Category 4: Cell Formatting (31–45)
 
@@ -111,23 +111,23 @@
 84. Create a parameterized spreadsheet where A1 and A2 are filled by params and A3 is an assessed SUM formula cell expecting the correct total.
 85. Create a parameterized quiz where param values provide the questions in column A and the assessed answer cells in column B expect specific values.
 
-## Category 9: Realistic Use Cases (86–95)
+## Category 9: Structural Compositions (86–95)
 
-86. Create a grocery budget spreadsheet with columns for Item, Quantity, Price, and Total. Include 4 items: Milk (2, $3.50), Bread (1, $2.99), Eggs (1, $4.25), Apples (6, $0.75). Add a grand total at the bottom using SUM.
-87. Create a student grade calculator with assignments listed in column A: Homework 1, Homework 2, Midterm, Final Project, Final Exam. Scores in column B: 88, 92, 75, 95, 82. Show the average at the bottom.
-88. Create a simple invoice spreadsheet with a title "Invoice #1001". It should have columns: Description, Qty, Unit Price, Line Total. Include 3 line items: Web Design (1, $500), Logo Design (2, $150), Hosting (12, $10). Calculate line totals and a grand total.
-89. Create a unit conversion exercise. Column A has Fahrenheit temperatures: 32, 68, 100, 212. Column B is blank for students to enter the Celsius equivalents. Assess that B1=0, B2=20, B3=37.78, B4=100.
-90. Create a multiplication practice spreadsheet. Column A has the first factor (3, 7, 5, 9), column B has the second factor (4, 6, 8, 2). Column C has blank assessed cells where students enter the product: 12, 42, 40, 18.
-91. Create a simple balance sheet with two sections. Assets: Cash ($5,000), Investments ($12,000), Property ($45,000). Liabilities: Loans ($8,000), Credit Cards ($2,500). Calculate total assets, total liabilities, and net worth.
-92. Create a tip calculator spreadsheet. Cell A1 has the label "Bill Amount", B1 has $85.00. A2 has "Tip %", B2 has 20%. A3 has "Tip Amount" and B3 should calculate the tip. A4 has "Total" and B4 should calculate bill plus tip.
-93. Create a BMI calculator. A1 has "Height (m)" with value 1.75 in B1. A2 has "Weight (kg)" with value 70 in B2. A3 has "BMI" with a formula in B3 that calculates weight divided by height squared. Round the result to 1 decimal.
-94. Create a loan payment spreadsheet. A1 is "Principal" with $10,000 in B1. A2 is "Annual Rate" with 5% in B2. A3 is "Monthly Payment" and B3 calculates the monthly interest amount. A4 has "Remaining Balance" showing principal minus monthly payment.
-95. Create a chemistry molarity quiz. Title it "Molarity Calculation". Include instructions explaining molarity = moles / liters. A1 has "Volume (L)" with value 2.5 in B1. A2 has "Moles" with 0.5 in B2. A3 has "Molarity (M)" with an assessed blank cell in B3 expecting 0.2.
+86. Create a four-column spreadsheet with a header row, 4 data rows, and a SUM total row. Column D computes row totals. Use bold headers and a bottom border on the header row.
+87. Create a two-column label/value layout with 4 rows. Column A has bold labels, column B has values. The last row uses a formula to compute a result from the rows above.
+88. Create a spreadsheet with a title, 4 columns (Description, Qty, Unit Price, Line Total), 3 data rows with cross-column multiplication formulas in column D, and a SUM grand total. Use bold headers and right-align the numeric columns.
+89. Create a two-column spreadsheet where column A has display-only labels and column B has blank assessed cells. Include 4 rows. Assess each B cell with the value method.
+90. Create a spreadsheet with two factors in columns A and B, and blank assessed product cells in column C. Include 4 rows. The assessed cells expect the correct multiplication result.
+91. Create a spreadsheet with a bold header row, data rows with values in column B, and an AVERAGE formula at the bottom. Center-align column B and format it with one decimal place.
+92. Create a two-column label/value spreadsheet with 3 input rows and a formula row. Use bold labels in column A, right-align column B, and add a border below the last input row to separate it from the total.
+93. Create a spreadsheet with a title, markdown instructions, two columns of given values, and a third column with assessed blank cells expecting computed results. Style the header row bold and center-align the value columns.
+94. Create a spreadsheet with row formatting on row 1 (bold, background color) and column formatting on column B (right-aligned, number format). Fill in a 4-row data set with a SUM at the bottom.
+95. Create a spreadsheet with two sections separated by a border row. The top section has 3 data rows with a SUM subtotal. The bottom section has 2 data rows with a SUM subtotal. Add a final row that sums both subtotals. Bold the subtotal and total rows.
 
-## Category 10: Complex / Multi-Feature (96–100)
+## Category 10: Feature Combinations (96–100)
 
-96. Create a class gradebook titled "Biology 101 Grades". Add instructions saying "Enter missing grades below". Make four columns: Student (200px wide), Quiz 1, Quiz 2, Average. Include 4 students with some scores filled in and some blank and assessed. Calculate averages with AVERAGE. Use alternating row colors, bold header row, and center-aligned score columns.
-97. Create a financial dashboard titled "Q4 Financial Summary" with instructions "Review revenue and expenses. Fill in missing values." Have sections for Revenue (Product Sales, Services, Licensing), Expenses (Salaries, Rent, Marketing), and a Profit row. Use SUM formulas for totals and an IF formula to flag negative profit. Add borders between sections, number formatting, bold totals, and assess the profit cell.
-98. Create a science experiment data sheet titled "Pendulum Period Measurements". Instructions should explain to record swing times and calculate averages. Columns: Trial, Time 1 (s), Time 2 (s), Time 3 (s), Average (s). Use params for 3 trial measurements. Use AVERAGE formulas in the last column. ROUND averages to 2 decimal places. Assess the average cells. Style the header row and use center alignment.
-99. Create a multi-step math word problem assessment titled "Area and Perimeter". Instructions: "A rectangle has length L and width W. Calculate the perimeter and area step by step." Use params for length=8 and width=5. Row 1 shows the values. Row 2 asks for perimeter with an assessed cell expecting 26. Row 3 asks for area with an assessed cell expecting 40. Protect the instruction cells. Format the input cells with a light yellow background.
-100. Create a complete quiz template titled "Science Quiz" with instructions "Answer each question. Your score will be calculated automatically." Include 5 questions using params for the question text. Column A has questions, column B has blank assessed cells with expected answers. At the bottom, use a formula to calculate the percentage of correct answers. Bold the header row, add borders between questions, right-align the score column, and format the percentage with a number format.
+96. Create a spreadsheet with a title, instructions, 4 columns with custom widths, a bold header row with background color, 4 data rows with alternating row colors, AVERAGE formulas in the last column, assessed blank cells for missing values, and center-aligned score columns.
+97. Create a spreadsheet with a title, instructions, 3 sections with borders between them, SUM formulas for section subtotals, a final total row using SUM of subtotals, an IF formula that displays "Positive" or "Negative" based on the result, number formatting on value cells, bold on total rows, and an assessed cell on the final total.
+98. Create a spreadsheet with a title, instructions, params providing input values for 3 rows, AVERAGE formulas in the last column, ROUND to 2 decimal places on the averages, assessed average cells, a bold header row with background color, and center-aligned columns.
+99. Create a spreadsheet with a title, instructions, params for two input values displayed in row 1, two assessed blank cells in rows 2 and 3 expecting computed results, protected cells on the instruction labels, and a light yellow background on the input cells.
+100. Create a spreadsheet with a title, instructions, params for 5 rows of question text in column A, blank assessed cells in column B with expected answers, a formula row at the bottom computing a percentage, a bold header row, borders between each question row, right-aligned score column, and number format on the percentage cell.
