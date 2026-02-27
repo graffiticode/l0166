@@ -115,7 +115,11 @@
           currentData.gcItemId = eventData.itemId;
         }
 
-        updateLearnosityQuestion(currentData.data);
+        const dataToStore = currentData.data || currentData;
+        if (currentGcItemId) {
+          dataToStore.gcItemId = currentGcItemId;
+        }
+        updateLearnosityQuestion(dataToStore);
         updateButtonText();
       }
 
@@ -141,6 +145,7 @@
         if (messageType === 'item-created') {
           currentGcItemId = event.data.itemId;
           updateLearnosityQuestion({
+            gcItemId: event.data.itemId,
             validation: { points: 0, ranges: {}, cells: {} },
             interaction: { type: 'table', v: '0.0.1', cells: {}, columns: {} }
           });
