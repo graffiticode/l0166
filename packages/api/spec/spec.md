@@ -122,19 +122,59 @@ columns [
 
 ### params
 
-Defines parameter sets used to populate cells.
+Defines parameter templates for populating cell values. The argument is a record
+mapping cell references to value specifications. Cells reference param values
+using `{{key}}` template syntax in their text.
+
+Value specifications:
+- **Comma-separated values**: `"Hello, Goodbye"` — one value is randomly selected
+- **Numeric range**: `"100..200:50"` — expands to values 100, 150, 200
+- **Single value**: `"Fees earned"` — always uses that value
+
+When multiple params are defined, the compiler generates the Cartesian product
+of all value combinations (up to a maximum of 249 records).
+
+Simple example with comma-separated values:
 
 ```
+columns [
+  column A width 100 align "center" {}
+  column B width 100 align "center" {}
+] cells [
+  cell A1 text "{{A1}}" {}
+  cell B1 {}
+  cell A2 {}
+  cell B2 {}
+]
+params {
+  A1: "Hello, Goodbye"
+}
+{
+  v: "0.0.1"
+}..
+```
+
+Example with numeric ranges:
+
+```
+columns [
+  column A width 200 align "right" {}
+  column B width 100 align "right" {}
+] cells [
+  cell A1 text "{{A1}}" {}
+  cell A2 text "{{A2}}" {}
+  cell B1 text "{{B1}}" {}
+  cell B2 text "{{B2}}" {}
+]
 params {
   A1: "Fees earned",
   A2: "Office expense",
-  A3: "Miscellaneous expense",
-  A4: "Salary and wage expense",
   B1: "1485000..1585000:200000",
   B2: "325000..425000:25000",
-  B3: "26000..30000:2000",
-  B4: "875000..975000:50000",
 }
+{
+  v: "0.0.1"
+}..
 ```
 
 ## Spreadsheet Formula Functions
@@ -184,58 +224,33 @@ Returns one value if a condition is true, another if false.
 
 ## Program Examples
 
+### Parameterized assessment with row sorting
+
 Create a 2 by 2 spreadsheet assessment where the rows are sorted to match the
-candidate's actual response.
+candidate's actual response. Param values populate cells using template syntax
+and are also used as expected values for assessment.
 
 ```
-rows {
-  "*": {
-    assess: {
-      index: "B",
-      order: "actual", | "expected", "asc", "desc"
-    }
-  }
-}
-columns {
-  A: {
-    width: 100,
-    align: "right",
-  },
-  B: {
-    width: 100,
-    align: "left",
-  },
-}
-cells {
-  A1: {
-    text: "{{A1}}",
-    attrs: {
-      assess: {
-        method: "value",
-        expected: "{{A1}}"
-      }
-    },
-  },
-  A2: {
-    text: "{{A2}}",
-    attrs: {
-      assess: {
-        method: "value",
-        expected: "{{A2}}"
-      }
-    },
-  },
-  B1: {
-    text: "{{B1}}",
-  },
-  B2: {
-    text: "{{B2}}",
-  },
-}
+rows [
+  row "*" assess [method "value" expected "actual"] {}
+]
+columns [
+  column A width 100 align "right" {}
+  column B width 100 align "left" {}
+]
+cells [
+  cell A1 text "{{A1}}" assess [method "value" expected "{{A1}}"] {}
+  cell A2 text "{{A2}}" assess [method "value" expected "{{A2}}"] {}
+  cell B1 text "{{B1}}" {}
+  cell B2 text "{{B2}}" {}
+]
 params {
-  A1: "100..200: 50",
-  A2: "1000..2000: 500",
+  A1: "100..200:50",
+  A2: "1000..2000:500",
   B1: "pigs, chickens, cows",
   B2: "apples, oranges, bananas",
-}{}..
+}
+{
+  v: "0.0.1"
+}..
 ```
