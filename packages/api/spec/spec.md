@@ -20,7 +20,8 @@ semantics and base library can be found here:
 | `align`  | `<string record: record>` | Sets the alignment of a column (left, right, center, justify) |
 | `cell`   | `<string string: record>` | Defines a single cell data and configuration |
 | `cells`  | `<array array: record>` | Defines multiple cells from an array |
-| `rows`   | `<record record: record>` | Defines row data and configurations |
+| `row`    | `<string record: record>` | Defines a single row configuration |
+| `rows`   | `<array array: record>` | Defines multiple rows from an array |
 | `column` | `<string string: record>` | Defines a single column configuration |
 | `columns`| `<array array: record>` | Defines multiple columns from an array |
 | `params` | `<record: record>` | Defines parameters available as cell values |
@@ -77,12 +78,25 @@ cells [
 ] {...}
 ```
 
-### rows
+### row
 
-Defines row attributes.
+Defines a single row configuration. The first argument is the row identifier
+(a number or `"*"` for all rows).
 
 ```
-rows {...} {...}
+row 1 font-weight "bold" {}
+row "*" assess [method "value" expected "actual"] {}
+```
+
+### rows
+
+Defines multiple row configurations from an array.
+
+```
+rows [
+  row 1 font-weight "bold" background-color "#DDDDDD" {},
+  row 2 color "#FF0000" {}
+] {...}
 ```
 
 ### width
