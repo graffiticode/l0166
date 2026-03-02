@@ -1,4 +1,4 @@
-# Dialect L0165 Specific Instructions
+# Dialect L0166 Specific Instructions
 
 This dialect is used for generating spreadsheet based assessments.
 
@@ -35,7 +35,7 @@ The following validates that cell A3 contains "300":
 cells [
   cell A1 text "100" {}
   cell A2 text "200" {}
-  cell A3 text: "" assess [method "value" expected "300"] {}
+  cell A3 text "" assess [method "value" expected "300"] {}
 ]
 ```
 
@@ -64,7 +64,7 @@ The following functions are available in L0166 with their specified arity (numbe
 ### Spreadsheet-specific functions (arity 2):
 - `title` - Sets the spreadsheet title
 - `instructions` - Sets instructions for the spreadsheet
-- `params` - Defines parameter templates for cell population
+- `params` - Defines parameter templates for cell population (see Params section below)
 - `cells` - Defines cell content and properties
 - `rows` - Configures row properties and assessment ordering
 - `columns` - Sets column widths and justification
@@ -138,4 +138,96 @@ The `border` function accepts two formats:
 
 ## Formula Function Usage
 
+The following spreadsheet functions are available for use in cell formulas:
+
+### SUM
+Adds all numeric values in a range.
+```
+=SUM(A1:A10)
+=SUM(B1,B2,B3)
+```
+
+### AVERAGE
+Computes the arithmetic mean of numeric values in a range.
+```
+=AVERAGE(A1:A10)
+=AVERAGE(B1,B2,B3)
+```
+
+### ROUND
+Rounds a number to a specified number of decimal places.
+```
+=ROUND(A1,2)
+```
+
+### IF
+Returns one value if a condition is true, another if false.
+```
+=IF(A1,B1,C1)
+```
+
 - IMPORTANT: Use the SUM function when adding or subtracting contiguous numeric cells with a formula
+- IMPORTANT: Use the AVERAGE function when computing the mean of contiguous numeric cells
+
+## Params (Parameter Templates)
+
+The `params` function defines parameter templates that populate cell values at runtime. Each time the spreadsheet is loaded, one set of values is randomly selected from the generated combinations.
+
+### Syntax
+
+`params` takes a record where keys are cell references and values are parameter specifications:
+
+```
+params {
+  A1: "Hello, Goodbye",
+}
+```
+
+### Cell template syntax
+
+Cells reference param values using `{{key}}` in their text:
+
+```
+cell A1 text "{{A1}}" {}
+```
+
+At runtime, `{{A1}}` is replaced with the selected param value.
+
+### Value specifications
+
+- **Comma-separated values**: `"Hello, Goodbye"` — randomly selects one value
+- **Numeric range**: `"100..200:50"` — expands to 100, 150, 200 (start..stop:increment)
+- **Single value**: `"Fees earned"` — always uses that value
+
+### Multiple params (Cartesian product)
+
+When multiple params are defined, all combinations are generated. For example:
+
+```
+params {
+  A1: "Hello, Goodbye",
+  B1: "10, 20",
+}
+```
+
+This generates 4 combinations: (Hello, 10), (Hello, 20), (Goodbye, 10), (Goodbye, 20). One is randomly selected each time.
+
+### Complete example
+
+```
+columns [
+  column A width 100 align "center" {}
+  column B width 100 align "center" {}
+] cells [
+  cell A1 text "{{A1}}" {}
+  cell B1 {}
+  cell A2 {}
+  cell B2 {}
+]
+params {
+  A1: "Hello, Goodbye"
+}
+{
+  v: "0.0.1"
+}..
+```

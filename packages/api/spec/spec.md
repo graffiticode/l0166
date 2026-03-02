@@ -141,6 +141,7 @@ mapping cell references to value specifications. Cells reference param values
 using `{{key}}` template syntax in their text.
 
 Value specifications:
+
 - **Comma-separated values**: `"Hello, Goodbye"` — one value is randomly selected
 - **Numeric range**: `"100..200:50"` — expands to values 100, 150, 200
 - **Single value**: `"Fees earned"` — always uses that value
