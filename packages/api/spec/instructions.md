@@ -35,7 +35,7 @@ The following validates that cell A3 contains "300":
 cells [
   cell A1 text "100" {}
   cell A2 text "200" {}
-  cell A3 text: "" assess [method "value" expected "300"] {}
+  cell A3 text "" assess [method "value" expected "300"] {}
 ]
 ```
 
