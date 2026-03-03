@@ -124,7 +124,7 @@ export class Checker extends BasisChecker {
       const err = [].concat(e0 || []);
       const methodName =
         (typeof v0 === 'string' && v0) ||
-        (v0 && typeof v0.tag === 'string' && v0.tag) ||
+        (v0 && typeof v0.tag === 'string' && v0.tag.toLowerCase()) ||
         undefined;
       const allowed = ['value', 'formula'];
       if (methodName === undefined) {
@@ -510,9 +510,12 @@ export class Transformer extends BasisTransformer {
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       const err = [].concat(e0 || []);
-      // v0 is the method value
+      const method =
+        (typeof v0 === 'string' && v0) ||
+        (v0 && typeof v0.tag === 'string' && v0.tag.toLowerCase()) ||
+        v0;
       const val = {
-        method: v0
+        method
       };
       resume(err, val);
     });
