@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # L0166 RAG Training Examples
 
 100 example prompts for training a RAG model on the L0166 spreadsheet assessment language.

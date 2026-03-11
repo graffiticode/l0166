@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import React from "react"; React;
 import { toggleMark } from "prosemirror-commands";
 import { FormulaBar } from "./FormulaBar";

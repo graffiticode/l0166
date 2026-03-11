@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /* Copyright (c) 2023, ARTCOMPILER INC */
 import assert from "assert";
 import Decimal from "decimal.js";
@@ -512,7 +513,7 @@ export class Transformer extends BasisTransformer {
       const err = [].concat(e0 || []);
       const method =
         (typeof v0 === 'string' && v0) ||
-        (v0 && typeof v0.tag === 'string' && v0.tag.toLowerCase()) ||
+        (v0 && typeof v0.tag === 'VALUE' && v0.tag.toLowerCase()) ||
         v0;
       const val = {
         method

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import React, { useState, useEffect, useRef } from 'react'; React;
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';

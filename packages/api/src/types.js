@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Minimal structural type constructors for the checker
 // Types are plain objects with a `kind` discriminator
 

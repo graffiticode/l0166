@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /*
   TODO
   [ ] Handle single and double click and tab in cells

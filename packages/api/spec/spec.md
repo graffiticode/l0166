@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Graffiticode L0166 Vocabulary
 
 This specification documents dialect-specific functions available in the

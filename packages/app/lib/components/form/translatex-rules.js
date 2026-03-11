@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export const evalRules = {
   "words": {
     "average": "average",

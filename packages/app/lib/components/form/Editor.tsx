@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import React from "react"; React;
 import { useState } from "react";
 import { MenuView } from "./MenuView";

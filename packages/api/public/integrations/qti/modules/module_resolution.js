@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Module Resolution Configuration for l0166 PCI
  * This file configures RequireJS for loading the PCI and its dependencies
