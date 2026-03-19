@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Dialect L0166 Specific Instructions
 
 This dialect is used for generating spreadsheet based assessments.

@@ -69,6 +69,19 @@ const getValidation = ({rows = {}, cells = {}}) => (
   }, {points: 0, regions: {}, cells: {}})
 );
 
+// Extract string value from a Checker node (STR or TAG)
+const checkerTagName = (v) =>
+  (typeof v === 'string' && v) ||
+  (v && v.tag === 'TAG' && v.elts[0]) ||
+  (v && v.tag === 'STR' && v.elts[0]) ||
+  undefined;
+
+// Extract string value from a Transformer value (string or {tag: name})
+const tagValue = (v) =>
+  (typeof v === 'string' && v) ||
+  (v && typeof v.tag === 'string' && v.tag) ||
+  undefined;
+
 export class Checker extends BasisChecker {
   HELLO(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
@@ -123,10 +136,7 @@ export class Checker extends BasisChecker {
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       const err = [].concat(e0 || []);
-      const methodName =
-        (typeof v0 === 'string' && v0) ||
-        (v0 && typeof v0.tag === 'string' && v0.tag.toLowerCase()) ||
-        undefined;
+      const methodName = checkerTagName(v0)?.toLowerCase();
       const allowed = ['value', 'formula'];
       if (methodName === undefined) {
         err.push("E_ARG_TYPE: METHOD expects a string or tag literal");
@@ -163,10 +173,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         const allowed = ['left', 'right', 'center'];
         if (value === undefined) {
           err.push("E_ARG_TYPE: ALIGN expects a string or tag literal");
@@ -183,10 +190,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         if (value === undefined) {
           err.push("E_ARG_TYPE: BACKGROUND_COLOR expects a string");
         }
@@ -212,10 +216,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         const allowed = ['normal', 'bold', 'lighter', 'bolder'];
         if (value === undefined) {
           err.push("E_ARG_TYPE: FONT_WEIGHT expects a string or tag literal");
@@ -232,10 +233,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         if (value === undefined) {
           err.push("E_ARG_TYPE: FORMAT expects a string");
         }
@@ -250,10 +248,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         if (value === undefined) {
           err.push("E_ARG_TYPE: FONT_SIZE expects a string");
         }
@@ -268,10 +263,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         if (value === undefined) {
           err.push("E_ARG_TYPE: FONT_FAMILY expects a string");
         }
@@ -286,10 +278,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         const allowed = ['normal', 'italic', 'oblique'];
         if (value === undefined) {
           err.push("E_ARG_TYPE: FONT_STYLE expects a string or tag literal");
@@ -306,10 +295,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         if (value === undefined) {
           err.push("E_ARG_TYPE: COLOR expects a string");
         }
@@ -324,10 +310,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         const allowed = ['none', 'underline', 'overline', 'line-through'];
         if (value === undefined) {
           err.push("E_ARG_TYPE: TEXT_DECORATION expects a string or tag literal");
@@ -344,10 +327,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         if (value === undefined) {
           err.push("E_ARG_TYPE: BORDER expects a string");
         }
@@ -362,10 +342,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const value =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          undefined;
+        const value = checkerTagName(v0);
         const allowed = ['top', 'middle', 'bottom'];
         if (value === undefined) {
           err.push("E_ARG_TYPE: VERTICAL_ALIGN expects a string or tag literal");
@@ -382,10 +359,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const cellName =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          'A1';
+        const cellName = checkerTagName(v0) || 'A1';
         const val = { type: t.record({ [cellName]: t.record({}, true) }, true) };
         resume(err, val);
       });
@@ -427,10 +401,7 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const columnName =
-          (typeof v0 === 'string' && v0) ||
-          (v0 && typeof v0.tag === 'string' && v0.tag) ||
-          'A';
+        const columnName = checkerTagName(v0) || 'A';
         const val = { type: t.record({ [columnName]: t.record({}, true) }, true) };
         resume(err, val);
       });
@@ -511,10 +482,7 @@ export class Transformer extends BasisTransformer {
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       const err = [].concat(e0 || []);
-      const method =
-        (typeof v0 === 'string' && v0) ||
-        (v0 && typeof v0.tag === 'VALUE' && v0.tag.toLowerCase()) ||
-        v0;
+      const method = tagValue(v0)?.toLowerCase() || v0;
       const val = {
         method
       };
@@ -554,7 +522,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the alignment value (string or tag)
         // v1 is the continuation value
-        const alignment = typeof v0 === 'string' ? v0 : v0.tag;
+        const alignment = tagValue(v0);
         const val = {
           ...v1,
           align: alignment
@@ -570,7 +538,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the color value (string or tag)
         // v1 is the continuation value
-        const color = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const color = tagValue(v0) || '';
         const val = {
           ...v1,
           'background-color': color
@@ -601,7 +569,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the font-weight value (string or tag)
         // v1 is the continuation value
-        const fontWeight = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const fontWeight = tagValue(v0) || '';
         const val = {
           ...v1,
           'font-weight': fontWeight
@@ -617,7 +585,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the format pattern (string or tag)
         // v1 is the continuation value
-        const format = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const format = tagValue(v0) || '';
         const val = {
           ...v1,
           format: format
@@ -633,7 +601,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the font-size value (string or tag)
         // v1 is the continuation value
-        const fontSize = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const fontSize = tagValue(v0) || '';
         const val = {
           ...v1,
           'font-size': fontSize
@@ -649,7 +617,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the font-family value (string or tag)
         // v1 is the continuation value
-        const fontFamily = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const fontFamily = tagValue(v0) || '';
         const val = {
           ...v1,
           'font-family': fontFamily
@@ -665,7 +633,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the font-style value (string or tag)
         // v1 is the continuation value
-        const fontStyle = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const fontStyle = tagValue(v0) || '';
         const val = {
           ...v1,
           'font-style': fontStyle
@@ -681,7 +649,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the color value (string or tag)
         // v1 is the continuation value
-        const color = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const color = tagValue(v0) || '';
         const val = {
           ...v1,
           color: color
@@ -697,7 +665,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the text-decoration value (string or tag)
         // v1 is the continuation value
-        const textDecoration = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const textDecoration = tagValue(v0) || '';
         const val = {
           ...v1,
           'text-decoration': textDecoration
@@ -713,7 +681,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the border value (string or tag)
         // v1 is the continuation value
-        const border = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const border = tagValue(v0) || '';
         const val = {
           ...v1,
           border: border
@@ -729,7 +697,7 @@ export class Transformer extends BasisTransformer {
         const err = [].concat(e0 || [], e1 || []);
         // v0 is the vertical-align value (string or tag)
         // v1 is the continuation value
-        const verticalAlign = typeof v0 === 'string' ? v0 : (v0 && v0.tag ? v0.tag : '');
+        const verticalAlign = tagValue(v0) || '';
         const val = {
           ...v1,
           'vertical-align': verticalAlign
@@ -743,9 +711,7 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const cellName =
-              typeof v0 === 'string' && v0 ||
-              typeof v0.tag === "string" && v0.tag;
+        const cellName = tagValue(v0);
         const cellContent = v1;
         const val = {
           [cellName]: cellContent
@@ -778,9 +744,7 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
-        const columnName =
-              typeof v0 === 'string' && v0 ||
-              typeof v0.tag === "string" && v0.tag;
+        const columnName = tagValue(v0);
         const columnContent = v1;
         const val = {
           [columnName]: columnContent

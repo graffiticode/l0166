@@ -181,5 +181,19 @@ export const lexicon = {
     "cls": "function",
     "length": 2,
     "arity": 2,
-  }
+  },
+  "^[A-Z][0-9]+$" : {
+    "tk": 22,
+    "name": "TAG",
+    "cls": "val",
+    "length": 0,
+    "arity": 0,
+  },
+  "^[A-Z]$" : {
+    "tk": 22,
+    "name": "TAG",
+    "cls": "val",
+    "length": 0,
+    "arity": 0,
+  },
 }
