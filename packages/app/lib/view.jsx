@@ -185,18 +185,18 @@ export const View = () => {
         focusValue = {};
       }
 
-      if (targetOrigin) {
-        // Prepare focus data with value
-        const focusData = {...args, value: focusValue};
-        if (args.type === 'column' && args.columns && args.columns.length > 0) {
-          // For multi-column selection, join column names with commas
-          focusData.name = args.columns.join(',');
-        } else if (args.type === 'row' && args.rows && args.rows.length > 0) {
-          // For multi-row selection, join row names with commas
-          focusData.name = args.rows.join(',');
-        }
-        window.parent.postMessage({focus: focusData}, targetOrigin);
-      }
+      // if (targetOrigin) {
+      //   // Prepare focus data with value
+      //   const focusData = {...args, value: focusValue};
+      //   if (args.type === 'column' && args.columns && args.columns.length > 0) {
+      //     // For multi-column selection, join column names with commas
+      //     focusData.name = args.columns.join(',');
+      //   } else if (args.type === 'row' && args.rows && args.rows.length > 0) {
+      //     // For multi-row selection, join row names with commas
+      //     focusData.name = args.rows.join(',');
+      //   }
+      //   window.parent.postMessage({focus: focusData}, targetOrigin);
+      // }
       return {
         ...data,
         focus: args,
