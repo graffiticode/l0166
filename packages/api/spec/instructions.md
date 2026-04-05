@@ -1,7 +1,9 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Dialect L0166 Specific Instructions
 
-This dialect is used for generating spreadsheet based assessments.
+L0166 is a Graffiticode dialect for authoring interactive spreadsheets with tabular cell data, cell-level formatting, spreadsheet formulas (SUM, AVERAGE, ROUND, IF), and optional assessment validation of cell values.
+
+Each L0166 program defines a single spreadsheet layout: column widths, individual cell contents with rich formatting, and optionally formulas or assessment rules that validate student-entered cell values.
 
 ## Response Requirements
 
