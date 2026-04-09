@@ -9,6 +9,21 @@ import {
 } from '@graffiticode/basis';
 import { t } from './types.js';
 
+function toPlainObject(val) {
+  if (val !== null && typeof val === 'object' && val._type === 'record' && val._entries instanceof Map) {
+    const obj = {};
+    for (const [k, v] of val._entries) {
+      const name = k.replace(/^(tag|str|num):/, '');
+      obj[name] = toPlainObject(v);
+    }
+    return obj;
+  }
+  if (Array.isArray(val)) {
+    return val.map(toPlainObject);
+  }
+  return val;
+}
+
 const rowInRegion = (region, cellName) => {
   const [min, max] = region.split("..");
   const row = cellName.slice(1);
@@ -832,8 +847,8 @@ export class Transformer extends BasisTransformer {
       }
       let values = [];
       let params = options.data && options.data.params
-        ? options.data.params  // Use form data.
-        : val1;                // Use defaults.
+        ? toPlainObject(options.data.params)  // Use form data.
+          : toPlainObject(val1);                // Use defaults.
       if (params) {
         let keys;
         let vals;
