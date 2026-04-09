@@ -474,15 +474,46 @@ const equivValue = (actual, expected, actualType, expectedType) => {
   return actual !== undefined && actual === expected;
 };
 
-const scoreCell = ({ method, expected, points = 1 }, {val, formula, type} = {val:undefined, formula:undefined, type:undefined}) => {
+const evaluateExpectedFormula = (formula, interactionCells) => {
+  if (!formula || !formula.startsWith('=') || !interactionCells) {
+    return formula;
+  }
+  // Build env with val property from text, since TransLaTeX looks up env[name].val
+  const env = {};
+  for (const [name, cell] of Object.entries(interactionCells)) {
+    env[name] = { ...cell as any, val: (cell as any).val || (cell as any).text };
+  }
+  const options = {
+    keepTextWhitespace: true,
+    env,
+    ...evalRules,
+  };
+  const processedText = toUpperCase(formula);
+  const translate = TransLaTeX.buildTranslator(options, spreadsheetExpanders);
+  let result = formula;
+  translate(processedText, (err, val) => {
+    if (!err || !err.length) {
+      result = String(val);
+    }
+  });
+  return result;
+};
+
+const scoreCell = ({ method, expected, points = 1 }, {val, formula, type} = {val:undefined, formula:undefined, type:undefined}, interactionCells = undefined) => {
   // For assessment by value, also consider the type
   if (method === "value") {
+    // If expected is a formula, evaluate it against the interaction cells
+    let resolvedExpected = expected;
+    if (typeof expected === 'string' && expected.startsWith('=')) {
+      resolvedExpected = evaluateExpectedFormula(expected, interactionCells);
+    }
+
     // Parse expected value to determine its type if not provided
     let expectedType = 'text';
-    let expectedVal = expected;
+    let expectedVal = resolvedExpected;
 
-    if (expected != null) {
-      const expectedStr = String(expected);
+    if (resolvedExpected != null) {
+      const expectedStr = String(resolvedExpected);
       // Check if it's a date
       const normalizedDate = normalizeDateInput(expectedStr);
       if (normalizedDate) {
@@ -797,14 +828,14 @@ export const getCellsValidation = ({ cells, validation }) => {
   return cellsValidations[0];
 };
 
-export const scoreCells = ({ cells, validation }) => {
+export const scoreCells = ({ cells, validation, interactionCells = undefined }) => {
   const cellsValidation = getCellsValidation({cells, validation});
   return Object.keys(cellsValidation).reduce((cells, cellName) => (
     {
       ...cells,
       [cellName]: cells[cellName] && {
         ...cells[cellName],
-        score: scoreCell(cellsValidation[cellName].assess, cells[cellName]),
+        score: scoreCell(cellsValidation[cellName].assess, cells[cellName], interactionCells),
       } || undefined,
     }
   ), cells);
@@ -812,7 +843,8 @@ export const scoreCells = ({ cells, validation }) => {
 
 const applyModelRules = (cellExprs, state, value, validation, formState) => {
   const cells = getCells(cellExprs, state);
-  const scoredCells = scoreCells({ cells: value.cells, validation });
+  const interactionCells = formState?.data?.interaction?.cells;
+  const scoredCells = scoreCells({ cells: value.cells, validation, interactionCells });
   const { doc, selection } = state;
   const { lastFocusedCell } = value;
   const focus = formState?.data?.focus;
