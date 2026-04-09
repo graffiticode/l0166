@@ -53,10 +53,14 @@ method "value"
 
 ### expected
 
-Specifies the expected value for assessment validation.
+Specifies the expected value for assessment validation. The value can be a
+literal string or a spreadsheet formula. When a formula is used (prefixed
+with `=`), it is evaluated against the current cell values at scoring time.
 
 ```
 expected "10"
+expected "=A1+C1"
+expected "=SUM(A1:A5)"
 ```
 
 ### cell
@@ -239,6 +243,33 @@ Returns one value if a condition is true, another if false.
 ```
 
 ## Program Examples
+
+### Formula-based assessment
+
+Create an addition problem where the expected answer is computed from other
+cell values. When used with `params`, each random combination produces a
+different correct answer.
+
+```
+columns [
+  column A width 150 align "center" {}
+  column B width 100 align "center" {}
+  column C width 150 align "center" {}
+] cells [
+  cell A1 text "{{A1}}" font-weight "bold" background-color "#FFFACD" {}
+  cell B1 text "+" font-weight "bold" {}
+  cell C1 text "{{C1}}" font-weight "bold" background-color "#FFFACD" {}
+  cell A2 text "What is the sum?" {}
+  cell C2 text "" assess [method "value" expected "=A1+C1"] {}
+]
+params {
+  A1: "12, 25, 34, 47",
+  C1: "8, 15, 26, 33",
+}
+{
+  v: "0.0.1"
+}..
+```
 
 ### Parameterized assessment with row sorting
 

@@ -42,6 +42,21 @@ cells [
 ]
 ```
 
+## Formula-based expected values
+
+The `expected` value in an assessment can be a spreadsheet formula. The formula is evaluated against the current cell values to compute the expected answer. This is useful when the correct answer depends on other cell values, especially with parameterized assessments.
+
+```
+cells [
+  cell A1 text "{{A1}}" font-weight "bold" {}
+  cell B1 text "+" {}
+  cell C1 text "{{C1}}" font-weight "bold" {}
+  cell A2 text "" assess [method "value" expected "=A1+C1"] {}
+]
+```
+
+Any spreadsheet formula (SUM, AVERAGE, ROUND, IF, or arithmetic like `=A1+C1`) can be used as an expected value. The formula is evaluated at scoring time using the current cell values.
+
 ## Formatting Guidelines
 
 - IMPORTANT: Remember to maintain Graffiticode's core syntax with `let` declarations and `..` endings
@@ -195,6 +210,8 @@ cell A1 text "{{A1}}" {}
 ```
 
 At runtime, `{{A1}}` is replaced with the selected param value.
+
+**IMPORTANT**: Only reference params that are defined. A `{{key}}` reference must correspond to a key in the `params` record. Referencing an undefined param will leave the template unresolved.
 
 ### Value specifications
 
