@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://graffiticode.org/schemas/l0166.json",
   "title": "L0166",
-  "description": "A spreadsheet-based assessment language",
+  "description": "An authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case.",
   "type": "object",
   "properties": {
     "interaction": {

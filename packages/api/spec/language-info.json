@@ -1,6 +1,6 @@
 {
   "id": "0166",
-  "description": "Authors interactive spreadsheets from natural language, with spreadsheet-based assessment as a primary use case — cells that grade student-entered values or formulas against an expected answer, optionally with parameterized inputs that vary per render. Also supports display and worksheet modes: cell grids with text, formatting (fonts, colors, borders, alignment, column widths), and formulas (SUM, AVERAGE, ROUND, IF, arithmetic). Describe the layout, the cells, the formulas, and any grading rules — L0166 emits a program that renders as an interactive spreadsheet.",
+  "description": "L0166 is an authoring language for interactive spreadsheets. A primary use case is spreadsheet-based assessment — cells that grade student-entered values or formulas against an expected answer, optionally with parameterized inputs that vary per render. L0166 also supports display and worksheet modes without grading: cell grids with text, formatting (fonts, colors, borders, alignment, column widths), and formulas (SUM, AVERAGE, ROUND, IF, arithmetic). Describe the layout, the cells, the formulas, and any grading rules — L0166 emits a program that renders as an interactive spreadsheet.",
   "supported_item_types": [
     "spreadsheet",
     "assessment_spreadsheet",

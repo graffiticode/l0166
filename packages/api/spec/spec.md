@@ -1,13 +1,16 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Graffiticode L0166 Vocabulary
 
-This specification documents dialect-specific functions available in the
-**L0166** language of Graffiticode. These functions extend the core language
-with additional functionality tailored to L0166 use cases.
+L0166 is an authoring language for interactive spreadsheets. A primary use
+case is spreadsheet-based assessment — cells that grade student-entered
+values or formulas against an expected answer, optionally with parameterized
+inputs that vary per render. L0166 also supports display and worksheet modes
+without grading.
 
-The core language specification including the definition of its syntax,
-semantics and base library can be found here:
-[Graffiticode Language Specification](./graffiticode-language-spec.html)
+This specification documents the dialect-specific functions that extend the
+core Graffiticode language for L0166 use cases. The core language
+specification, including syntax, semantics, and base library, can be found
+here: [Graffiticode Language Specification](./graffiticode-language-spec.html)
 
 ## Functions
 

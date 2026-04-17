@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # L0166 RAG Training Examples
 
-100 example prompts for training a RAG model on the L0166 spreadsheet assessment language.
+L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This file contains 100 example prompts for training a RAG model on L0166 — covering display spreadsheets, assessed spreadsheets, and parameterized templates.
 
 ## Category 1: Minimal / Structural Basics (1–10)
 

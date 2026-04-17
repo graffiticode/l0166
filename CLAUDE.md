@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-This is a Graffiticode language implementation (L0166) for creating spreadsheet-based assessments. The codebase is a monorepo with two packages:
+L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This repository is the L0166 implementation: a monorepo with two packages.
 
 - **packages/api**: Express.js server that compiles L0166 code and serves the application
 - **packages/app**: React component library (`@graffiticode/l0166`) built with Vite that provides spreadsheet UI components

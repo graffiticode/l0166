@@ -2,7 +2,7 @@
 
 # L0166 Usage Guide
 
-Welcome to the L0166 language guide, where you'll learn how to create and customize spreadsheets using natural language requests. This language is accessible through the Graffiticode MCP tool and console, allowing both AI agents and human users to generate structured spreadsheet documents with ease.
+L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This guide walks through creating and customizing spreadsheets — including assessed, parameterized, display, and worksheet layouts — using natural language requests. The language is accessible through the Graffiticode MCP tool and console, so both AI agents and human users can generate structured spreadsheet documents with ease.
 
 ## What You Can Create with L0166
 

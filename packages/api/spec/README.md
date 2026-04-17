@@ -1,8 +1,13 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# Specifications and Documentation
+# L0166 Specifications and Documentation
 
-This directory contains the language specification, authoring instructions, examples,
-and training data for this Graffiticode language.
+L0166 is an authoring language for interactive spreadsheets. A primary use case
+is spreadsheet-based assessment — cells that grade student-entered values or
+formulas against an expected answer, optionally with parameterized inputs that
+vary per render. L0166 also supports display and worksheet modes without grading.
+
+This directory contains the language specification, authoring instructions,
+examples, and training data for L0166.
 
 ## License
 

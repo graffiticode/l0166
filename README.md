@@ -3,16 +3,16 @@
 [![License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](packages/LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](LICENSE-DOCS)
 
-L0166 is a **spreadsheet-based assessment language**. It creates interactive spreadsheets where users fill in cells and their answers are validated against expected values.
+L0166 is an authoring language for **interactive spreadsheets**, with spreadsheet-based assessment as a primary use case. A program describes a single spreadsheet — its layout, cells, formulas, and optional grading rules — and renders as an interactive cell grid. L0166 also supports display and worksheet modes without grading.
 
-Use it for quizzes, exercises, and any assessment where you need a grid of inputs with grading.
+Use it for quizzes, problem sets, worksheets, data tables, and parameterized assessment templates where each student sees a different instance of the same problem.
 
 ## Features
 
-- Cell validation with expected values
-- Formulas (`=SUM`, `=AVERAGE`, `=ROUND`, `=IF`)
-- Parameterized templates for randomized assessments
-- Rich styling (fonts, colors, borders)
+- Interactive cell grids with rich styling (fonts, colors, borders, alignment, column widths)
+- Spreadsheet formulas: `=SUM`, `=AVERAGE`, `=ROUND`, `=IF`, plus arithmetic like `=A1+C1`
+- Cell-level assessment with value-match or formula-match against an expected answer
+- Parameterized templates for randomized inputs that vary per render
 
 ## Documentation
 
