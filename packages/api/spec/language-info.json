@@ -1,0 +1,41 @@
+{
+  "id": "0166",
+  "description": "Authors interactive spreadsheets from natural language, with spreadsheet-based assessment as a primary use case — cells that grade student-entered values or formulas against an expected answer, optionally with parameterized inputs that vary per render. Also supports display and worksheet modes: cell grids with text, formatting (fonts, colors, borders, alignment, column widths), and formulas (SUM, AVERAGE, ROUND, IF, arithmetic). Describe the layout, the cells, the formulas, and any grading rules — L0166 emits a program that renders as an interactive spreadsheet.",
+  "supported_item_types": [
+    "spreadsheet",
+    "assessment_spreadsheet",
+    "parameterized_spreadsheet"
+  ],
+  "example_prompts": [
+    {
+      "prompt": "Create a four-column spreadsheet with a header row (Product, Qty, Unit Price, Line Total), 3 data rows with =B*C line totals in column D, and a SUM grand total in D5. Bold the header row and right-align the numeric columns.",
+      "produces": "spreadsheet",
+      "notes": "Names every formula and every formatting choice explicitly (bold header, right-align numeric columns, per-row line-total formula, SUM grand total). The backend emits no implicit defaults."
+    },
+    {
+      "prompt": "Create a 3 by 3 grid of assessed input cells where the expected answers are 1 through 9, reading left to right, top to bottom.",
+      "produces": "assessment_spreadsheet",
+      "notes": "States the reading order (left-to-right, top-to-bottom) — otherwise the backend has to guess which cell gets which expected value."
+    },
+    {
+      "prompt": "Put values 10, 20, and 30 in A1 through A3. Assess cell A4 expecting the student to enter the formula =SUM(A1:A3).",
+      "produces": "assessment_spreadsheet",
+      "notes": "Says 'enter the formula' — triggers formula-method validation rather than value-method; backend would otherwise default to value-match."
+    },
+    {
+      "prompt": "Create a parameterized spreadsheet where A1 and A2 are filled by params and A3 is an assessed SUM formula cell expecting the correct total.",
+      "produces": "parameterized_spreadsheet",
+      "notes": "Combines params with an assess block whose expected value is a formula evaluated at scoring time against the current param values — the canonical parameterized-quiz shape."
+    },
+    {
+      "prompt": "Create a two-column label/value layout with 4 rows. Column A has bold labels; column B is right-aligned with a light-yellow background. The last row computes a SUM of the rows above.",
+      "produces": "spreadsheet",
+      "notes": "Names column-level formatting (alignment, background) and a composition pattern (label/value + footer sum). The backend emits the layout without asking follow-ups."
+    },
+    {
+      "prompt": "Create a quiz spreadsheet with a title, instructions, 5 word-problem rows (problem in column A, blank assessed cell in column B expecting the correct numeric answer), and a bold header row on a light-gray background.",
+      "produces": "assessment_spreadsheet",
+      "notes": "Bundles title, instructions, header formatting, and per-row assessment in one description — mirrors how an instructor hands off a problem set."
+    }
+  ]
+}

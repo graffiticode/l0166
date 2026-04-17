@@ -13,6 +13,7 @@
     "lint": "eslint src/ tools/",
     "lint:fix": "eslint src/ tools/ --fix",
     "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/template.gc ./dist/template.gc && cp ./spec/usage-guide.md ./dist/usage-guide.md",
+    "build-language-info": "node tools/build-language-info.js",
     "watch-spec": "npx nodemon --exec 'npx spec-md > ./dist/spec.html' ./spec/spec.md"
   },
   "dependencies": {
