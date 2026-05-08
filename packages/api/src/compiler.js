@@ -994,7 +994,13 @@ t;
 
   PROG(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      const data = options?.data || {};
+      const rawData = options?.data || {};
+      // Strip an upstream `errors` field before merging — it's not
+      // spreadsheet state and would otherwise leak into our compile output,
+      // making this stage look errored whenever the input was. Upstream
+      // errors are still surfaced by the api server's reduce chain via the
+      // err argument, not by piggybacking on the value.
+      const { errors: _upstreamErrors, ...data } = rawData;
       const err = e0;
       v0 = v0.pop();  // Get last expression.
       const {
