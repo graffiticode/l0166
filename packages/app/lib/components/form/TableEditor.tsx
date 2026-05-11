@@ -356,10 +356,16 @@ const normalizeDateInput = (text) => {
     return null;
   }
   // Try to parse various date formats
-  // First, try native Date parsing for ISO and common formats
-  const parsed = Date.parse(trimmed);
-  if (!isNaN(parsed)) {
-    return dateToSerial(new Date(parsed));
+  // First, try native Date parsing for ISO and common formats.
+  // V8's Date.parse is permissive (e.g. Date.parse("7-4=") returns a valid
+  // timestamp). Guard with an allowlist of characters that can plausibly
+  // appear in a date — digits, separators, spaces, ASCII letters for month
+  // names — so things like "7-4=" or "2+3" never reach the lenient parser.
+  if (/^[\dA-Za-z\s\/\-\.\,\:T]+$/.test(trimmed)) {
+    const parsed = Date.parse(trimmed);
+    if (!isNaN(parsed)) {
+      return dateToSerial(new Date(parsed));
+    }
   }
   // Handle MM/DD/YYYY, MM-DD-YYYY, MM.DD.YYYY
   const usDatePattern = /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
