@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# L0166 User Guide
+# L0166 Usage Guide
 
 Agent-facing guide for authoring interactive spreadsheets through L0166. Read this before composing a `create_item` prompt or an `update_item` modification.
 
