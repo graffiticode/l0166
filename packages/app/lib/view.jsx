@@ -249,16 +249,19 @@ export const View = () => {
   );
 
   if (initResp.data) {
-    const data = initResp.data;
-    const templateVariablesRecords = data.templateVariablesRecords || [];
-    const index = Math.floor(Math.random() * templateVariablesRecords.length);
-    const env = templateVariablesRecords[index] || {};
-    const args = resolveVariables(data, env);
+    setDoInit(false);
+    if (Array.isArray(initResp.data.errors) && initResp.data.errors.length > 0) {
+      state.apply({ type: "init", args: { errors: initResp.data.errors } });
+    } else {
+      state.apply({ type: "init", args: initResp.data });
+    }
+  }
+  if (initResp.error) {
+    setDoInit(false);
     state.apply({
       type: "init",
-      args: initResp.data,
+      args: { errors: [{ message: String(initResp.error.message || initResp.error) }] },
     });
-    setDoInit(false);
   }
 
   const compileResp = useSWR(
@@ -271,11 +274,19 @@ export const View = () => {
   );
 
   if (compileResp.data) {
+    setDoRecompile(false);
+    if (Array.isArray(compileResp.data.errors) && compileResp.data.errors.length > 0) {
+      state.apply({ type: "compile", args: { errors: compileResp.data.errors } });
+    } else {
+      state.apply({ type: "compile", args: { ...compileResp.data, errors: undefined } });
+    }
+  }
+  if (compileResp.error) {
+    setDoRecompile(false);
     state.apply({
       type: "compile",
-      args: compileResp.data,
+      args: { errors: [{ message: String(compileResp.error.message || compileResp.error) }] },
     });
-    setDoRecompile(false);
   }
 
   return (
