@@ -12,6 +12,7 @@
     "Schema-validated output suitable for hosting as a Learnosity custom question via L0158"
   ],
   "out_of_scope": [
+    "Any tabular tool that isn't a spreadsheet (database tables, CSV editors, query builders, pivot dashboards, Airtable-style relational tables, gantt charts)",
     "Charts and visualizations (pie, bar, line) — charting belongs in a separate dialect",
     "Pivot tables, cross-sheet references, or aggregations across sheets",
     "External data imports (CSV, database, HTTP ingestion)",
