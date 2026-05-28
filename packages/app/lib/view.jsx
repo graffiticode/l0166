@@ -13,6 +13,23 @@ function isNonNullObject(obj) {
   );
 }
 
+// Both the /compile response and the stored /data response use the standard
+// { data, errors } envelope. A response carrying a `data` and/or `errors`
+// field is read as an envelope. For backward compatibility, a payload with
+// neither field is used as the data model itself.
+function unwrapEnvelope(resp) {
+  if (
+    resp && typeof resp === "object" && !Array.isArray(resp) &&
+    ("data" in resp || "errors" in resp)
+  ) {
+    return {
+      data: resp.data,
+      errors: Array.isArray(resp.errors) ? resp.errors : [],
+    };
+  }
+  return { data: resp, errors: [] };
+}
+
 /*
   View manages the state of the form. It may or may not use the server compiler
   to handle state transitions. Its interface with the host is through the url
@@ -250,18 +267,15 @@ export const View = () => {
 
   if (initResp.data) {
     setDoInit(false);
-    if (Array.isArray(initResp.data.errors) && initResp.data.errors.length > 0) {
-      state.apply({ type: "init", args: { errors: initResp.data.errors } });
-    } else {
-      state.apply({ type: "init", args: initResp.data });
+    const { data, errors } = unwrapEnvelope(initResp.data);
+    state.setErrors(errors);
+    if (errors.length === 0 && data !== null && data !== undefined) {
+      state.apply({ type: "init", args: data });
     }
   }
   if (initResp.error) {
     setDoInit(false);
-    state.apply({
-      type: "init",
-      args: { errors: [{ message: String(initResp.error.message || initResp.error) }] },
-    });
+    state.setErrors([{ message: String(initResp.error.message || initResp.error) }]);
   }
 
   const compileResp = useSWR(
@@ -275,22 +289,19 @@ export const View = () => {
 
   if (compileResp.data) {
     setDoRecompile(false);
-    if (Array.isArray(compileResp.data.errors) && compileResp.data.errors.length > 0) {
-      state.apply({ type: "compile", args: { errors: compileResp.data.errors } });
-    } else {
-      state.apply({ type: "compile", args: { ...compileResp.data, errors: undefined } });
+    const { data, errors } = unwrapEnvelope(compileResp.data);
+    state.setErrors(errors);
+    if (errors.length === 0 && data !== null && data !== undefined) {
+      state.apply({ type: "compile", args: data });
     }
   }
   if (compileResp.error) {
     setDoRecompile(false);
-    state.apply({
-      type: "compile",
-      args: { errors: [{ message: String(compileResp.error.message || compileResp.error) }] },
-    });
+    state.setErrors([{ message: String(compileResp.error.message || compileResp.error) }]);
   }
 
   return (
-    isNonNullObject(state.data) &&
+    (isNonNullObject(state.data) || state.errors.length > 0) &&
       <Form state={state} /> ||
       <div />
   );
