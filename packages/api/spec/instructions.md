@@ -7,8 +7,10 @@ Each L0166 program defines a single spreadsheet layout: column widths, individua
 
 ## Response Requirements
 
-- **IMPORTANT**: Whatever the user request is, the response should always be a complete spreadsheet with all necessary data, formulas, and formatting included.
-- **DEFAULT BEHAVIOR**: If no specific instructions are given but table data is present, create a simple spreadsheet that represents the data with appropriate headers and formatting.
+- **IMPORTANT**: Whatever the user request is, the response should always be a complete, working spreadsheet — include the data, columns, and formulas it needs to function.
+- **MINIMAL BY DEFAULT**: Include only what the request asks for. Do not add extra columns (e.g. a "Notes" or "Comments" column), extra rows, or sample data the user didn't mention. If the request is plain, the output should be plain.
+- **STYLING IS OPT-IN**: Do not apply colors, `background-color`, alternating row shading, borders, or custom fonts unless the request explicitly asks for that styling (or for a specific look/theme). Plain cells with default formatting are the correct default. The Formatting Examples below show how to style *when asked* — they are not a baseline to apply to every spreadsheet.
+- **DEFAULT BEHAVIOR**: If no specific instructions are given but table data is present, create a simple spreadsheet that represents the data with appropriate headers — without decorative styling.
 - If the user does not explicitly ask for a title and/or instructions then don't include them in the program.
 
 ## Program structure
@@ -110,6 +112,8 @@ The following functions are available in L0166 with their specified arity (numbe
 - `expected` - Expected value for validation
 
 ## Formatting Examples
+
+These examples show the *syntax* for styling. Apply them only when the request asks for that styling — do not add color, shading, or borders to a plain spreadsheet by default.
 
 ### Cell Formatting
 ```
