@@ -195,6 +195,9 @@ Returns one value if a condition is true, another if false.
 
 The `params` function defines parameter templates that populate cell values at runtime. Each time the spreadsheet is loaded, one set of values is randomly selected from the generated combinations.
 
+- **OPT-IN ONLY**: Use `params` only when the request explicitly asks for randomized, parameterized, or per-render-varying values (e.g. "generate different numbers each time", "randomize the inputs"). For ordinary spreadsheets, put literal values directly in the cells — do not introduce `params`.
+- **KEEP IT SMALL**: Every param multiplies the total combinations (Cartesian product), so a few params with several values each can explode into thousands of generated combinations. When mock/sample values are needed, give each param only a handful of values (≈2–5) and keep the number of params small. Prefer narrow ranges over wide `start..stop:increment` spans.
+
 ### Syntax
 
 `params` takes a record where keys are cell references and values are parameter specifications:
@@ -235,6 +238,8 @@ params {
 ```
 
 This generates 4 combinations: (Hello, 10), (Hello, 20), (Goodbye, 10), (Goodbye, 20). One is randomly selected each time.
+
+**CAUTION**: The count is the product of every param's value count. Three params with 5 values each is already 125 combinations, and ranges expand fast (`"1..100:1"` is 100 values on its own). Keep value sets and ranges small so the generated set stays in the low tens at most.
 
 ### Complete example
 
