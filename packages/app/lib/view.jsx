@@ -279,7 +279,7 @@ export const View = () => {
   }
 
   const compileResp = useSWR(
-    doRecompile && accessToken && id && {
+    doRecompile && id && {
       accessToken,
       id,
       data: state.data,
