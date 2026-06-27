@@ -1,6 +1,6 @@
 {
   "id": "0166",
-  "summary": "Authors interactive spreadsheets, including spreadsheet-based assessment, from natural-language descriptions.",
+  "summary": "Authors interactive spreadsheets (tabular cells, formatting, formulas), optionally with assessed cells the learner fills in, from natural-language descriptions.",
   "in_scope": [
     "Single-cell and grid spreadsheets",
     "Column / row / region styling: width, alignment, fonts, colors, borders",
@@ -12,6 +12,7 @@
     "Schema-validated output suitable for hosting as a Learnosity custom question via L0158"
   ],
   "out_of_scope": [
+    "Authoring assessment ITEMS or QUESTIONS as content — reading-comprehension or ELA items, multiple-choice / EBSR / short-answer questions, passages, stems, answer keys, or rubric-scored prose. L0166 authors a spreadsheet INTERACTION (cells and formulas the learner completes), NOT question items; assessment-item authoring (e.g. ELA, reading, word problems) belongs to a dedicated assessment dialect, not a spreadsheet",
     "Any tabular tool that isn't a spreadsheet (database tables, CSV editors, query builders, pivot dashboards, Airtable-style relational tables, gantt charts)",
     "Charts and visualizations (pie, bar, line) — charting belongs in a separate dialect",
     "Pivot tables, cross-sheet references, or aggregations across sheets",
