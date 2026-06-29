@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # L0166 RAG Training Examples
 
-L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This file contains 100 example prompts for training a RAG model on L0166 — covering display spreadsheets, assessed spreadsheets, and parameterized templates.
+L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This file contains 101 example prompts for training a RAG model on L0166 — covering display spreadsheets, assessed spreadsheets, and parameterized templates.
 
 ## Category 1: Minimal / Structural Basics (1–10)
 
@@ -125,10 +125,11 @@ L0166 is an authoring language for interactive spreadsheets, with spreadsheet-ba
 94. Create a spreadsheet with row formatting on row 1 (bold, background color) and column formatting on column B (right-aligned, number format). Fill in a 4-row data set with a SUM at the bottom.
 95. Create a spreadsheet with two sections separated by a border row. The top section has 3 data rows with a SUM subtotal. The bottom section has 2 data rows with a SUM subtotal. Add a final row that sums both subtotals. Bold the subtotal and total rows.
 
-## Category 10: Feature Combinations (96–100)
+## Category 10: Feature Combinations (96–101)
 
 96. Create a spreadsheet with a title, instructions, 4 columns with custom widths, a bold header row with background color, 4 data rows with alternating row colors, AVERAGE formulas in the last column, assessed blank cells for missing values, and center-aligned score columns.
 97. Create a spreadsheet with a title, instructions, 3 sections with borders between them, SUM formulas for section subtotals, a final total row using SUM of subtotals, an IF formula that displays "Positive" or "Negative" based on the result, number formatting on value cells, bold on total rows, and an assessed cell on the final total.
 98. Create a spreadsheet with a title, instructions, params providing input values for 3 rows, AVERAGE formulas in the last column, ROUND to 2 decimal places on the averages, assessed average cells, a bold header row with background color, and center-aligned columns.
 99. Create a spreadsheet with a title, instructions, params for two input values displayed in row 1, two assessed blank cells in rows 2 and 3 expecting computed results, protected cells on the instruction labels, and a light yellow background on the input cells.
 100. Create a spreadsheet with a title, instructions, params for 5 rows of question text in column A, blank assessed cells in column B with expected answers, a formula row at the bottom computing a percentage, a bold header row, borders between each question row, right-aligned score column, and number format on the percentage cell.
+101. Create an assessed addition spreadsheet — two input values in row 1 and an assessed blank cell in row 2 expecting their sum — and hide the formula bar so students only see the cells.

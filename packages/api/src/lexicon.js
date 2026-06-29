@@ -147,6 +147,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2,
   },
+  "hide-formulabar" : {
+    "tk": 1,
+    "name": "HIDE_FORMULABAR",
+    "cls": "function",
+    "length": 2,
+    "arity": 2,
+  },
   "cells" : {
     "tk": 1,
     "name": "CELLS",

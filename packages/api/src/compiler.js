@@ -228,6 +228,21 @@ export class Checker extends BasisChecker {
     });
   }
 
+  HIDE_FORMULABAR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // Checker visits a BOOL literal to its node (see basis Checker.BOOL),
+        // so validate by node tag rather than the runtime value.
+        if (v0?.tag !== 'BOOL') {
+          err.push("E_ARG_TYPE: hide-formulabar expects a boolean literal");
+        }
+        const val = { type: t.record({ hideMenu: t.bool() }, true) };
+        resume(err, val);
+      });
+    });
+  }
+
   FONT_WEIGHT(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -573,6 +588,21 @@ export class Transformer extends BasisTransformer {
         const val = {
           ...v1,
           protected: v0
+        };
+        resume(err, val);
+      });
+    });
+  }
+
+  HIDE_FORMULABAR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        const err = [].concat(e0 || [], e1 || []);
+        // v0 is the boolean value
+        // v1 is the continuation value
+        const val = {
+          ...v1,
+          hideMenu: v0
         };
         resume(err, val);
       });
@@ -1010,6 +1040,7 @@ t;
         columns,
         rows,
         cells,
+        hideMenu,
         errors,
       } = v0;
       const val = {
@@ -1022,6 +1053,7 @@ t;
           rows,
           columns,
           cells,
+          ...(hideMenu !== undefined ? { hideMenu } : {}),
         },
         errors,
       };

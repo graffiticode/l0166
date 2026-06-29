@@ -104,6 +104,7 @@ The following functions are available in L0166 with their specified arity (numbe
 - `vertical-align` - Sets vertical alignment (top, middle, bottom)
 - `format` - Sets format pattern for cell values (#,##0.00, currency, date, etc.)
 - `protected` - Sets whether cell is protected from editing
+- `hide-formulabar` - Hides the formula bar (boolean); use when the task should not show the fx formula input
 - `column` - Defines column properties
 - `row` - Defines properties for a specific row
 

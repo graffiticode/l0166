@@ -32,4 +32,49 @@ describe("compiler", () => {
     const result = await compile(code);
     expect(result.interaction.cells.A1.text).toBe("A1");
   });
+
+  it("should omit interaction.hideMenu when hide-formulabar is not used", async () => {
+    const code = {
+      "3": { "elts": ["A1"], "tag": "TAG" },
+      "5": { "elts": ["A1"], "tag": "STR" },
+      "6": { "elts": [], "tag": "RECORD" },
+      "8": { "elts": ["v"], "tag": "TAG" },
+      "9": { "elts": ["0.0.1"], "tag": "STR" },
+      "10": { "elts": [8, 9], "tag": "BINDING" },
+      "11": { "elts": [10], "tag": "RECORD" },
+      "15": { "elts": [5, 6], "tag": "TEXT" },
+      "17": { "elts": [3, 15], "tag": "CELL" },
+      "19": { "elts": [17], "tag": "LIST" },
+      "20": { "elts": [19, 11], "tag": "CELLS" },
+      "22": { "elts": [20], "tag": "EXPRS" },
+      "23": { "elts": [22], "tag": "PROG" },
+      "root": 23
+    };
+    const result = await compile(code);
+    expect(result.interaction.hideMenu).toBeUndefined();
+  });
+
+  it("should set interaction.hideMenu when hide-formulabar true is used", async () => {
+    const code = {
+      "3": { "elts": ["A1"], "tag": "TAG" },
+      "5": { "elts": ["A1"], "tag": "STR" },
+      "6": { "elts": [], "tag": "RECORD" },
+      "8": { "elts": ["v"], "tag": "TAG" },
+      "9": { "elts": ["0.0.1"], "tag": "STR" },
+      "10": { "elts": [8, 9], "tag": "BINDING" },
+      "11": { "elts": [10], "tag": "RECORD" },
+      "15": { "elts": [5, 6], "tag": "TEXT" },
+      "17": { "elts": [3, 15], "tag": "CELL" },
+      "19": { "elts": [17], "tag": "LIST" },
+      "20": { "elts": [19, 11], "tag": "CELLS" },
+      "24": { "elts": [true], "tag": "BOOL" },
+      "25": { "elts": [24, 20], "tag": "HIDE_FORMULABAR" },
+      "22": { "elts": [25], "tag": "EXPRS" },
+      "23": { "elts": [22], "tag": "PROG" },
+      "root": 23
+    };
+    const result = await compile(code);
+    expect(result.interaction.hideMenu).toBe(true);
+    expect(result.interaction.cells.A1.text).toBe("A1");
+  });
 });

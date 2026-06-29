@@ -36,6 +36,7 @@ Say this to get that:
 - **Params / template syntax** — `params [a1: "42"]` plus `text "{{A1}}"` in a cell renders the param value. Use when the request mentions "parameters", "fill from params", or "template".
 - **Formatting keywords** — `font-weight` ("bold"/"normal"), `font-style` ("italic"), `font-size` (px), `color`, `background-color`, `border` ("1px solid #000"), `text-decoration` ("underline"/"strikethrough"), `text-align`, `vertical-align`.
 - **Protected** — `protected true` marks a cell as read-only; useful alongside assessed cells to prevent edits to instruction labels.
+- **Hide formula bar** — `hide-formulabar true` hides the fx formula input above the grid; use when the request says "hide the formula bar" or wants a cleaner/distraction-free assessment view.
 - **Number format** — "format with two decimals", "display as currency", "thousands separators" — L0166 maps these to the cell's number format.
 - **Alternating row colors** — a recognized pattern; say "alternating row colors" or "striped rows" and L0166 applies it across data rows.
 

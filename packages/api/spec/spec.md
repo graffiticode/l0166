@@ -29,6 +29,7 @@ here: [Graffiticode Language Specification](./graffiticode-language-spec.html)
 | `column` | `<string string: record>` | Defines a single column configuration |
 | `columns`| `<array array: record>` | Defines multiple columns from an array |
 | `params` | `<record: record>` | Defines parameters available as cell values |
+| `hide-formulabar` | `<bool: record>` | Hides the spreadsheet formula bar |
 
 ### text
 
@@ -195,6 +196,24 @@ params {
   B1: "1485000..1585000:200000",
   B2: "325000..425000:25000",
 }
+{
+  v: "0.0.1"
+}..
+```
+
+### hide-formulabar
+
+Hides the spreadsheet formula bar (the `fx` input above the grid). Pass a boolean
+value. When `true`, the compiler sets `interaction.hideMenu` in the output and the
+renderer omits the formula bar — useful for a cleaner or distraction-free
+assessment view.
+
+```
+hide-formulabar true
+cells [
+  cell A1 text "12" {}
+  cell A2 text "" assess [method "value" expected "=A1*2"] {}
+]
 {
   v: "0.0.1"
 }..
