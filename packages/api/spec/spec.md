@@ -193,7 +193,7 @@ columns [
   cell B2 {}
 ]
 params {
-  A1: "Hello, Goodbye"
+  "A1": "Hello, Goodbye"
 }
 {
   v: "0.0.1"
@@ -213,10 +213,10 @@ columns [
   cell B2 text "{{B2}}" {}
 ]
 params {
-  A1: "Fees earned",
-  A2: "Office expense",
-  B1: "1485000..1585000:200000",
-  B2: "325000..425000:25000",
+  "A1": "Fees earned"
+  "A2": "Office expense"
+  "B1": "1485000..1585000:200000"
+  "B2": "325000..425000:25000"
 }
 {
   v: "0.0.1"
@@ -307,8 +307,8 @@ columns [
   cell C2 text "" assess [method "value" expected "=A1+C1"] {}
 ]
 params {
-  A1: "12, 25, 34, 47",
-  C1: "8, 15, 26, 33",
+  "A1": "12, 25, 34, 47"
+  "C1": "8, 15, 26, 33"
 }
 {
   v: "0.0.1"
@@ -336,10 +336,10 @@ cells [
   cell B2 text "{{B2}}" {}
 ]
 params {
-  A1: "100..200:50",
-  A2: "1000..2000:500",
-  B1: "pigs, chickens, cows",
-  B2: "apples, oranges, bananas",
+  "A1": "100..200:50"
+  "A2": "1000..2000:500"
+  "B1": "pigs, chickens, cows"
+  "B2": "apples, oranges, bananas"
 }
 {
   v: "0.0.1"
