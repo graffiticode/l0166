@@ -7,9 +7,9 @@
     "Cell text, formatting, and per-cell properties",
     "Formulas (SUM, AVERAGE, ROUND, IF, arithmetic)",
     "Parameterized values that vary per render (templateVariablesRecords)",
-    "Assessed cells: value-equivalence, formula-equivalence, points, partial credit",
+    "Assessed cells: value-equivalence, formula-equivalence, per-cell partial credit",
     "Display and worksheet (non-assessed) modes",
-    "Schema-validated output suitable for hosting as a Learnosity custom question via L0158"
+    "Schema-validated output suitable for hosting as a Learnosity custom question via L0176"
   ],
   "out_of_scope": [
     "Authoring assessment ITEMS or QUESTIONS as content — reading-comprehension or ELA items, multiple-choice / EBSR / short-answer questions, passages, stems, answer keys, or rubric-scored prose. L0166 authors a spreadsheet INTERACTION (cells and formulas the learner completes), NOT question items; assessment-item authoring (e.g. ELA, reading, word problems) belongs to a dedicated assessment dialect, not a spreadsheet",

@@ -59,6 +59,38 @@ cells [
 
 Any spreadsheet formula (SUM, AVERAGE, ROUND, IF, or arithmetic like `=A1+C1`) can be used as an expected value. The formula is evaluated at scoring time using the current cell values.
 
+## Points and partial credit
+
+Each assessed cell is scored independently, so a learner who gets some cells right and others wrong earns partial credit automatically. By default every assessed cell is worth 1 point. Add `points` inside the `assess` block to weight a cell differently:
+
+```
+cells [
+  cell A1 text "2 + 3 =" {}
+  cell B1 text "" assess [method "value" expected "5" points 2] {}
+  cell A2 text "12 x 12 =" {}
+  cell B2 text "" assess [method "value" expected "144" points 4] {}
+]
+```
+
+The maximum score here is 6. Use `points` whenever the request assigns a worth to a question — "each worth 2 points", "the last question counts double", "out of 10 points".
+
+`points` must be a non-negative number. Fractions like `points 0.5` are allowed. `points 0` marks a cell that is still checked and coloured for the learner but adds nothing to the score — use it for practice rows and worked examples. A negative value or a non-number is a compile error, so do not write `points "2"`.
+
+When every assessed cell in a row or column carries the same weight, set `points` once on the row or column instead of annotating each cell. A cell's own `points` overrides an inherited one:
+
+```
+rows [
+  row "*" assess [method "value" expected "actual" points 2] {}
+]
+cells [
+  cell A1 text "" assess [method "value" expected "10"] {}
+  cell A2 text "" assess [method "value" expected "20"] {}
+  cell A3 text "" assess [method "value" expected "30" points 5] {}
+]
+```
+
+A1 and A2 are worth 2 each; A3 is worth 5, for a maximum of 9.
+
 ## Formatting Guidelines
 
 - IMPORTANT: Remember to maintain Graffiticode's core syntax with `let` declarations and `..` endings
@@ -111,6 +143,7 @@ The following functions are available in L0166 with their specified arity (numbe
 ### Assessment functions (arity 1):
 - `method` - Assessment method (value or formula)
 - `expected` - Expected value for validation
+- `points` - How much a correct answer is worth (non-negative number, default 1)
 
 ## Formatting Examples
 

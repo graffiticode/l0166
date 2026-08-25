@@ -50,6 +50,54 @@ const getIndexCell = (cells, colName, cellName) => (
 // current cell with its assess.
 // If there is no assess in the index cell, then the cell is scored as is.
 
+// `points` may be authored on a cell's own assess, or on the assess of the row
+// region or column the cell belongs to. Resolve inheritance here, at compile
+// time, so that every assessed cell carries a concrete `points` value.
+//
+// This is a correctness requirement, not a convenience: the deployed Learnosity
+// scorer computes the earned score by summing each cell's `assess.points` while
+// taking the maximum from `validation.points` (which getValidation sums from
+// the same cells). If an inherited value reached only one of the two, a fully
+// correct response could never equal the maximum.
+//
+// Precedence: cell > row > column.
+const hasOwnPoints = (assess) => (
+  assess !== null &&
+    typeof assess === "object" &&
+    Object.prototype.hasOwnProperty.call(assess, "points") &&
+    assess.points !== undefined
+);
+
+const resolveInheritedPoints = (val) => {
+  const { rows = {}, columns = {}, cells = {} } = val || {};
+  const resolvedCells = Object.keys(cells).reduce((acc, key) => {
+    const cell = cells[key];
+    const assess = cell && cell.assess;
+    // Unassessed cells score nothing, and an explicit `points` always wins —
+    // including `points 0`, which is why this tests for the key rather than
+    // for truthiness.
+    if (!assess || hasOwnPoints(assess)) {
+      acc[key] = cell;
+      return acc;
+    }
+    const [rowRegion] = getPrimaryColumn(rows, key);
+    const rowPoints = rows[rowRegion]?.assess?.points;
+    const columnPoints = columns[key.slice(0, 1)]?.assess?.points;
+    // Explicit typeof tests, not `||` — an inherited `points 0` is falsy and
+    // would otherwise fall through to the next level or be dropped entirely.
+    const inherited =
+          typeof rowPoints === "number" ? rowPoints :
+          typeof columnPoints === "number" ? columnPoints :
+          undefined;
+    acc[key] = inherited === undefined ? cell : {
+      ...cell,
+      assess: { ...assess, points: inherited },
+    };
+    return acc;
+  }, {});
+  return { ...val, cells: resolvedCells };
+};
+
 const getValidation = ({rows = {}, cells = {}}) => (
   // TODO compile the index column and value for each validated cell.
   Object.keys(cells).reduce((obj, key) => {
@@ -139,7 +187,32 @@ export class Checker extends BasisChecker {
   }
 
   ASSESS(node, options, resume) {
-    this.visit(node.elts[0], options, async (e0, v0) => {
+    // Basis Checker.LIST visits only its first element, so delegating to it
+    // would silently drop errors from every assess member after the first
+    // (e.g. a bad `points` in `[method ... expected ... points -1]`). Walk the
+    // members ourselves. Scoped to assess so the rest of the language keeps
+    // its existing — more forgiving — behavior.
+    const listNode = this.nodePool[node.elts[0]];
+    const memberIds =
+          listNode && listNode.tag === "LIST" && listNode.elts || null;
+    const visitMembers = (resumeMembers) => {
+      if (memberIds === null) {
+        // Not a list literal; fall back to the ordinary single visit.
+        this.visit(node.elts[0], options, (e0, v0) => resumeMembers(e0 || []));
+        return;
+      }
+      const step = (i, errs) => {
+        if (i >= memberIds.length) {
+          resumeMembers(errs);
+          return;
+        }
+        this.visit(memberIds[i], options, (e, v) =>
+          step(i + 1, errs.concat(e || []))
+        );
+      };
+      step(0, []);
+    };
+    visitMembers((e0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const err = [].concat(e0 || [], e1 || []);
         // First pass: an open assess record
@@ -168,6 +241,19 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       const err = [].concat(e0 || []);
       const val = { type: t.record({ expected: t.any() }, true) };
+      resume(err, val);
+    });
+  }
+
+  POINTS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [].concat(e0 || []);
+      if (typeof v0 !== 'number' || !isFinite(v0)) {
+        err.push("E_ARG_TYPE: POINTS expects a number literal");
+      } else if (v0 < 0) {
+        err.push(`E_INVALID_POINTS: ${v0} must be >= 0`);
+      }
+      const val = { type: t.record({ points: t.number() }, true) };
       resume(err, val);
     });
   }
@@ -527,6 +613,18 @@ export class Transformer extends BasisTransformer {
       // v0 is the expected value
       const val = {
         expected: v0
+      };
+      resume(err, val);
+    });
+  }
+
+  POINTS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      const err = [].concat(e0 || []);
+      // v0 is the point value. Pass it through untouched: a `|| 1` style
+      // fallback here would turn an authored `points 0` back into 1.
+      const val = {
+        points: v0
       };
       resume(err, val);
     });
@@ -1033,6 +1131,10 @@ t;
       const { errors: _upstreamErrors, ...data } = rawData;
       const err = e0;
       v0 = v0.pop();  // Get last expression.
+      // Fold row/column-level `points` down onto each assessed cell before
+      // anything reads `cells`, so interaction.cells and validation.points are
+      // derived from the same resolved values.
+      v0 = resolveInheritedPoints(v0);
       const {
         templateVariablesRecords,
         title,

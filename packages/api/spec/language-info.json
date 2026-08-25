@@ -28,6 +28,11 @@
       "notes": "Combines params with an assess block whose expected value is a formula evaluated at scoring time against the current param values — the canonical parameterized-quiz shape."
     },
     {
+      "prompt": "Create a 3-question arithmetic quiz where each assessed cell is worth 2 points, plus a practice row at the top that is checked but worth 0 points.",
+      "produces": "assessment_spreadsheet",
+      "notes": "Names a per-cell worth, so the backend emits `points` inside each assess block instead of leaving every cell at the default 1. `points 0` keeps the practice row checked and coloured while contributing nothing to the total."
+    },
+    {
       "prompt": "Create a two-column label/value layout with 4 rows. Column A has bold labels; column B is right-aligned with a light-yellow background. The last row computes a SUM of the rows above.",
       "produces": "spreadsheet",
       "notes": "Names column-level formatting (alignment, background) and a composition pattern (label/value + footer sum). The backend emits the layout without asking follow-ups."

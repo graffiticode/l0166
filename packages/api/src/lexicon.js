@@ -56,6 +56,13 @@ export const lexicon = {
     "length": 1,
     "arity": 1,
   },
+  "points" : {
+    "tk": 1,
+    "name": "POINTS",
+    "cls": "function",
+    "length": 1,
+    "arity": 1,
+  },
   "width" : {
     "tk": 1,
     "name": "WIDTH",

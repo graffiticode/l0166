@@ -20,6 +20,7 @@ here: [Graffiticode Language Specification](./graffiticode-language-spec.html)
 | `assess` | `<array array: record>` | Defines assessment criteria for a cell |
 | `method` | `<string>` | Specifies the assessment method |
 | `expected` | `<string>` | Specifies the expected value for assessment |
+| `points` | `<number>` | Sets how much an assessed cell is worth (default 1) |
 | `width`  | `<int record: record>` | Sets the width of a column |
 | `align`  | `<string record: record>` | Sets the alignment of a column (left, right, center, justify) |
 | `cell`   | `<string string: record>` | Defines a single cell data and configuration |
@@ -67,6 +68,26 @@ expected "=A1+C1"
 expected "=SUM(A1:A5)"
 ```
 
+### points
+
+Sets how much a correctly answered cell is worth. Omitting it is the same as
+`points 1`, so existing programs score unchanged.
+
+The value must be a non-negative number. Fractions are allowed. `points 0`
+marks a cell that is still checked and coloured for the learner but contributes
+nothing to the score — useful for practice or worked-example rows. A negative
+value or a non-number is a compile error.
+
+```
+points 2
+points 0.5
+points 0
+```
+
+`points` may also be set on a `row` or `column` assess block, in which case
+every assessed cell in that row or column inherits it. A cell's own `points`
+wins over an inherited one. Precedence is cell, then row, then column.
+
 ### cell
 
 Defines a single cell content and configuration.
@@ -95,6 +116,7 @@ Defines a single row configuration. The first argument is the row identifier
 ```
 row 1 font-weight "bold" {}
 row "*" assess [method "value" expected "actual"] {}
+row "*" assess [method "value" expected "actual" points 2] {}
 ```
 
 ### rows
@@ -323,3 +345,52 @@ params {
   v: "0.0.1"
 }..
 ```
+
+### Weighted assessment with partial credit
+
+Create a three-question quiz where every assessed cell is worth 2 points, the
+practice row at the top is checked but worth nothing, and the final question is
+worth double. Each cell is scored independently, so a learner who answers two of
+the three correctly earns partial credit.
+
+```
+columns [
+  column A width 220 align "left" {}
+  column B width 100 align "center" {}
+]
+cells [
+  cell A1 text "Practice: 1 + 1 =" {}
+  cell B1 text "" assess [method "value" expected "2" points 0] {}
+  cell A2 text "2 + 3 =" {}
+  cell B2 text "" assess [method "value" expected "5" points 2] {}
+  cell A3 text "7 - 4 =" {}
+  cell B3 text "" assess [method "value" expected "3" points 2] {}
+  cell A4 text "12 x 12 =" {}
+  cell B4 text "" assess [method "value" expected "144" points 4] {}
+]
+{
+  v: "0.0.1"
+}..
+```
+
+The maximum score for this spreadsheet is 8: the practice row contributes 0, the
+two 2-point questions contribute 4, and the final question contributes 4.
+
+When every assessed cell in a region carries the same weight, set `points` once
+on the row instead of annotating each cell:
+
+```
+rows [
+  row "*" assess [method "value" expected "actual" points 2] {}
+]
+cells [
+  cell A1 text "" assess [method "value" expected "10"] {}
+  cell A2 text "" assess [method "value" expected "20"] {}
+  cell A3 text "" assess [method "value" expected "30" points 5] {}
+]
+{
+  v: "0.0.1"
+}..
+```
+
+A1 and A2 inherit 2 points each; A3 overrides with 5, for a maximum of 9.

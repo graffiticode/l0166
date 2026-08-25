@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # L0166 RAG Training Examples
 
-L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This file contains 101 example prompts for training a RAG model on L0166 — covering display spreadsheets, assessed spreadsheets, and parameterized templates.
+L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This file contains 107 example prompts for training a RAG model on L0166 — covering display spreadsheets, assessed spreadsheets, and parameterized templates.
 
 ## Category 1: Minimal / Structural Basics (1–10)
 
@@ -133,3 +133,12 @@ L0166 is an authoring language for interactive spreadsheets, with spreadsheet-ba
 99. Create a spreadsheet with a title, instructions, params for two input values displayed in row 1, two assessed blank cells in rows 2 and 3 expecting computed results, protected cells on the instruction labels, and a light yellow background on the input cells.
 100. Create a spreadsheet with a title, instructions, params for 5 rows of question text in column A, blank assessed cells in column B with expected answers, a formula row at the bottom computing a percentage, a bold header row, borders between each question row, right-aligned score column, and number format on the percentage cell.
 101. Create an assessed addition spreadsheet — two input values in row 1 and an assessed blank cell in row 2 expecting their sum — and hide the formula bar so students only see the cells.
+
+## Category 11: Weighted Scoring / Partial Credit (102–107)
+
+102. Create a 3-question arithmetic quiz where each assessed cell is worth 2 points.
+103. Create a quiz with four assessed cells where the first three are worth 1 point each and the last one is worth 5.
+104. Create an assessed spreadsheet with a practice row at the top that is checked but worth 0 points, followed by three scored rows worth 2 points each.
+105. Create a column of five assessed cells expecting 2, 4, 6, 8, 10, all worth 2 points each, set once on the row rather than per cell.
+106. Create an assessed spreadsheet worth 10 points total, split across four questions, where students get partial credit for each cell they answer correctly.
+107. Create a spreadsheet with a title, instructions, five word-problem rows with blank assessed cells in column B, each worth 2 points, and a bold header row.

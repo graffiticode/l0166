@@ -33,6 +33,7 @@ Say this to get that:
 - **Row** — `row 1 font-weight "bold" {}`. Apply bold, background color, or alignment across a whole row.
 - **Formula** — any `=` expression in a cell's text: `text "=SUM(A1:A3)"`. Supported functions: SUM, AVERAGE, ROUND, IF, plus arithmetic (`=A1+B1`, `=A1*C1`).
 - **Assess / expected** — `assess [method "value" expected "300"] {}` grades a cell. `method "value"` is string/number match; `method "formula"` requires the student to enter a matching formula. `expected` accepts a literal or a formula (prefix `=`); formula-valued `expected` is evaluated at scoring time against current cell values.
+- **Points / partial credit** — `assess [method "value" expected "300" points 2] {}` sets what a cell is worth. Every assessed cell is scored independently, so partial credit is automatic; `points` only changes the weighting. Omit it and the cell is worth 1. Say "each worth 2 points", "the last question counts double", or "out of 10 points" to trigger it. Non-negative numbers only — fractions like `points 0.5` are allowed, and `points 0` means the cell is checked and coloured but adds nothing to the score (practice rows). Set `points` on a `row` or `column` assess block to weight a whole region at once; a cell's own `points` overrides the inherited value.
 - **Params / template syntax** — `params [a1: "42"]` plus `text "{{A1}}"` in a cell renders the param value. Use when the request mentions "parameters", "fill from params", or "template".
 - **Formatting keywords** — `font-weight` ("bold"/"normal"), `font-style` ("italic"), `font-size` (px), `color`, `background-color`, `border` ("1px solid #000"), `text-decoration` ("underline"/"strikethrough"), `text-align`, `vertical-align`.
 - **Protected** — `protected true` marks a cell as read-only; useful alongside assessed cells to prevent edits to instruction labels.
@@ -48,6 +49,7 @@ Say this to get that:
 - *"Create a parameterized spreadsheet where A1 and A2 are filled by params and A3 is an assessed SUM formula cell expecting the correct total."* → `parameterized_spreadsheet`
 - *"Create a two-column label/value layout with 4 rows. Column A has bold labels; column B is right-aligned with a light-yellow background. The last row computes a SUM of the rows above."* → `spreadsheet`
 - *"Create a quiz spreadsheet with a title, instructions, 5 word-problem rows (problem in column A, blank assessed cell in column B expecting the correct numeric answer), and a bold header row on a light-gray background."* → `assessment_spreadsheet`
+- *"Create a 3-question arithmetic quiz where each assessed cell is worth 2 points, plus a practice row at the top that is checked but worth 0 points."* → `assessment_spreadsheet`
 
 ## Out of Scope
 
