@@ -1,0 +1,24 @@
+title "Bus Purchase Cash Flows"
+instructions "Complete the shaded cells. Enter the net cash flow for each year, then total the project."
+columns [
+  column A width 260 align "left" {}
+  column B width 110 align "right" {}
+  column C width 110 align "right" {}
+] cells [
+  cell A1 text "Cash Flows" font-weight "bold" {}
+  cell B1 text "Year One" font-weight "bold" align "center" {}
+  cell C1 text "Year Two" font-weight "bold" align "center" {}
+  cell A2 text "Cost Savings" {}
+  cell B2 text "48000" {}
+  cell C2 text "52000" {}
+  cell A3 text "Petrol" {}
+  cell B3 text "-12000" {}
+  cell C3 text "-13000" {}
+  cell A4 text "Net Cash Flows" font-weight "bold" {}
+  cell B4 text "" assess [method "value" expected "36000" points 2] {}
+  cell C4 text "" assess [method "value" expected "39000" points 2] {}
+  cell A5 text "Total" font-weight "bold" {}
+  cell B5 text "" assess [method "formula" expected "=SUM(B4:C4)" points 3] {}
+] {
+  v: "0.0.1"
+}..

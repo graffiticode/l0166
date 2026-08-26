@@ -7,7 +7,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "watch": "webpack watch --mode development --devtool eval-source-map",
-    "demo": "node demo/server.js"
+    "demo": "node demo/server.js",
+    "demo:fixture": "node demo/build-fixture.js"
   },
   "dependencies": {
     "@graffiticode/l0166": "*",
