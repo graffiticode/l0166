@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Learnosity custom question type bundles.
+# Built by packages/integrations/learnosity (webpack) straight into public/ on every
+# `npm run build`, and copied on to dist/ by vite's publicDir. Not byte-reproducible --
+# Terser's parallel workers vary variable hoisting -- so committing them churns for nothing.
+public/question.js
+public/question.js.LICENSE.txt
+public/scorer.js
+public/scorer.js.LICENSE.txt
+public/question.css
+public/authoring_custom_layout.html
+public/images/spreadsheet-icon.png

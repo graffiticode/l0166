@@ -110,8 +110,10 @@ Two things found during implementation that were not in the original writeup:
   places, folding inherited points onto the cells is a correctness requirement, not a
   convenience: otherwise a fully correct response could never reach the maximum and
   `isValid()` would be permanently false. No envelope change was needed, and no rebundle —
-  `public/scorer.js` and `public/question.js` are checked-in prebuilt artifacts with no source
-  in this repo, and they already carry the `points` logic.
+  they already carry the `points` logic. (At the time this was written `public/scorer.js` and
+  `public/question.js` were checked-in prebuilt artifacts with no source in this repo. They are
+  now built from `packages/integrations/learnosity/` on every `npm run build`, and are no longer
+  tracked in git.)
 
 Decisions taken:
 
@@ -146,11 +148,12 @@ These are yours; I have deliberately not assumed answers.
    already exists and carries an `order`. Should `points` be settable there and inherited by
    the row's cells, with per-cell overriding? This is the difference between a one-line
    authoring change and a 30-row grid needing 30 annotations.
-5. **How maximum points reach a Learnosity host.** L0158 embeds L0166 as a `custom` question
-   whose scoring is this widget's own `scorer.js`, with no `valid-response` emitted. If the
-   host needs a max score to report an item's worth, the validation total has to be surfaced
-   in the compiled envelope in a shape L0158 reads. Worth confirming with that repo before
-   fixing the shape — it is the one requirement here with a cross-repo contract.
+5. **How maximum points reach a Learnosity host.** *(Answered — see "Decisions taken" 5.
+   Also note the host is now L0176; L0158 has been deprecated and replaced by it.)* The host
+   embeds L0166 as a `custom` question whose scoring is this widget's own `scorer.js`, with no
+   `valid-response` emitted. If the host needs a max score to report an item's worth, the
+   validation total has to be surfaced in the compiled envelope in a shape the host reads —
+   it is the one requirement here with a cross-repo contract.
 
 ## Verification
 

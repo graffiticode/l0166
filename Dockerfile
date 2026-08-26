@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY packages/api/package*.json ./packages/api/
 COPY packages/app/package*.json ./packages/app/
+COPY packages/integrations/learnosity/package*.json ./packages/integrations/learnosity/
 
 # Install all dependencies (including devDependencies for build)
 RUN npm ci

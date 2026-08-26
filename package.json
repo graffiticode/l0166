@@ -2,11 +2,12 @@
   "type": "module",
   "workspaces": [
     "packages/api",
-    "packages/app"
+    "packages/app",
+    "packages/integrations/*"
   ],
   "scripts": {
     "update-lang-id": "find packages -type f -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.json\" -o -name \"*.md\" -o -name \"*.html\" | xargs grep -l \"0165\" | xargs sed -i '' 's/0165/0166/g'",
-    "build": "npm run -w packages/app build && npm run -w packages/api build && npm run build-static",
+    "build": "npm run -w packages/app build && npm run -w packages/integrations/learnosity build && npm run -w packages/api build && npm run build-static",
     "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec; npm run -w packages/api build-instructions; npm run -w packages/api build-language-info",
     "dev": "npm run -w packages/api dev",
     "start": "npm run -w packages/api start",
@@ -16,7 +17,8 @@
     "publish": "npm -w packages/app publish --access=public",
     "gcp:build": "gcloud builds submit --config cloudbuild.yaml --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo 'latest')",
     "gcp:deploy": "gcloud run deploy l0166 --source . --port 50166 --region us-central1 --platform managed --allow-unauthenticated",
-    "gcp:logs": "gcloud run logs read l0166 --region us-central1"
+    "gcp:logs": "gcloud run logs read l0166 --region us-central1",
+    "build-integrations": "npm run -w packages/integrations/learnosity build"
   },
   "devDependencies": {
     "eslint": "^8.44.0",
@@ -32,7 +34,5 @@
       "<rootDir>/node_modules/"
     ]
   },
-  "dependencies": {
-    "@graffiticode/l0151": "^0.1.4"
-  }
+  "private": true
 }

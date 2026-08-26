@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- Root workspace: npm workspaces managing two packages.
+- Root workspace: npm workspaces.
 - `packages/api/`: Node.js service with the compiler, routes, and spec assets.
   - Source: `packages/api/src/` (`compiler.js`, `util.js`, etc.)
   - Public assets: `packages/api/public/` (e.g., `spec.html`, `lexicon.js`)
@@ -9,6 +9,11 @@
 - `packages/app/`: React + TypeScript UI library/components.
   - Source: `packages/app/lib/` (TS/TSX; some legacy JSX)
   - Build output: `packages/*/dist/`
+- `packages/integrations/learnosity/`: Learnosity custom question type.
+  - Source: `packages/integrations/learnosity/src/` (wiring only; the shared lifecycle
+    lives in `@graffiticode/learnosity-cqt`)
+  - Local harness: `packages/integrations/learnosity/demo/`
+  - Build output: written into `packages/api/public/` (not `dist/`)
 
 ## Build, Test, and Development Commands
 - Build all: `npm run build` (app + api builds via workspaces)
@@ -17,6 +22,7 @@
 - Lint all: `npm run lint` | Auto-fix: `npm run lint:fix`
 - App-only: `npm run -w packages/app build | dev | preview`
 - API-only: `npm run -w packages/api build | dev | build-spec`
+- Learnosity-only: `npm run -w packages/integrations/learnosity build | watch | demo`
 
 ## Architecture Overview
 - Basis roles: `Checker` performs semantic checks and returns `{ type: Type }`; `Transformer` shapes final output (interaction/validation); `Compiler` orchestrates both.

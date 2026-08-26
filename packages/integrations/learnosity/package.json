@@ -1,0 +1,31 @@
+{
+  "name": "@graffiticode/l0166-learnosity",
+  "version": "0.1.0",
+  "description": "Learnosity custom question type for L0166 spreadsheets",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack watch --mode development --devtool eval-source-map",
+    "demo": "node demo/server.js"
+  },
+  "dependencies": {
+    "@graffiticode/l0166": "*",
+    "@graffiticode/learnosity-cqt": "^0.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.24.0",
+    "babel-loader": "^9.2.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^7.1.2",
+    "express": "^4.19.2",
+    "learnosity-sdk-nodejs": "^0.7.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

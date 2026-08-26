@@ -1,0 +1,148 @@
+{
+  "rich_text_editor": {
+    "toolbar_settings": {
+      "ltr_toolbar": [
+        {
+          "items": [
+            "FontSize"
+          ],
+          "name": "basicstyles"
+        },
+        {
+          "items": [
+            "Undo",
+            "Redo"
+          ],
+          "name": "clipboard"
+        }
+      ]
+    }
+  },
+  "group_defaults": false,
+  "template_defaults": false,
+  "ui": {
+    "layout": {
+      "advanced_group": false
+    }
+  },
+  "question_type_groups": [
+    {
+      "reference": "ac_only",
+      "name": "Spreadsheet",
+      "template_references": [
+        "ac_spreadsheet_template"
+      ]
+    },
+    {
+      "reference": "other",
+      "name": "Other"
+    }
+  ],
+  "question_type_templates": {
+    "custom_question_l0166": [
+      {
+        "reference": "ac_spreadsheet_template",
+        "name": "Spreadsheet Question",
+        "description": "Spreadsheet questions",
+        "group_reference": "ac_only",
+        "image": "dist/images/spreadsheet-icon.png",
+        "defaults": {
+          "type": "custom",
+          "custom_type": "custom_question_l0166",
+          "stimulus": "This is stimulus",
+          "js": {
+            "question": "dist/question.js",
+            "scorer": "dist/scorer.js"
+          },
+          "css": "dist/question.css",
+          "instant_feedback": false,
+          "data": ""
+        }
+      }
+    ]
+  },
+  "custom_question_types": [
+    {
+      "custom_type": "custom_question_l0166",
+      "type": "custom",
+      "name": "Spreadsheet Question",
+      "icon": "images/spreadsheet-icon.svg",
+      "editor_layout": "dist/authoring_custom_layout.html",
+      "js": {
+        "question": "dist/question.js",
+        "scorer": "dist/scorer.js"
+      },
+      "css": "dist/question.css",
+      "version": "v1.0.0",
+      "editor_schema": {
+        "hidden_question": false,
+        "attributes": {
+          "instant_feedback": {
+            "name": "Check answer button",
+            "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "spreadsheet_interaction": {
+            "name": "Spreadsheet",
+            "description": "In this section, shows what the spreadsheet looks like.",
+            "type": "question",
+            "white_list": [
+              "data"
+            ],
+            "default": "{}"
+          },
+          "data": {
+            "name": "Spreadsheet data",
+            "description": "Data model copied from Artcompiler console.",
+            "type": "string",
+            "required": true,
+            "default": "{}"
+          }
+        }
+      }
+    },
+    {
+      "custom_type": "custom_question_spreadsheet",
+      "type": "custom",
+      "name": "Spreadsheet Question (legacy)",
+      "icon": "images/spreadsheet-icon.svg",
+      "editor_layout": "dist/authoring_custom_layout.html",
+      "js": {
+        "question": "dist/question.js",
+        "scorer": "dist/scorer.js"
+      },
+      "css": "dist/question.css",
+      "version": "v1.0.0",
+      "editor_schema": {
+        "hidden_question": false,
+        "attributes": {
+          "instant_feedback": {
+            "name": "Check answer button",
+            "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "spreadsheet_interaction": {
+            "name": "Spreadsheet",
+            "description": "In this section, shows what the spreadsheet looks like.",
+            "type": "question",
+            "white_list": [
+              "data"
+            ],
+            "default": "{}"
+          },
+          "data": {
+            "name": "Spreadsheet data",
+            "description": "Data model copied from Artcompiler console.",
+            "type": "string",
+            "required": true,
+            "default": "{}"
+          }
+        }
+      }
+    }
+  ]
+}

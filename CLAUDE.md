@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This repo is a monorepo (npm workspaces) with two packages.
+L0166 is an authoring language for interactive spreadsheets, with spreadsheet-based assessment as a primary use case. This repo is a monorepo (npm workspaces).
 
 - **packages/api**: Express.js server that compiles L0166 source and serves the application
 - **packages/app**: React component library (`@graffiticode/l0166`) built with Vite that renders the spreadsheet UI
+- **packages/integrations/learnosity**: Learnosity custom question type. Builds `question.js` / `scorer.js` / `question.css` straight into `packages/api/public`, which is where Learnosity loads them from.
 
 ### Compiler pipeline (packages/api)
 
@@ -29,6 +30,35 @@ Routes in `src/routes/` (compile, auth, config, root) wire HTTP endpoints; the s
 - `TableEditor` (`lib/components/form/TableEditor.tsx`) is the core spreadsheet component, built on ProseMirror tables.
 - Formula evaluation uses `@graffiticode/translatex` with spreadsheet expanders; arithmetic uses `decimal.js`.
 - Builds ESM (`index.es.js`) and UMD (`index.umd.js`) bundles to `dist/` for npm publish.
+
+### Platform integrations (packages/integrations/)
+
+`packages/integrations/<platform>/` holds code that embeds L0166 in a third-party
+assessment platform. Today that is `learnosity/`; the directory is shaped to take others.
+
+The Learnosity lifecycle code is **not** here -- it is shared across languages in
+`@graffiticode/learnosity-cqt` (repo `graffiticode/integrations`, `packages/learnosity-cqt`).
+This workspace is only the wiring:
+
+```js
+// packages/integrations/learnosity/src/question.js
+const Question = createQuestion({ Form, scoreCells, getCellsValidation, defaultData });
+```
+
+Two things follow from that split, and both matter:
+
+- `@graffiticode/l0166` is resolved through npm workspaces to `packages/app`, so the
+  integration always builds against the language in the same commit. The old setup copied
+  a `.tgz` between repos by hand and had drifted a version behind.
+- Webpack writes directly into `packages/api/public/` with `clean: false`. That directory
+  also holds `lexicon.js`, `spec.html`, `schema.json` and `integrations/{qti,front}` --
+  and the QTI bundle has no surviving source, so wiping it is unrecoverable.
+
+`question.js` and `scorer.js` are separate entry points on purpose: Learnosity also runs
+the scorer server-side, so it must not pull in React or the renderer.
+
+Run the local harness (Questions API + Author API, signed with Learnosity's public demo
+consumer) with `npm run -w packages/integrations/learnosity demo`.
 
 ### L0166 language surface
 
@@ -58,6 +88,7 @@ npm run publish        # Publish @graffiticode/l0166 to npm (public)
 ```bash
 npm run -w packages/api dev | build | build-spec | build-lexicon | coverage
 npm run -w packages/app dev | build | preview
+npm run -w packages/integrations/learnosity build | watch | demo
 ```
 
 **Static asset builds** (`npm run build-static` runs all four):
